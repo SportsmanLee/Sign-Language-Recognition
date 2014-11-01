@@ -1,4 +1,7 @@
 #pragma once
+#include <msclr/marshal_cppstd.h>
+#include "include\opencv2\core\core.hpp"
+#include "include\opencv2\highgui\highgui.hpp"
 
 namespace CWinFormOpenCV {
 
@@ -8,6 +11,8 @@ namespace CWinFormOpenCV {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace cv;
+	using namespace std;
 
 	/// <summary>
 	/// WinForm 的摘要
@@ -39,6 +44,7 @@ namespace CWinFormOpenCV {
 	protected: 
 
 	private: System::Windows::Forms::OpenFileDialog^  fileChooser;
+
 
 
 	private:
@@ -81,11 +87,11 @@ namespace CWinFormOpenCV {
 			// fileChooser
 			// 
 			this->fileChooser->FileName = L"fileChooser";
-			this->fileChooser->Filter = "點陣圖檔案 (*.bmp;*.dib)|*.bmp|JPEG (*.jpg;*.jpeg;*.jpe;*.jfif)|*.jpg|GIF (*.gif)|*.gi" +
-				"f|TIFF (*.tiff;*.tif)|*.tiff|PNG (*.png)|*.png|ICO (*.ico)|*.ico|所有檔案 (*.*)|*.*";
+			this->fileChooser->Filter = L"點陣圖檔案 (*.bmp;*.dib)|*.bmp|JPEG (*.jpg;*.jpeg;*.jpe;*.jfif)|*.jpg|GIF (*.gif)|*.gi" 
+				L"f|TIFF (*.tiff;*.tif)|*.tiff|PNG (*.png)|*.png|ICO (*.ico)|*.ico|所有檔案 (*.*)|*.*";
 			this->fileChooser->FilterIndex = 7;
 			this->fileChooser->Multiselect = true;
-			this->fileChooser->Title = "選取影像";
+			this->fileChooser->Title = L"選取影像";
 			// 
 			// WinForm
 			// 
@@ -105,9 +111,33 @@ namespace CWinFormOpenCV {
 	private: System::Void loadImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				if (fileChooser->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
 					// read an image & resize it to fit the picture box
-					Bitmap^ tempImage = gcnew Bitmap(fileChooser->FileName);
-					Bitmap^ loadedImage = gcnew Bitmap(tempImage, originPictureBox->Size);
-					originPictureBox->Image = loadedImage;
+					/*Bitmap^ tempImage = gcnew Bitmap(fileChooser->FileName);
+					Bitmap^ originImage = gcnew Bitmap(tempImage, originPictureBox->Size);
+					originPictureBox->Image = originImage;*/
+					
+					Mat cvImage;
+					cvImage = imread(msclr::interop::marshal_as<std::string>(fileChooser->FileName), CV_LOAD_IMAGE_COLOR);
+
+					Graphics^ graphics2 = originPictureBox->CreateGraphics();
+					IntPtr ptr(cvImage.ptr());
+
+					System::Drawing::Imaging::PixelFormat pf;
+					switch (cvImage.channels())	{
+						case 1:
+							pf = System::Drawing::Imaging::PixelFormat::Format8bppIndexed; break;
+						case 3:
+							pf = System::Drawing::Imaging::PixelFormat::Format24bppRgb; break;
+						case 4:
+							pf = System::Drawing::Imaging::PixelFormat::Format32bppArgb; break;
+						default:
+							throw gcnew ArgumentException("Number of channels must be 1, 3 or 4.", "src");
+					}
+
+					Bitmap^ tempImage  = gcnew Bitmap(cvImage.size().width, cvImage.size().height, cvImage.step, pf, (IntPtr)cvImage.data);
+					//Bitmap^ originImage = gcnew Bitmap(tempImage, originPictureBox->Size);
+					System::Drawing::RectangleF rect(0,0, originPictureBox->Width, originPictureBox->Height);
+					graphics2->DrawImage(tempImage, rect);  
+					
 				}
 			 }
 	};
