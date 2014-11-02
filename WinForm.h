@@ -1,7 +1,10 @@
 #pragma once
+#include "MyCV.h"
 #include <msclr/marshal_cppstd.h>
 #include "include\opencv2\core\core.hpp"
 #include "include\opencv2\highgui\highgui.hpp"
+
+MyCV w_opencv;
 
 namespace CWinFormOpenCV {
 
@@ -12,7 +15,6 @@ namespace CWinFormOpenCV {
 	using namespace System::Data;
 	using namespace System::Drawing;
 	using namespace cv;
-	using namespace std;
 
 	/// <summary>
 	/// WinForm ªººK­n
@@ -110,34 +112,12 @@ namespace CWinFormOpenCV {
 #pragma endregion
 	private: System::Void loadImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				if (fileChooser->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+					
 					// read an image & resize it to fit the picture box
-					/*Bitmap^ tempImage = gcnew Bitmap(fileChooser->FileName);
+					w_opencv.readImage(msclr::interop::marshal_as<std::string>(fileChooser->FileName));
+					Bitmap^ tempImage = w_opencv.getBitmap();
 					Bitmap^ originImage = gcnew Bitmap(tempImage, originPictureBox->Size);
-					originPictureBox->Image = originImage;*/
-					
-					Mat cvImage;
-					cvImage = imread(msclr::interop::marshal_as<std::string>(fileChooser->FileName), CV_LOAD_IMAGE_COLOR);
-
-					Graphics^ graphics2 = originPictureBox->CreateGraphics();
-					IntPtr ptr(cvImage.ptr());
-
-					System::Drawing::Imaging::PixelFormat pf;
-					switch (cvImage.channels())	{
-						case 1:
-							pf = System::Drawing::Imaging::PixelFormat::Format8bppIndexed; break;
-						case 3:
-							pf = System::Drawing::Imaging::PixelFormat::Format24bppRgb; break;
-						case 4:
-							pf = System::Drawing::Imaging::PixelFormat::Format32bppArgb; break;
-						default:
-							throw gcnew ArgumentException("Number of channels must be 1, 3 or 4.", "src");
-					}
-
-					Bitmap^ tempImage  = gcnew Bitmap(cvImage.size().width, cvImage.size().height, cvImage.step, pf, (IntPtr)cvImage.data);
-					//Bitmap^ originImage = gcnew Bitmap(tempImage, originPictureBox->Size);
-					System::Drawing::RectangleF rect(0,0, originPictureBox->Width, originPictureBox->Height);
-					graphics2->DrawImage(tempImage, rect);  
-					
+					originPictureBox->Image = originImage;
 				}
 			 }
 	};
