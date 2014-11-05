@@ -46,6 +46,9 @@ namespace CWinFormOpenCV {
 	protected: 
 
 	private: System::Windows::Forms::OpenFileDialog^  fileChooser;
+	private: System::Windows::Forms::Button^  histButton;
+	private: System::Windows::Forms::Button^  SIFTButton;
+
 
 
 
@@ -65,6 +68,8 @@ namespace CWinFormOpenCV {
 			this->loadImageButton = (gcnew System::Windows::Forms::Button());
 			this->originPictureBox = (gcnew System::Windows::Forms::PictureBox());
 			this->fileChooser = (gcnew System::Windows::Forms::OpenFileDialog());
+			this->histButton = (gcnew System::Windows::Forms::Button());
+			this->SIFTButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -95,11 +100,33 @@ namespace CWinFormOpenCV {
 			this->fileChooser->Multiselect = true;
 			this->fileChooser->Title = L"選取影像";
 			// 
+			// histButton
+			// 
+			this->histButton->Location = System::Drawing::Point(90, 118);
+			this->histButton->Name = L"histButton";
+			this->histButton->Size = System::Drawing::Size(75, 23);
+			this->histButton->TabIndex = 2;
+			this->histButton->Text = L"Histogram";
+			this->histButton->UseVisualStyleBackColor = true;
+			this->histButton->Click += gcnew System::EventHandler(this, &WinForm::histButton_Click);
+			// 
+			// SIFTButton
+			// 
+			this->SIFTButton->Location = System::Drawing::Point(90, 184);
+			this->SIFTButton->Name = L"SIFTButton";
+			this->SIFTButton->Size = System::Drawing::Size(75, 23);
+			this->SIFTButton->TabIndex = 3;
+			this->SIFTButton->Text = L"SIFT";
+			this->SIFTButton->UseVisualStyleBackColor = true;
+			this->SIFTButton->Click += gcnew System::EventHandler(this, &WinForm::SIFTButton_Click);
+			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(714, 442);
+			this->Controls->Add(this->SIFTButton);
+			this->Controls->Add(this->histButton);
 			this->Controls->Add(this->originPictureBox);
 			this->Controls->Add(this->loadImageButton);
 			this->Name = L"WinForm";
@@ -111,14 +138,26 @@ namespace CWinFormOpenCV {
 		}
 #pragma endregion
 	private: System::Void loadImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				if (fileChooser->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
-					
-					// read an image & resize it to fit the picture box
-					w_opencv.readImage(msclr::interop::marshal_as<std::string>(fileChooser->FileName));
-					Bitmap^ tempImage = w_opencv.getBitmap();
-					Bitmap^ originImage = gcnew Bitmap(tempImage, originPictureBox->Size);
-					originPictureBox->Image = originImage;
-				}
+				 if (fileChooser->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+
+					 // read an image & resize it to fit the picture box
+					 w_opencv.readImage(msclr::interop::marshal_as<std::string>(fileChooser->FileName));
+					 Bitmap^ tempImage = w_opencv.getBitmap();
+					 Bitmap^ originImage = gcnew Bitmap(tempImage, originPictureBox->Size);
+					 originPictureBox->Image = originImage;
+				 }
+			 }
+	private: System::Void histButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 int histSize = 16;
+				 float range[] = { 0, 256 } ;
+				 const float* histRange = { range };
+
+				 w_opencv.calHistogram(histSize, histRange);
+
+
+			 }
+	private: System::Void SIFTButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 w_opencv.detectSIFT();
 			 }
 	};
 }
