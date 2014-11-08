@@ -11,9 +11,7 @@ using namespace System::Drawing;
 
 MyCV::MyCV()
 {
-	histVector.clear();
-	siftVector.clear();
-	huVector.clear();
+	clearVectors();
 }
 
 System::Drawing::Bitmap^ MyCV::getBitmap()
@@ -203,10 +201,10 @@ void MyCV::calHistogram(int histSize, const float* histRange)
 	}
 
 	/// Display
-	if (histVector.size() == 16) {
+	/*if (histVector.size() == 16) {
 		imshow("Histogram", histImage );
 		waitKey(0);
-	}
+	}*/
 }
 
 void MyCV::detectSIFT()
@@ -241,10 +239,10 @@ void MyCV::detectSIFT()
 		}
 	}  
 
-	if (siftVector.size() == (50 * 2)) {
+	/*if (siftVector.size() == (50 * 2)) {
 		imshow("SIFT Features", keypointsImg );
 		waitKey(0);
-	}
+	}*/
 }
 
 void MyCV::readImage(std::string fileName)
@@ -256,6 +254,11 @@ void MyCV::readImage(std::string fileName)
 Mat MyCV::getImage()
 {
 	return cvImage;
+}
+
+vector<std::string> MyCV::getFiles()
+{
+	return files;
 }
 
 vector<double> MyCV::getHuVector()
@@ -271,4 +274,16 @@ vector<double> MyCV::getHistVector()
 vector<double> MyCV::getSiftVector()
 {
 	return siftVector;
+}
+
+void MyCV::setFiles(std::string filepath)
+{
+	files.push_back(filepath);
+}
+
+void MyCV::clearVectors()
+{
+	histVector.clear();
+	huVector.clear();
+	siftVector.clear();
 }

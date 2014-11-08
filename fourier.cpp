@@ -181,8 +181,12 @@ void fourier::fourier_descriptor()
 
 vector<double> fourier::get_vector()
 {
-
 	return FD;
+}
+
+void fourier::clear_vector()
+{
+	FD.clear();
 }
 
 void fourier::image_process (Mat in_image)

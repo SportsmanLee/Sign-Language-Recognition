@@ -15,5 +15,5 @@ public:
 	void trainSVM();
 
 private:
-	vector<double> featureVector;
+	vector< vector<double> > featureVector;
 };

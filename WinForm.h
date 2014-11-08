@@ -3,6 +3,7 @@
 #include "MyCV.h"
 #include "fourier.h"
 #include "MySVM.h"
+#include "include\dirent.h"
 #include <msclr/marshal_cppstd.h>
 #include "include\opencv2\core\core.hpp"
 #include "include\opencv2\highgui\highgui.hpp"
@@ -92,7 +93,7 @@ namespace CWinFormOpenCV {
 			this->loadImageButton->Name = L"loadImageButton";
 			this->loadImageButton->Size = System::Drawing::Size(213, 37);
 			this->loadImageButton->TabIndex = 0;
-			this->loadImageButton->Text = L"Load Image";
+			this->loadImageButton->Text = L"Choose Folder";
 			this->loadImageButton->UseVisualStyleBackColor = true;
 			this->loadImageButton->Click += gcnew System::EventHandler(this, &WinForm::loadImageButton_Click);
 			// 
@@ -100,7 +101,8 @@ namespace CWinFormOpenCV {
 			// 
 			this->originPictureBox->Location = System::Drawing::Point(291, 12);
 			this->originPictureBox->Name = L"originPictureBox";
-			this->originPictureBox->Size = System::Drawing::Size(411, 418);
+			this->originPictureBox->Size = System::Drawing::Size(640, 360);
+			this->originPictureBox->SizeMode = System::Windows::Forms::PictureBoxSizeMode::CenterImage;
 			this->originPictureBox->TabIndex = 1;
 			this->originPictureBox->TabStop = false;
 			// 
@@ -137,7 +139,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(714, 442);
+			this->ClientSize = System::Drawing::Size(942, 385);
 			this->Controls->Add(this->featureButton);
 			this->Controls->Add(this->huTextBox);
 			this->Controls->Add(this->originPictureBox);
@@ -151,79 +153,79 @@ namespace CWinFormOpenCV {
 
 		}
 #pragma endregion
+	private: int getdir(std::string dir, vector<std::string> &files) {
+				 DIR *dp;//創立資料夾指標
+				 struct dirent *dirp;
+				 if((dp = opendir(dir.c_str())) == NULL){
+					 cout << "Error(" << errno << ") opening " << dir << endl;
+					 return errno;
+				 }
+				 while((dirp = readdir(dp)) != NULL)
+				 {//如果dirent指標非空
+					 files.push_back(std::string(dirp->d_name));//將資料夾和檔案名放入vector
+				 }
+				 closedir(dp);//關閉資料夾指標
+				 return 0;
+			 }
 	private: System::Void loadImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 if (fileChooser->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+				 vector<std::string> all_files = vector<std::string>();
 
-					 // read an image & resize it to fit the picture box
-					 w_opencv.readImage(msclr::interop::marshal_as<std::string>(fileChooser->FileName));
-					 Bitmap^ tempImage = w_opencv.getBitmap();
-					 Bitmap^ originImage = gcnew Bitmap(tempImage, originPictureBox->Size);
-					 originPictureBox->Image = originImage;
-				 }
-			 }
-	/*private: System::Void histButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 int histSize = 16;
-				 float range[] = { 0, 256 } ;
-				 const float* histRange = { range };
+				 FolderBrowserDialog^ folderBrowserDiaglog = gcnew FolderBrowserDialog();
 
-				 w_opencv.calHistogram(histSize, histRange);
+				 folderBrowserDiaglog->ShowDialog();
+				 std::string path = msclr::interop::marshal_as<std::string>(folderBrowserDiaglog->SelectedPath);
 
+				 getdir(path,all_files);
 
-			 }
-	private: System::Void SIFTButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 w_opencv.detectSIFT();
-			 }
-	private: System::Void huButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 w_opencv.HuMoment();
-
-				 std::vector<double> huVector = w_opencv.getHuVector();
-				 huTextBox->Text = "";
-				 for(int i=0; i<huVector.size(); i++)
+				 string message;
+				 for(unsigned int i = 0; i < all_files.size(); i++)
 				 {
-					 huTextBox->Text += L"Hu Moment hu" + (i+1) + ": " + ToString()->Format("{0:0.000000000000}",huVector[i]) + "\r\n";
+					 if (all_files[i] == "." || all_files[i] == "..")
+						 continue;
+					 message = path + "\\" + all_files[i];
+					 w_opencv.setFiles(message);
 				 }
 			 }
-	private: System::Void fourierButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 w_fourier.image_process(w_opencv.getImage());
-			 }
-	private: System::Void concateButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 vector< vector<double> > features;
-
-				 features.push_back(w_opencv.getHistVector());
-				 features.push_back(w_opencv.getHuVector());
-				 features.push_back(w_opencv.getSiftVector());
-				 features.push_back(w_fourier.get_vector());
-
-				 w_svm.concateFeature(features);
-			 }*/
 	private: System::Void featureButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 int histSize = 16;
-				 float range[] = { 0, 256 } ;
-				 const float* histRange = { range };
+				 vector<std::string> all_files = w_opencv.getFiles();
 
-				 w_opencv.calHistogram(histSize, histRange);
+				 for (unsigned int i = 0; i < all_files.size(); ++i) {
+					 w_opencv.readImage(all_files[i]);
 
-				 w_opencv.detectSIFT();
+					 int histSize = 16;
+					 float range[] = { 0, 256 } ;
+					 const float* histRange = { range };
+					 w_opencv.calHistogram(histSize, histRange);
 
-				 w_opencv.HuMoment();
+					 w_opencv.detectSIFT();
 
-				 std::vector<double> huVector = w_opencv.getHuVector();
-				 huTextBox->Text = "";
-				 for(int i=0; i<huVector.size(); i++)
-				 {
-					 huTextBox->Text += L"Hu Moment hu" + (i+1) + ": " + ToString()->Format("{0:0.000000000000}",huVector[i]) + "\r\n";
+					 w_opencv.HuMoment();
+					 std::vector<double> huVector = w_opencv.getHuVector();
+					 
+					 /*huTextBox->Text = "";
+					 for(int i=0; i<huVector.size(); i++)
+					 {
+						 huTextBox->Text += L"Hu Moment hu" + (i+1) + ": " + ToString()->Format("{0:0.000000000000}",huVector[i]) + "\r\n";
+					 }*/
+
+					 w_fourier.image_process(w_opencv.getImage());
+
+					 vector< vector<double> > features;
+
+					 features.push_back(w_opencv.getHistVector());
+					 features.push_back(w_opencv.getHuVector());
+					 features.push_back(w_opencv.getSiftVector());
+					 features.push_back(w_fourier.get_vector());
+
+					 /*int size = features[0].size() + features[1].size() + features[2].size() + features[3].size();
+					 MessageBoxA(0, std::to_string(size).c_str(), "feature size", MB_OK);*/
+
+					 w_svm.concatenateFeature(features);
+					 
+					 features.clear();
+					 w_opencv.clearVectors();
+					 w_fourier.clear_vector();
 				 }
-
-				 w_fourier.image_process(w_opencv.getImage());
-
-				 vector< vector<double> > features;
-
-				 features.push_back(w_opencv.getHistVector());
-				 features.push_back(w_opencv.getHuVector());
-				 features.push_back(w_opencv.getSiftVector());
-				 features.push_back(w_fourier.get_vector());
-
-				 w_svm.concatenateFeature(features);
 			 }
 };
 }

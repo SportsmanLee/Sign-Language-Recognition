@@ -10,6 +10,7 @@ class fourier
 	public: 
 		fourier();
 		vector<double> get_vector();
+		void clear_vector();
 		void image_process(Mat);
 	private:
 		void readimg(string);
