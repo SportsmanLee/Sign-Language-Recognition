@@ -1,5 +1,7 @@
 #pragma once
+
 #include "MyCV.h"
+#include "Gabor.h"
 #include <msclr/marshal_cppstd.h>
 #include "include\opencv2\core\core.hpp"
 #include "include\opencv2\highgui\highgui.hpp"
@@ -48,6 +50,9 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::OpenFileDialog^  fileChooser;
 	private: System::Windows::Forms::Button^  histButton;
 	private: System::Windows::Forms::Button^  SIFTButton;
+	private: System::Windows::Forms::Button^  huButton;
+	private: System::Windows::Forms::TextBox^  huTextBox;
+	private: System::Windows::Forms::Button^  gaborButton;
 
 
 
@@ -70,6 +75,9 @@ namespace CWinFormOpenCV {
 			this->fileChooser = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->histButton = (gcnew System::Windows::Forms::Button());
 			this->SIFTButton = (gcnew System::Windows::Forms::Button());
+			this->huButton = (gcnew System::Windows::Forms::Button());
+			this->huTextBox = (gcnew System::Windows::Forms::TextBox());
+			this->gaborButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -102,7 +110,7 @@ namespace CWinFormOpenCV {
 			// 
 			// histButton
 			// 
-			this->histButton->Location = System::Drawing::Point(90, 118);
+			this->histButton->Location = System::Drawing::Point(90, 104);
 			this->histButton->Name = L"histButton";
 			this->histButton->Size = System::Drawing::Size(75, 23);
 			this->histButton->TabIndex = 2;
@@ -112,7 +120,7 @@ namespace CWinFormOpenCV {
 			// 
 			// SIFTButton
 			// 
-			this->SIFTButton->Location = System::Drawing::Point(90, 184);
+			this->SIFTButton->Location = System::Drawing::Point(90, 154);
 			this->SIFTButton->Name = L"SIFTButton";
 			this->SIFTButton->Size = System::Drawing::Size(75, 23);
 			this->SIFTButton->TabIndex = 3;
@@ -120,11 +128,42 @@ namespace CWinFormOpenCV {
 			this->SIFTButton->UseVisualStyleBackColor = true;
 			this->SIFTButton->Click += gcnew System::EventHandler(this, &WinForm::SIFTButton_Click);
 			// 
+			// huButton
+			// 
+			this->huButton->Location = System::Drawing::Point(90, 205);
+			this->huButton->Name = L"huButton";
+			this->huButton->Size = System::Drawing::Size(75, 23);
+			this->huButton->TabIndex = 4;
+			this->huButton->Text = L"Hu Moments";
+			this->huButton->UseVisualStyleBackColor = true;
+			this->huButton->Click += gcnew System::EventHandler(this, &WinForm::huButton_Click);
+			// 
+			// huTextBox
+			// 
+			this->huTextBox->Location = System::Drawing::Point(12, 234);
+			this->huTextBox->Name = L"huTextBox";
+			this->huTextBox->Size = System::Drawing::Size(273, 22);
+			this->huTextBox->TabIndex = 5;
+			this->huTextBox->Text = L"0";
+			// 
+			// gaborButton
+			// 
+			this->gaborButton->Location = System::Drawing::Point(90, 262);
+			this->gaborButton->Name = L"gaborButton";
+			this->gaborButton->Size = System::Drawing::Size(75, 23);
+			this->gaborButton->TabIndex = 6;
+			this->gaborButton->Text = L"Gabor";
+			this->gaborButton->UseVisualStyleBackColor = true;
+			this->gaborButton->Click += gcnew System::EventHandler(this, &WinForm::gaborButton_Click);
+			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(714, 442);
+			this->Controls->Add(this->gaborButton);
+			this->Controls->Add(this->huTextBox);
+			this->Controls->Add(this->huButton);
 			this->Controls->Add(this->SIFTButton);
 			this->Controls->Add(this->histButton);
 			this->Controls->Add(this->originPictureBox);
@@ -134,6 +173,7 @@ namespace CWinFormOpenCV {
 			this->Text = L"WinForm";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->EndInit();
 			this->ResumeLayout(false);
+			this->PerformLayout();
 
 		}
 #pragma endregion
@@ -159,5 +199,18 @@ namespace CWinFormOpenCV {
 	private: System::Void SIFTButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 w_opencv.detectSIFT();
 			 }
-	};
+	private: System::Void huButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 w_opencv.HuMoment();
+
+				 std::vector<double> huVector = w_opencv.getHuVector();
+				 huTextBox->Text = "";
+				 for(int i=0; i<huVector.size(); i++)
+				 {
+					 huTextBox->Text += L"Hu Moment hu" + (i+1) + ": " + ToString()->Format("{0:0.000000000000}",huVector[i]) + "\r\n";
+				 }
+			 }
+	private: System::Void gaborButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 
+			 }
+};
 }
