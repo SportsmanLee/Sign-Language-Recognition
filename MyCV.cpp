@@ -226,22 +226,31 @@ void MyCV::detectSIFT()
 	drawKeypoints( cvImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
 	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
 
-	while (((int)keypoints.size() - 50) > 0) {
-		keypoints.pop_back();
-	}
+	int count = 0;
+	for (unsigned int i = 0; i < keypoints.size(); ++i) {
+		if (count == 50) {
+			break;
+		}
 
-	for (unsigned int i = 0; i < 50; ++i) {
 		siftVector.push_back((double)keypoints[i].pt.x);
 		siftVector.push_back((double)keypoints[i].pt.y);
+		++count;
+
+		if (i == (keypoints.size() - 1) && count < 50) {
+			--i;
+		}
 	}  
 
-	imshow("SIFT Features", keypointsImg );
-	waitKey(0);
+	if (siftVector.size() == (50 * 2)) {
+		imshow("SIFT Features", keypointsImg );
+		waitKey(0);
+	}
 }
 
 void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
+	cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols / 2.0), cvRound(cvImage.rows / 2.0)));
 }
 
 Mat MyCV::getImage()
@@ -252,4 +261,14 @@ Mat MyCV::getImage()
 vector<double> MyCV::getHuVector()
 {
 	return huVector;
+}
+
+vector<double> MyCV::getHistVector()
+{
+	return histVector;
+}
+
+vector<double> MyCV::getSiftVector()
+{
+	return siftVector;
 }

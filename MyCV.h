@@ -7,6 +7,7 @@
 #include "include\opencv2\features2d\features2d.hpp"
 #include "include\opencv2\nonfree\features2d.hpp"
 #include "include\opencv2\nonfree\nonfree.hpp"
+#include "include\opencv2\ml\ml.hpp"
 #include "include\opencv\cv.h"
 
 using namespace std;
@@ -26,6 +27,8 @@ public:
 	void readImage(std::string fileName);
 	Mat getImage();
 	vector<double> getHuVector();
+	vector<double> getHistVector();
+	vector<double> getSiftVector();
 
 private:
 	Mat cvImage;
