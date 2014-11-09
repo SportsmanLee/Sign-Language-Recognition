@@ -13,9 +13,13 @@ class MySVM
 public:
 	void concatenateGt(vector< vector<double> > features);
 	void concatenateOther(vector< vector<double> > features);
+	void concatetest(vector< vector<double> > features);
+	void clear_testVector();
 	void trainSVM();
+	int testSVM();
 
 private:
 	vector< vector<double> > gtVectors;
 	vector< vector<double> > otherVectors;
+	vector<double> testVector;
 };

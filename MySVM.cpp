@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "MySVM.h"
 
 using namespace cv;
@@ -27,19 +27,28 @@ void MySVM::concatenateOther(vector< vector<double> > features)
 	otherVectors.push_back(insertVector);
 }
 
+void MySVM::concatetest(vector< vector<double> > features)
+{
+	for (unsigned int i = 0; i < features.size(); ++i) {
+		for (unsigned int j = 0; j < features[i].size(); ++j) {
+			testVector.push_back(features[i][j]);
+		}
+	}
+}
+
 void MySVM::trainSVM()
 {
 	// Set up training data
-	Mat labels(gtVectors.size() + otherVectors.size(), 1, CV_32F, Scalar(0));
+	Mat labels(gtVectors.size() + otherVectors.size(), 1, CV_32FC1, Scalar(0));
 	Mat textImage(100, 100, CV_8UC1, Scalar(0));
 	for (unsigned int i = 0; i < labels.rows; ++i) {
 		labels.at<float>(i, 0) = (i < gtVectors.size()) ? 1.0 : -1.0;
 	}
 
-	Mat trainingData(gtVectors.size() + otherVectors.size(), gtVectors[0].size(), CV_64F);
+	Mat trainingData(gtVectors.size() + otherVectors.size(), gtVectors[0].size(), CV_32FC1);
 	for (unsigned int i = 0; i < trainingData.rows; ++i) {
 		for (unsigned int j = 0; j < trainingData.cols; ++j) {
-			trainingData.at<double>(i, j) = i < gtVectors.size() ? gtVectors[i][j] : otherVectors[i - gtVectors.size()][j];
+			trainingData.at<float>(i, j) = (i < gtVectors.size()) ? gtVectors[i][j] : otherVectors[i - gtVectors.size()][j];
 		}
 	}
 
@@ -52,4 +61,23 @@ void MySVM::trainSVM()
     // Train the SVM
     CvSVM SVM;
     SVM.train(trainingData, labels, Mat(), Mat(), params);
+	SVM.save("svm_data.xml");
+}
+
+int MySVM::testSVM()
+{
+	Mat testImage(1, testVector.size(), CV_32FC1);
+	for (unsigned int i = 0; i < testVector.size(); ++i) {
+		testImage.at<float>(0, i) = testVector[i];
+	}
+
+	CvSVM SVM;
+	SVM.load("svm_data.xml");
+
+	return SVM.predict(testImage); // test result 
+}
+
+void MySVM::clear_testVector()
+{
+	testVector.clear();
 }

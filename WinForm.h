@@ -59,6 +59,7 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::Button^  truthButton;
 	private: System::Windows::Forms::Button^  falseButton;
 	private: System::Windows::Forms::Button^  trainButton;
+	private: System::Windows::Forms::Button^  test;
 
 
 
@@ -88,6 +89,7 @@ namespace CWinFormOpenCV {
 			this->truthButton = (gcnew System::Windows::Forms::Button());
 			this->falseButton = (gcnew System::Windows::Forms::Button());
 			this->trainButton = (gcnew System::Windows::Forms::Button());
+			this->test = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -95,7 +97,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->loadImageButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->loadImageButton->Location = System::Drawing::Point(41, 63);
+			this->loadImageButton->Location = System::Drawing::Point(41, 27);
 			this->loadImageButton->Name = L"loadImageButton";
 			this->loadImageButton->Size = System::Drawing::Size(213, 37);
 			this->loadImageButton->TabIndex = 0;
@@ -123,7 +125,7 @@ namespace CWinFormOpenCV {
 			// 
 			// huTextBox
 			// 
-			this->huTextBox->Location = System::Drawing::Point(12, 291);
+			this->huTextBox->Location = System::Drawing::Point(12, 333);
 			this->huTextBox->Multiline = true;
 			this->huTextBox->Name = L"huTextBox";
 			this->huTextBox->Size = System::Drawing::Size(273, 39);
@@ -134,7 +136,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->truthButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->truthButton->Location = System::Drawing::Point(41, 131);
+			this->truthButton->Location = System::Drawing::Point(41, 89);
 			this->truthButton->Name = L"truthButton";
 			this->truthButton->Size = System::Drawing::Size(213, 33);
 			this->truthButton->TabIndex = 9;
@@ -146,7 +148,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->falseButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->falseButton->Location = System::Drawing::Point(41, 189);
+			this->falseButton->Location = System::Drawing::Point(41, 149);
 			this->falseButton->Name = L"falseButton";
 			this->falseButton->Size = System::Drawing::Size(213, 33);
 			this->falseButton->TabIndex = 10;
@@ -158,7 +160,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->trainButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->trainButton->Location = System::Drawing::Point(41, 251);
+			this->trainButton->Location = System::Drawing::Point(41, 210);
 			this->trainButton->Name = L"trainButton";
 			this->trainButton->Size = System::Drawing::Size(213, 33);
 			this->trainButton->TabIndex = 11;
@@ -166,11 +168,24 @@ namespace CWinFormOpenCV {
 			this->trainButton->UseVisualStyleBackColor = true;
 			this->trainButton->Click += gcnew System::EventHandler(this, &WinForm::trainButton_Click);
 			// 
+			// test
+			// 
+			this->test->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->test->Location = System::Drawing::Point(41, 270);
+			this->test->Name = L"test";
+			this->test->Size = System::Drawing::Size(213, 33);
+			this->test->TabIndex = 12;
+			this->test->Text = L"Test";
+			this->test->UseVisualStyleBackColor = true;
+			this->test->Click += gcnew System::EventHandler(this, &WinForm::test_Click);
+			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(942, 385);
+			this->Controls->Add(this->test);
 			this->Controls->Add(this->trainButton);
 			this->Controls->Add(this->falseButton);
 			this->Controls->Add(this->truthButton);
@@ -250,6 +265,9 @@ namespace CWinFormOpenCV {
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
 
+					 /*int size = features[0].size() + features[1].size() + features[2].size() + features[3].size();
+					 MessageBoxA(0, std::to_string(size).c_str(), "feature size", MB_OK);*/
+
 					 w_svm.concatenateGt(features);
 
 					 features.clear();
@@ -295,6 +313,9 @@ namespace CWinFormOpenCV {
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
 
+					 /*int size = features[0].size() + features[1].size() + features[2].size() + features[3].size();
+					 MessageBoxA(0, std::to_string(size).c_str(), "feature size", MB_OK);*/
+
 					 w_svm.concatenateOther(features);
 
 					 features.clear();
@@ -312,6 +333,54 @@ namespace CWinFormOpenCV {
 	private: System::Void trainButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 w_svm.trainSVM();
 				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
+			 }
+	private: System::Void test_Click(System::Object^  sender, System::EventArgs^  e) {
+				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				 openFileDialog1->InitialDirectory = "C:\\Users\\Roy\\Documents\\Visual Studio 2012\\Projects\\ConsoleApplication1\\ConsoleApplication1";
+				 openFileDialog1->Filter = "Image Files (*.jpg, *.bmp, *.gif, *.tga)|*.jpg; *.bmp; *.gif; *.tga ";
+				 openFileDialog1->Title = "開啟圖片檔";
+
+				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
+					return;
+
+				std::string file;	
+				file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+				w_opencv.readImage(file);
+
+			//	imshow("00",w_opencv.getImage());
+			//	cv::waitKey();
+				
+				w_opencv.readImage(file);
+
+				int histSize = 16;
+				float range[] = { 0, 256 } ;
+				const float* histRange = { range };
+				w_opencv.calHistogram(histSize, histRange);
+
+				w_opencv.detectSIFT();
+
+				w_opencv.HuMoment();
+				std::vector<double> huVector = w_opencv.getHuVector();
+
+				w_fourier.image_process(w_opencv.getImage());
+
+				vector< vector<double> > features;
+
+				features.push_back(w_opencv.getHistVector());
+				features.push_back(w_opencv.getHuVector());
+				features.push_back(w_opencv.getSiftVector());
+				features.push_back(w_fourier.get_vector());
+				
+				w_svm.concatetest(features);
+
+				int res = w_svm.testSVM();
+				MessageBoxA(0, std::to_string(res).c_str(), "SVM", MB_OK);
+				
+				
+				features.clear();
+				w_opencv.clear();
+				w_fourier.clear_vector();
+				w_svm.clear_testVector();
 			 }
 };
 }
