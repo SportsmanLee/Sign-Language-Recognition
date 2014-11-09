@@ -11,9 +11,11 @@ using namespace cv;
 class MySVM
 {
 public:
-	void concatenateFeature(vector< vector<double> > features);
+	void concatenateGt(vector< vector<double> > features);
+	void concatenateOther(vector< vector<double> > features);
 	void trainSVM();
 
 private:
-	vector< vector<double> > featureVector;
+	vector< vector<double> > gtVectors;
+	vector< vector<double> > otherVectors;
 };

@@ -31,7 +31,8 @@ public:
 	vector<double> getHistVector();
 	vector<double> getSiftVector();
 	void setFiles(std::string filepath);
-	void clearVectors();
+	void clear();
+	void clearFiles();
 
 private:
 	Mat cvImage;

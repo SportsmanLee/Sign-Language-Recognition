@@ -11,7 +11,7 @@ using namespace System::Drawing;
 
 MyCV::MyCV()
 {
-	clearVectors();
+	clear();
 }
 
 System::Drawing::Bitmap^ MyCV::getBitmap()
@@ -112,16 +112,14 @@ void MyCV::HuMoment()
 {
 	IplImage *tmp, *gray_img, *dst, *YCbCr_img; 
 
-	CvMemStorage* storge = cvCreateMemStorage(0);
-	CvMemStorage* storge1 = cvCreateMemStorage(0);
+	CvMemStorage* storage = cvCreateMemStorage(0);
+	CvMemStorage* storage1 = cvCreateMemStorage(0);
 
 	CvSeq* contour = 0;
 	CvSeq* cont;
 	CvSeq* mcont;
-
-	huVector.clear();
-
-	tmp = &IplImage(cvImage);
+	
+	tmp = cvCloneImage(&(IplImage)cvImage);
 		
 	//Img = cvCreateImage(img_resize, tmp->depth, tmp->nChannels);
 	//YCbCr_img = cvCreateImage(cvGetSize(Img), Img->depth, Img->nChannels);
@@ -143,7 +141,7 @@ void MyCV::HuMoment()
 
 	cvCvtColor( YCbCr_img, gray_img, CV_RGB2GRAY );
 	//===========Find Contours & Draw=============
-	cvFindContours(gray_img, storge, &contour, sizeof(CvContour), CV_RETR_EXTERNAL , CV_CHAIN_APPROX_SIMPLE);
+	cvFindContours(gray_img, storage, &contour, sizeof(CvContour), CV_RETR_EXTERNAL , CV_CHAIN_APPROX_SIMPLE);
 
 	if(contour)
 	{
@@ -151,7 +149,7 @@ void MyCV::HuMoment()
 		cvInitTreeNodeIterator(&it, contour, 1);
 		while(0 != (cont = (CvSeq*)cvNextTreeNode (&it)))
 		{
-			mcont = cvApproxPoly(cont, sizeof(CvContour), storge1, CV_POLY_APPROX_DP, cvContourPerimeter(cont)*0.02, 0);
+			mcont = cvApproxPoly(cont, sizeof(CvContour), storage1, CV_POLY_APPROX_DP, cvContourPerimeter(cont)*0.02, 0);
 			cvDrawContours(dst, mcont, CV_RGB(0,255,0), CV_RGB(0,0,100), 1, 2, 8, cvPoint(0,0));
 		}
 	}
@@ -167,6 +165,21 @@ void MyCV::HuMoment()
 	huVector.push_back(HuMoments.hu5);
 	huVector.push_back(HuMoments.hu6);
 	huVector.push_back(HuMoments.hu7);
+
+	cvReleaseImage(&gray_img);
+	cvReleaseImage(&dst);
+	cvReleaseImage(&YCbCr_img);
+	cvReleaseImage(&tmp);
+	cvClearMemStorage(storage);
+	cvClearMemStorage(storage1);
+	cvReleaseMemStorage(&storage);
+	cvReleaseMemStorage(&storage1);
+	//cvClearSeq(contour);
+	//cvClearSeq(cont);
+	//cvClearSeq(mcont);
+	//cvReleaseMemStorage(&contour->storage);
+	//cvReleaseMemStorage(&cont->storage);
+	//cvReleaseMemStorage(&mcont->storage);
 }
 
 void MyCV::calHistogram(int histSize, const float* histRange)
@@ -176,9 +189,6 @@ void MyCV::calHistogram(int histSize, const float* histRange)
 	Mat hist, n_hist;
 	/// Compute the histogram
 	calcHist(&grayImage, 1, 0, Mat(), hist, 1, &histSize, &histRange);
-
-	// Record the histogram values
-	histVector.clear();
 
 	for (int i = 0; i < hist.rows; ++i) {
 		histVector.push_back((double)hist.at<float>(i));
@@ -214,8 +224,6 @@ void MyCV::detectSIFT()
 	// Detect the keypoints using SIFT Detector
 	SiftFeatureDetector detector(50, 3, 0.04, 10, 1.6f);
 	vector<KeyPoint> keypoints;
-
-	siftVector.clear();
 
 	detector.detect(grayImage, keypoints);
 
@@ -281,9 +289,15 @@ void MyCV::setFiles(std::string filepath)
 	files.push_back(filepath);
 }
 
-void MyCV::clearVectors()
+void MyCV::clear()
 {
 	histVector.clear();
 	huVector.clear();
 	siftVector.clear();
+	cvImage.release();
+}
+
+void MyCV::clearFiles()
+{
+	files.clear();
 }

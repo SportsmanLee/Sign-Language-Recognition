@@ -64,22 +64,16 @@ void fourier::Skin_Color_Detection(IplImage *img)
 	}
 }
 
-
-
 void fourier::boundary(){
 	Mat kernel = cv::Mat::ones(3, 3, CV_8U);
 	Mat eroded;
 	erode(img_gray, eroded, kernel);
 	img_gray = img_gray - eroded;
 
-
-	IplImage *tmp, *gray_img, *dst, *YCbCr_img; 
-
-	CvMemStorage* storge = cvCreateMemStorage(0);
-	CvMemStorage* storge1 = cvCreateMemStorage(0);
+	IplImage *tmp, *YCbCr_img;
 
 	CvSeq* contour = 0;
-	tmp = &IplImage(img);
+	tmp = cvCloneImage(&(IplImage)img);
 	YCbCr_img = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 
 	//========RGB2YCrCb==========
@@ -94,16 +88,11 @@ void fourier::boundary(){
 
 
 	//===========YCbCr轉灰階=============
-	gray_img = cvCreateImage(cvGetSize(tmp), IPL_DEPTH_8U, 1);
-	dst = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 	cvtColor(img,img_gray,CV_RGB2GRAY);
-	gray_img = &IplImage(img_gray);
-	waitKey(0);
 
 
 	//cvCvtColor( YCbCr_img, gray_img, CV_RGB2GRAY );
 	//===========Find Contours & Draw=============
-	RNG rng(12345);
 	
 	Canny( img_gray, img_gray, 10, 10*2, 3 );
 	/// Find contours
@@ -119,6 +108,15 @@ void fourier::boundary(){
 		}
 	}
 	contours_one.push_back(insertContours);
+
+	cvReleaseImage(&YCbCr_img);
+	cvReleaseImage(&tmp);
+	//cvClearSeq(contour);
+	//cvClearSeq(cont);
+	//cvClearSeq(mcont);
+	//cvReleaseMemStorage(&contour->storage);
+	//cvReleaseMemStorage(&cont->storage);
+	//cvReleaseMemStorage(&mcont->storage);
 /*
 	Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
 	drawContours( img_gray, contours_one,0, color, 2, 8, hierarchy, 0, Point() );
@@ -129,7 +127,6 @@ void fourier::boundary(){
 }
 void fourier::fourier_descriptor()
 {
-	cout<<"fourier"<<endl;
 	vector<complex<double>> z (contours_one[0].size());
 	//FD = vector<double>(128);
 	vector<Point> p (contours_one[0].size());
@@ -142,7 +139,6 @@ void fourier::fourier_descriptor()
 
 	//dft
 	dft(z,z);
-	cout<<"dft"<<endl;
 	//cut 128 
 	for(int i = 0 ; i < 64 ; i ++)
 	{
