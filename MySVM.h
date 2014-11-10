@@ -11,15 +11,15 @@ using namespace cv;
 class MySVM
 {
 public:
-	void concatenateGt(vector< vector<double> > features);
-	void concatenateOther(vector< vector<double> > features);
-	void concatetest(vector< vector<double> > features);
+	void concatenateGt(vector< vector<float> > features);
+	void concatenateOther(vector< vector<float> > features);
+	void concatetest(vector< vector<float> > features);
 	void clear_testVector();
 	void trainSVM();
-	int testSVM();
+	float testSVM();
 
 private:
-	vector< vector<double> > gtVectors;
-	vector< vector<double> > otherVectors;
-	vector<double> testVector;
+	vector< vector<float> > gtVectors;
+	vector< vector<float> > otherVectors;
+	vector<float> testVector;
 };

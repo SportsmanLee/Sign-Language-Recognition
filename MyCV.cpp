@@ -228,6 +228,9 @@ void MyCV::detectSIFT()
 	while (keypoints.size() < 50) {
 		keypoints.push_back(keypoints[keypoints.size() - 1]);
 	}
+	while (keypoints.size() > 50) {
+		keypoints.pop_back();
+	}
 
 	Mat descriptor;
 	extractor.compute(cvImage, keypoints, descriptor);
@@ -243,7 +246,7 @@ void MyCV::detectSIFT()
 	drawKeypoints( cvImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
 	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
 	cv::putText(keypointsImg, std::to_string(descriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
-	cv::putText(keypointsImg, std::to_string(descriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
+	cv::putText(keypointsImg, std::to_string(descriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
 	imshow("keypoints", keypointsImg);
 	waitKey();*/
 }
@@ -264,17 +267,17 @@ vector<std::string> MyCV::getFiles()
 	return files;
 }
 
-vector<double> MyCV::getHuVector()
+vector<float> MyCV::getHuVector()
 {
 	return huVector;
 }
 
-vector<double> MyCV::getHistVector()
+vector<float> MyCV::getHistVector()
 {
 	return histVector;
 }
 
-vector<double> MyCV::getSiftVector()
+vector<float> MyCV::getSiftVector()
 {
 	return siftVector;
 }

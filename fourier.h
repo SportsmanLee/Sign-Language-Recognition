@@ -9,7 +9,7 @@ class fourier
 {
 	public: 
 		fourier();
-		vector<double> get_vector();
+		vector<float> get_vector();
 		void clear_vector();
 		void image_process(Mat);
 	private:
@@ -23,10 +23,10 @@ class fourier
 		Mat img;
 		Mat img_gray;
 		vector<vector<cv::Point> > contours;
-		vector<vector<complex<double>>>contours_one_p;
+		vector<vector<complex<float>>>contours_one_p;
 		vector<vector<cv::Point> > contours_one;
 		vector<vector<cv::Point> > inverse_contours;
-		vector<double> FD;
+		vector<float> FD;
 		vector<Vec4i> hierarchy;
 
 };

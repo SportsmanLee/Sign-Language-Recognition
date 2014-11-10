@@ -127,13 +127,13 @@ void fourier::boundary(){
 }
 void fourier::fourier_descriptor()
 {
-	vector<complex<double>> z (contours_one[0].size());
+	vector<complex<float>> z (contours_one[0].size());
 	//FD = vector<double>(128);
 	vector<Point> p (contours_one[0].size());
 	//point to complex
 	for(int i = 0 ; i < contours_one[0].size() ; i++)
 	{
-		z[i]=complex<double>(contours_one[0][i].x,contours_one[0][i].y);
+		z[i]=complex<float>(contours_one[0][i].x,contours_one[0][i].y);
 	}
 	contours_one_p.push_back(z);
 
@@ -175,7 +175,7 @@ void fourier::fourier_descriptor()
 	
 }
 
-vector<double> fourier::get_vector()
+vector<float> fourier::get_vector()
 {
 	return FD;
 }

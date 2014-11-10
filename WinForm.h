@@ -248,7 +248,7 @@ namespace CWinFormOpenCV {
 					 w_opencv.detectSIFT();
 
 					 w_opencv.HuMoment();
-					 std::vector<double> huVector = w_opencv.getHuVector();
+					 std::vector<float> huVector = w_opencv.getHuVector();
 
 					 /*huTextBox->Text = "";
 					 for(int i=0; i<huVector.size(); i++)
@@ -258,7 +258,7 @@ namespace CWinFormOpenCV {
 
 					 w_fourier.image_process(w_opencv.getImage());
 
-					 vector< vector<double> > features;
+					 vector< vector<float> > features;
 
 					 features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
@@ -296,7 +296,7 @@ namespace CWinFormOpenCV {
 					 w_opencv.detectSIFT();
 
 					 w_opencv.HuMoment();
-					 std::vector<double> huVector = w_opencv.getHuVector();
+					 std::vector<float> huVector = w_opencv.getHuVector();
 
 					 /*huTextBox->Text = "";
 					 for(int i=0; i<huVector.size(); i++)
@@ -306,7 +306,7 @@ namespace CWinFormOpenCV {
 
 					 w_fourier.image_process(w_opencv.getImage());
 
-					 vector< vector<double> > features;
+					 vector< vector<float> > features;
 
 					 features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
@@ -360,11 +360,11 @@ namespace CWinFormOpenCV {
 				w_opencv.detectSIFT();
 
 				w_opencv.HuMoment();
-				std::vector<double> huVector = w_opencv.getHuVector();
+				std::vector<float> huVector = w_opencv.getHuVector();
 
 				w_fourier.image_process(w_opencv.getImage());
 
-				vector< vector<double> > features;
+				vector< vector<float> > features;
 
 				features.push_back(w_opencv.getHistVector());
 				features.push_back(w_opencv.getHuVector());
@@ -373,7 +373,7 @@ namespace CWinFormOpenCV {
 				
 				w_svm.concatetest(features);
 
-				int res = w_svm.testSVM();
+				float res = w_svm.testSVM();
 				MessageBoxA(0, std::to_string(res).c_str(), "SVM", MB_OK);
 				
 				

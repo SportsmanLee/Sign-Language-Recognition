@@ -27,9 +27,9 @@ public:
 	void readImage(std::string fileName);
 	Mat getImage();
 	vector<std::string> getFiles();
-	vector<double> getHuVector();
-	vector<double> getHistVector();
-	vector<double> getSiftVector();
+	vector<float> getHuVector();
+	vector<float> getHistVector();
+	vector<float> getSiftVector();
 	void setFiles(std::string filepath);
 	void clear();
 	void clearFiles();
@@ -38,7 +38,7 @@ private:
 	Mat cvImage;
 	vector<std::string> files;
 	CvHuMoments HuMoments; 
-	vector<double> huVector;
-	vector<double> histVector;
-	vector<double> siftVector;
+	vector<float> huVector;
+	vector<float> histVector;
+	vector<float> siftVector;
 };
