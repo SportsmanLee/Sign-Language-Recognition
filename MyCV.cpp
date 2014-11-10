@@ -219,38 +219,33 @@ void MyCV::calHistogram(int histSize, const float* histRange)
 
 void MyCV::detectSIFT()
 {
-	Mat grayImage;	cvtColor(cvImage, grayImage, CV_RGB2GRAY);
-
 	// Detect the keypoints using SIFT Detector
-	SiftFeatureDetector detector(50, 3, 0.04, 10, 1.6f);
+	SiftFeatureDetector detector(50, 3, 0.04, 10.0, 1.6f);
+	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
 
-	detector.detect(grayImage, keypoints);
+	detector.detect(cvImage, keypoints);
+	while (keypoints.size() < 50) {
+		keypoints.push_back(keypoints[keypoints.size() - 1]);
+	}
 
+	Mat descriptor;
+	extractor.compute(cvImage, keypoints, descriptor);
+
+	for (unsigned int i = 0; i < descriptor.rows; ++i) {
+		for (unsigned int j = 0; j < descriptor.cols; ++j) {
+			siftVector.push_back(descriptor.at<float>(i, j));
+		}
+	}
+	
 	// Draw keypoints
-	Mat keypointsImg;
+	/*Mat keypointsImg;
 	drawKeypoints( cvImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
 	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
-
-	int count = 0;
-	for (unsigned int i = 0; i < keypoints.size(); ++i) {
-		if (count == 50) {
-			break;
-		}
-
-		siftVector.push_back((double)keypoints[i].pt.x);
-		siftVector.push_back((double)keypoints[i].pt.y);
-		++count;
-
-		if (i == (keypoints.size() - 1) && count < 50) {
-			--i;
-		}
-	}  
-
-	/*if (siftVector.size() == (50 * 2)) {
-		imshow("SIFT Features", keypointsImg );
-		waitKey(0);
-	}*/
+	cv::putText(keypointsImg, std::to_string(descriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
+	cv::putText(keypointsImg, std::to_string(descriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
+	imshow("keypoints", keypointsImg);
+	waitKey();*/
 }
 
 void MyCV::readImage(std::string fileName)
