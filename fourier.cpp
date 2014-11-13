@@ -102,8 +102,8 @@ void fourier::boundary(){
 	Mat drawing = Mat::zeros( img_gray.size(), CV_8UC3 );
 
 	vector<cv::Point> insertContours;
-	for(int i = 0 ;i < contours.size();i++) {
-		for (int j = 0; j < contours[i].size(); j++) {
+	for(unsigned int i = 0 ;i < contours.size();i++) {
+		for (unsigned int j = 0; j < contours[i].size(); j++) {
 			insertContours.push_back(contours[i][j]);
 		}
 	}
@@ -114,15 +114,7 @@ void fourier::boundary(){
 	//cvClearSeq(contour);
 	//cvClearSeq(cont);
 	//cvClearSeq(mcont);
-	//cvReleaseMemStorage(&contour->storage);
-	//cvReleaseMemStorage(&cont->storage);
-	//cvReleaseMemStorage(&mcont->storage);
-/*
-	Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-	drawContours( img_gray, contours_one,0, color, 2, 8, hierarchy, 0, Point() );
-	imshow("",img_gray);
-	waitKey(0);
-	*/
+
 	return;
 }
 void fourier::fourier_descriptor()
@@ -131,9 +123,9 @@ void fourier::fourier_descriptor()
 	//FD = vector<double>(128);
 	vector<Point> p (contours_one[0].size());
 	//point to complex
-	for(int i = 0 ; i < contours_one[0].size() ; i++)
+	for(unsigned int i = 0 ; i < contours_one[0].size() ; i++)
 	{
-		z[i]=complex<float>(contours_one[0][i].x,contours_one[0][i].y);
+		z[i]=complex<float>((float)contours_one[0][i].x,(float)contours_one[0][i].y);
 	}
 	contours_one_p.push_back(z);
 
@@ -145,7 +137,7 @@ void fourier::fourier_descriptor()
 		if(z.size()>128)
 			FD.push_back(z[i].real());
 	}
-	for(int i = z.size()-64 ; i < z.size() ; i ++)
+	for(unsigned int i = z.size()-64 ; i < z.size() ; i ++)
 	{
 		if(z.size()>128)
 			FD.push_back(z[i].real());

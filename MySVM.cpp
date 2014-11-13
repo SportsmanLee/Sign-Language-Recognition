@@ -27,7 +27,7 @@ void MySVM::concatenateOther(vector< vector<float> > features)
 	otherVectors.push_back(insertVector);
 }
 
-void MySVM::concatetest(vector< vector<float> > features)
+void MySVM::concatenateTest(vector< vector<float> > features)
 {
 	for (unsigned int i = 0; i < features.size(); ++i) {
 		for (unsigned int j = 0; j < features[i].size(); ++j) {
@@ -72,9 +72,14 @@ float MySVM::testSVM()
 	}
 
 	CvSVM SVM;
-	SVM.load("svm_data_auto_a_v2.xml");
+	SVM.load(modelFile.c_str());
 
 	return SVM.predict(testImage, false); // test result 
+}
+
+void MySVM::setModel(string filename)
+{
+	modelFile = filename;
 }
 
 void MySVM::clear_testVector()
