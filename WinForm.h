@@ -4,13 +4,14 @@
 #include "fourier.h"
 #include "MySVM.h"
 #include "include\dirent.h"
+#include <fstream>
 #include <msclr/marshal_cppstd.h>
 #include "include\opencv2\core\core.hpp"
 #include "include\opencv2\highgui\highgui.hpp"
 
-MyCV w_opencv;
-fourier w_fourier;
-MySVM w_svm;
+extern MyCV w_opencv;
+extern fourier w_fourier;
+extern MySVM w_svm;
 
 namespace CWinFormOpenCV {
 
@@ -50,25 +51,12 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::Button^  loadImageButton;
 	private: System::Windows::Forms::PictureBox^  originPictureBox;
 	protected: 
-
 	private: System::Windows::Forms::OpenFileDialog^  fileChooser;
-
-
-
 	private: System::Windows::Forms::TextBox^  huTextBox;
 	private: System::Windows::Forms::Button^  truthButton;
 	private: System::Windows::Forms::Button^  falseButton;
 	private: System::Windows::Forms::Button^  trainButton;
 	private: System::Windows::Forms::Button^  test;
-
-
-
-
-
-
-
-
-
 	private:
 		/// <summary>
 		/// 設計工具所需的變數。
@@ -250,12 +238,6 @@ namespace CWinFormOpenCV {
 					 w_opencv.HuMoment();
 					 std::vector<float> huVector = w_opencv.getHuVector();
 
-					 /*huTextBox->Text = "";
-					 for(int i=0; i<huVector.size(); i++)
-					 {
-					 huTextBox->Text += L"Hu Moment hu" + (i+1) + ": " + ToString()->Format("{0:0.000000000000}",huVector[i]) + "\r\n";
-					 }*/
-
 					 w_fourier.image_process(w_opencv.getImage());
 
 					 vector< vector<float> > features;
@@ -264,9 +246,6 @@ namespace CWinFormOpenCV {
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
-
-					 /*int size = features[0].size() + features[1].size() + features[2].size() + features[3].size();
-					 MessageBoxA(0, std::to_string(size).c_str(), "feature size", MB_OK);*/
 
 					 w_svm.concatenateGt(features);
 
@@ -298,12 +277,6 @@ namespace CWinFormOpenCV {
 					 w_opencv.HuMoment();
 					 std::vector<float> huVector = w_opencv.getHuVector();
 
-					 /*huTextBox->Text = "";
-					 for(int i=0; i<huVector.size(); i++)
-					 {
-					 huTextBox->Text += L"Hu Moment hu" + (i+1) + ": " + ToString()->Format("{0:0.000000000000}",huVector[i]) + "\r\n";
-					 }*/
-
 					 w_fourier.image_process(w_opencv.getImage());
 
 					 vector< vector<float> > features;
@@ -312,9 +285,6 @@ namespace CWinFormOpenCV {
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
-
-					 /*int size = features[0].size() + features[1].size() + features[2].size() + features[3].size();
-					 MessageBoxA(0, std::to_string(size).c_str(), "feature size", MB_OK);*/
 
 					 w_svm.concatenateOther(features);
 
@@ -335,52 +305,68 @@ namespace CWinFormOpenCV {
 				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
 			 }
 	private: System::Void test_Click(System::Object^  sender, System::EventArgs^  e) {
-				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
-				 openFileDialog1->InitialDirectory = "C:\\Users\\Roy\\Documents\\Visual Studio 2012\\Projects\\ConsoleApplication1\\ConsoleApplication1";
+				 /* OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				 openFileDialog1->InitialDirectory = "C:\\桌面";
 				 openFileDialog1->Filter = "Image Files (*.jpg, *.bmp, *.gif, *.tga)|*.jpg; *.bmp; *.gif; *.tga ";
 				 openFileDialog1->Title = "開啟圖片檔";
 
 				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
-					return;
+				 return;
 
-				std::string file;	
-				file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
-				w_opencv.readImage(file);
+				 std::string file;	
+				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+				 //w_opencv.readImage(file);
 
-			//	imshow("00",w_opencv.getImage());
-			//	cv::waitKey();
-				
-				w_opencv.readImage(file);
+				 //	imshow("00",w_opencv.getImage());
+				 //	cv::waitKey();
 
-				int histSize = 16;
-				float range[] = { 0, 256 } ;
-				const float* histRange = { range };
-				w_opencv.calHistogram(histSize, histRange);
+				 w_opencv.readImage(file);  */
+				 ofstream output("output.txt", ios::out);
 
-				w_opencv.detectSIFT();
+				 vector<std::string> all_files = w_opencv.getFiles();
 
-				w_opencv.HuMoment();
-				std::vector<float> huVector = w_opencv.getHuVector();
+				 for (unsigned int i = 0; i < all_files.size(); ++i) {
+					 w_opencv.readImage(all_files[i]);
 
-				w_fourier.image_process(w_opencv.getImage());
+					 int histSize = 16;
+					 float range[] = { 0, 256 } ;
+					 const float* histRange = { range };
+					 w_opencv.calHistogram(histSize, histRange);
 
-				vector< vector<float> > features;
+					 w_opencv.detectSIFT();
 
-				features.push_back(w_opencv.getHistVector());
-				features.push_back(w_opencv.getHuVector());
-				features.push_back(w_opencv.getSiftVector());
-				features.push_back(w_fourier.get_vector());
-				
-				w_svm.concatetest(features);
+					 w_opencv.HuMoment();
+					 std::vector<float> huVector = w_opencv.getHuVector();
 
-				float res = w_svm.testSVM();
-				MessageBoxA(0, std::to_string(res).c_str(), "SVM", MB_OK);
-				
-				
-				features.clear();
-				w_opencv.clear();
-				w_fourier.clear_vector();
-				w_svm.clear_testVector();
+					 w_fourier.image_process(w_opencv.getImage());
+
+					 vector< vector<float> > features;
+
+					 features.push_back(w_opencv.getHistVector());
+					 features.push_back(w_opencv.getHuVector());
+					 features.push_back(w_opencv.getSiftVector());
+					 features.push_back(w_fourier.get_vector());
+
+					 w_svm.concatetest(features);
+
+					 System::String^ string = gcnew System::String(all_files[i].c_str());
+					 huTextBox->Text = string;
+					 huTextBox->Refresh();
+
+					 float res = w_svm.testSVM();
+					 //MessageBoxA(0, std::to_string(res).c_str(), "SVM", MB_OK);
+
+					 char result[512]; 
+					 sprintf( result, "%s  %f\r\n",all_files[i].c_str(),res );  
+					 output << result;
+
+					 features.clear();
+					 w_opencv.clear();
+					 w_fourier.clear_vector();
+					 w_svm.clear_testVector();
+				 }
+				 output.close();
+				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
 			 }
 };
 }

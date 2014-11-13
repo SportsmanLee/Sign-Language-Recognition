@@ -72,9 +72,9 @@ float MySVM::testSVM()
 	}
 
 	CvSVM SVM;
-	SVM.load("svm_data_auto.xml");
+	SVM.load("svm_data_auto_a_v2.xml");
 
-	return SVM.predict(testImage, true); // test result 
+	return SVM.predict(testImage, false); // test result 
 }
 
 void MySVM::clear_testVector()
