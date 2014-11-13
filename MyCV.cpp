@@ -262,11 +262,6 @@ Mat MyCV::getImage()
 	return cvImage;
 }
 
-vector<std::string> MyCV::getFiles()
-{
-	return files;
-}
-
 vector<float> MyCV::getHuVector()
 {
 	return huVector;
@@ -282,20 +277,10 @@ vector<float> MyCV::getSiftVector()
 	return siftVector;
 }
 
-void MyCV::setFiles(std::string filepath)
-{
-	files.push_back(filepath);
-}
-
 void MyCV::clear()
 {
 	histVector.clear();
 	huVector.clear();
 	siftVector.clear();
 	cvImage.release();
-}
-
-void MyCV::clearFiles()
-{
-	files.clear();
 }

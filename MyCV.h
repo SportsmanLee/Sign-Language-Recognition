@@ -26,17 +26,13 @@ public:
 	void detectSIFT();
 	void readImage(std::string fileName);
 	Mat getImage();
-	vector<std::string> getFiles();
 	vector<float> getHuVector();
 	vector<float> getHistVector();
 	vector<float> getSiftVector();
-	void setFiles(std::string filepath);
 	void clear();
-	void clearFiles();
 
 private:
 	Mat cvImage;
-	vector<std::string> files;
 	CvHuMoments HuMoments; 
 	vector<float> huVector;
 	vector<float> histVector;

@@ -6,6 +6,10 @@
 using namespace System;
 using namespace CWinFormOpenCV;
 
+MyCV w_opencv;
+fourier w_fourier;
+MySVM w_svm;
+
 [STAThreadAttribute]
 int main(array<System::String ^> ^args)
 {
