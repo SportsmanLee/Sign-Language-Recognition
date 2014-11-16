@@ -134,13 +134,11 @@ void fourier::fourier_descriptor()
 	//cut 128 
 	for(int i = 0 ; i < 64 ; i ++)
 	{
-		if(z.size()>128)
-			FD.push_back(z[i].real());
+		FD.push_back(z[i].real());
 	}
 	for(unsigned int i = z.size()-64 ; i < z.size() ; i ++)
 	{
-		if(z.size()>128)
-			FD.push_back(z[i].real());
+		FD.push_back(z[i].real());
 	}
 
 	/*
@@ -183,9 +181,9 @@ void fourier::image_process (Mat in_image)
 	cvtColor(img,img_gray,CV_RGB2GRAY);
 
 	//boundary of binary image , find contour
-	fourier::boundary();
+	boundary();
 
 	//fourier 
-	fourier::fourier_descriptor();
+	fourier_descriptor();
 }
 

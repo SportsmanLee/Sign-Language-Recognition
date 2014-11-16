@@ -5,6 +5,8 @@ This project is to develop a system which could recognize different hand gesture
 
 Developing...
 
-...
-Visual Studio 2012 & OpenCV 2.4.9
-...
+Developing Tools
+================
+
+Visual Studio 2012
+OpenCV 2.4.9
