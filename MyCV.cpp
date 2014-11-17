@@ -135,6 +135,9 @@ void MyCV::HuMoment()
 
 	//==========skin color detection=========
 	Skin_Color_Detection(YCbCr_img);
+	imshow("",(Mat)YCbCr_img);
+	waitKey();
+	//skin = cvCloneImage(YCbCr_img);
 	//imshow("",(Mat)YCbCr_img);
 	//waitKey();
 	//===========YCbCrÂà¦Ç¶¥=============
