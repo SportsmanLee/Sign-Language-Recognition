@@ -135,8 +135,6 @@ void MyCV::HuMoment()
 
 	//==========skin color detection=========
 	Skin_Color_Detection(YCbCr_img);
-	//imshow("",(Mat)YCbCr_img);
-	//waitKey();
 	//===========YCbCrÂà¦Ç¶¥=============
 	gray_img = cvCreateImage(cvGetSize(tmp), IPL_DEPTH_8U, 1);
 	dst = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
@@ -160,13 +158,13 @@ void MyCV::HuMoment()
 	cvContourMoments(mcont,&Moments);
 	cvGetHuMoments(&Moments, &HuMoments);
 	
-	huVector.push_back(HuMoments.hu1);
-	huVector.push_back(HuMoments.hu2);
-	huVector.push_back(HuMoments.hu3);
-	huVector.push_back(HuMoments.hu4);
-	huVector.push_back(HuMoments.hu5);
-	huVector.push_back(HuMoments.hu6);
-	huVector.push_back(HuMoments.hu7);
+	huVector.push_back((float)HuMoments.hu1);
+	huVector.push_back((float)HuMoments.hu2);
+	huVector.push_back((float)HuMoments.hu3);
+	huVector.push_back((float)HuMoments.hu4);
+	huVector.push_back((float)HuMoments.hu5);
+	huVector.push_back((float)HuMoments.hu6);
+	huVector.push_back((float)HuMoments.hu7);
 
 	cvReleaseImage(&gray_img);
 	cvReleaseImage(&dst);
@@ -193,7 +191,7 @@ void MyCV::calHistogram(int histSize, const float* histRange)
 	calcHist(&grayImage, 1, 0, Mat(), hist, 1, &histSize, &histRange);
 
 	for (int i = 0; i < hist.rows; ++i) {
-		histVector.push_back((double)hist.at<float>(i));
+		histVector.push_back(hist.at<float>(i));
 	}
 
 	// Draw the histogram for intensity
