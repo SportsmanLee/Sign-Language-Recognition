@@ -15,6 +15,7 @@ public:
 	void concatenateOther(vector< vector<float> > features);
 	void concatenateTest(vector< vector<float> > features);
 	void clear_testVector();
+	vector<float> getTestVector();
 	void trainSVM();
 	float testSVM();
 	void setModel(string filename);

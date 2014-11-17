@@ -165,7 +165,6 @@ namespace CWinFormOpenCV {
 			// 
 			// testButton
 			// 
-			this->testButton->Enabled = false;
 			this->testButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
 			this->testButton->Location = System::Drawing::Point(41, 294);
@@ -354,18 +353,48 @@ namespace CWinFormOpenCV {
 				 testButton->Enabled = true;
 			 }
 	private: System::Void testButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 /* OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
-				 openFileDialog1->InitialDirectory = "C:\\桌面";
-				 openFileDialog1->Filter = "Image Files (*.jpg, *.bmp, *.gif, *.tga)|*.jpg; *.bmp; *.gif; *.tga ";
-				 openFileDialog1->Title = "開啟圖片檔";
+				 
+				 //w_svm.setModel("svm_data_auto_a_v2.xml");
+				 ofstream output("output.txt", ios::out);
+				 int fn=0;
+				 string output_file;
+
+				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				 openFileDialog1->InitialDirectory = "C:\\Users\\Roy\\Desktop";
+				 openFileDialog1->Filter = "Video Files (*.wmv,*.avi)|*.wmv;*.avi;*.* ";
+				 openFileDialog1->Title = "開啟影片檔";
 
 				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
-				 return;
-
+					return;
+				 
 				 std::string file;	
 				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
-				 //w_opencv.readImage(file);*/
+				 //MessageBoxA(0, file.c_str(), "File name", MB_OK);
+				 VideoCapture cap(file);
+				 if(!cap.isOpened())
+				 {
+					 MessageBoxA(0, "Cannot open the video!!", "Open file failed", MB_OK);
+					 return ;
+				 }
 
+				 while(1)
+				 {
+					 Mat frame;
+					 cap >> frame;
+					 fn++;
+					 if(fn%10 != 0)
+					 {
+						 continue;
+					 }
+
+					 if(frame.empty())
+						 break;
+					// imshow("image",frame);
+					// waitKey(30);
+				 
+
+
+				 /*
 				 FolderBrowserDialog^ folderBrowserDiaglog = gcnew FolderBrowserDialog();
 				 folderBrowserDiaglog->ShowDialog();
 				 std::string path = msclr::interop::marshal_as<std::string>(folderBrowserDiaglog->SelectedPath);
@@ -381,12 +410,13 @@ namespace CWinFormOpenCV {
 						 continue;
 					 message = path + "\\" + filenames[i];
 					 all_files.push_back(message);
-				 }
+				 }*/
 
-				 ofstream output("output.txt", ios::out);
-
-				 for (unsigned int i = 0; i < all_files.size(); ++i) {
-					 w_opencv.readImage(all_files[i]);
+				 //ofstream output("output.txt", ios::out);
+				 
+				 //for (unsigned int i = 0; i < all_files.size(); ++i) {
+					// w_opencv.readImage(all_files[i]);
+					 w_opencv.readFrame(frame);
 
 					 Bitmap^ testImage = w_opencv.getBitmap();
 					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
@@ -397,11 +427,6 @@ namespace CWinFormOpenCV {
 						 originPictureBox->Image = testImage;
 					 }
 					 originPictureBox->Refresh();
-
-					 /*int histSize = 16;
-					 float range[] = { 0, 256 } ;
-					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);*/
 
 					 w_opencv.detectSIFT();
 
@@ -419,7 +444,16 @@ namespace CWinFormOpenCV {
 
 					 w_svm.concatenateTest(features);
 
-					 System::String^ string = gcnew System::String(all_files[i].c_str());
+					 output_file = "feature_" + to_string(fn) + ".txt";
+					 ofstream output(output_file, ios::out);
+
+					 std::vector<float> all_feature = w_svm.getTestVector();
+					 ostream_iterator<float> output_iterator(output, "\n");
+					 copy(all_feature.begin(), all_feature.end(), output_iterator);
+
+					 output.close();
+
+					 System::String^ string = gcnew System::String(std::to_string(fn).c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
 
@@ -427,17 +461,23 @@ namespace CWinFormOpenCV {
 					 //MessageBoxA(0, std::to_string(res).c_str(), "SVM", MB_OK);
 
 					 char result[128];
-					 sprintf(result, "%s\t%f\r\n", all_files[i].c_str(), res);  
+					 sprintf(result, "%s\t%f\r\n", std::to_string(fn).c_str(), res);  
+					 
 					 output << result;
 
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
 					 w_svm.clear_testVector();
-				 }
+				 //}
 
+				 
+				 } // end while(1)
 				 output.close();
 				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
+
+				 
+				 
 			 }
 };
 }

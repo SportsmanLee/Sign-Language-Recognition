@@ -1,5 +1,7 @@
 ﻿#include "stdafx.h"
 #include "MySVM.h"
+#include <fstream>
+#include <iterator>
 
 using namespace cv;
 
@@ -34,6 +36,7 @@ void MySVM::concatenateTest(vector< vector<float> > features)
 			testVector.push_back(features[i][j]);
 		}
 	}
+
 }
 
 void MySVM::trainSVM()
@@ -70,6 +73,10 @@ float MySVM::testSVM()
 	for (unsigned int i = 0; i < testVector.size(); ++i) {
 		testImage.at<float>(0, i) = testVector[i];
 	}
+	/*Mat debug(500,500,CV_8UC1, Scalar(0));
+	cv::putText(debug, std::to_string(testVector.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255));
+	imshow("", debug);
+	waitKey();*/
 
 	CvSVM SVM;
 	SVM.load(modelFile.c_str());
@@ -85,4 +92,9 @@ void MySVM::setModel(string filename)
 void MySVM::clear_testVector()
 {
 	testVector.clear();
+}
+
+vector<float> MySVM::getTestVector()
+{
+	return testVector;
 }

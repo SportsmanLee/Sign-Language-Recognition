@@ -1,4 +1,4 @@
-ï»¿#include "stdafx.h"
+#include "stdafx.h"
 #include <iostream>
 #include "MyCV.h"
 
@@ -75,20 +75,20 @@ void MyCV::RGBtoYCbCr(IplImage *img)
 	for( int i = 0; i < img->height; i++ )
 	for( int j = 0; j < img->width; j++ )
 	{
-		scalarImg = cvGet2D(img, i, j);   //å¾å½±åƒä¸­å–RGBå€¼
+		scalarImg = cvGet2D(img, i, j);   //±q¼v¹³¤¤¨úRGB­È
 		y =  (16 + scalarImg.val[2]*0.257 + scalarImg.val[1]*0.504 + scalarImg.val[0]*0.098);
 		cb = (128 - scalarImg.val[2]*0.148 - scalarImg.val[1]*0.291 + scalarImg.val[0]*0.439);
 		cr = (128 + scalarImg.val[2]*0.439 - scalarImg.val[1]*0.368 - scalarImg.val[0]*0.071);      
-		cvSet2D(img, i, j, cvScalar( y, cr, cb));  //ä»¥YCbCræ–¹å¼ç•«img
+		cvSet2D(img, i, j, cvScalar( y, cr, cb));  //¥HYCbCr¤è¦¡µeimg
 	}
 }
 
 void MyCV::Skin_Color_Detection(IplImage *img)
 {
 	//================
-	int avg_cb = 120;  //YCbCré¡è‰²ç©ºé–“è†šè‰²cbçš„å¹³å‡å€¼
-	int avg_cr = 155;  //YCbCré¡è‰²ç©ºé–“è†šè‰²crçš„å¹³å‡å€¼
-	int skinRange = 22;  //YCbCré¡è‰²ç©ºé–“è†šè‰²çš„ç¯„åœ
+	int avg_cb = 120;  //YCbCrÃC¦âªÅ¶¡½§¦âcbªº¥­§¡­È
+	int avg_cr = 155;  //YCbCrÃC¦âªÅ¶¡½§¦âcrªº¥­§¡­È
+	int skinRange = 15;  //YCbCrÃC¦âªÅ¶¡½§¦âªº½d³ò
 	//================
 
 	CvScalar scalarImg;
@@ -123,8 +123,8 @@ void MyCV::HuMoment()
 		
 	//Img = cvCreateImage(img_resize, tmp->depth, tmp->nChannels);
 	//YCbCr_img = cvCreateImage(cvGetSize(Img), Img->depth, Img->nChannels);
-	//cvResize(tmp, Img, CV_INTER_LINEAR);    //ç¸®æ”¾ä¾†æºå½±åƒåˆ°ç›®æ¨™å½±åƒ
-	// cvSaveImage("00010 004.jpg", img);		 //å„²å­˜å½±åƒ(è¦†è“‹åŸæª”)
+	//cvResize(tmp, Img, CV_INTER_LINEAR);    //ÁY©ñ¨Ó·½¼v¹³¨ì¥Ø¼Ğ¼v¹³
+	// cvSaveImage("00010 004.jpg", img);		 //Àx¦s¼v¹³(ÂĞ»\­ìÀÉ)
 	
 	YCbCr_img = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 
@@ -135,7 +135,9 @@ void MyCV::HuMoment()
 
 	//==========skin color detection=========
 	Skin_Color_Detection(YCbCr_img);
-	//===========YCbCrè½‰ç°éš=============
+	//imshow("",(Mat)YCbCr_img);
+	//waitKey();
+	//===========YCbCrÂà¦Ç¶¥=============
 	gray_img = cvCreateImage(cvGetSize(tmp), IPL_DEPTH_8U, 1);
 	dst = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 
@@ -158,13 +160,13 @@ void MyCV::HuMoment()
 	cvContourMoments(mcont,&Moments);
 	cvGetHuMoments(&Moments, &HuMoments);
 	
-	huVector.push_back((float)HuMoments.hu1);
-	huVector.push_back((float)HuMoments.hu2);
-	huVector.push_back((float)HuMoments.hu3);
-	huVector.push_back((float)HuMoments.hu4);
-	huVector.push_back((float)HuMoments.hu5);
-	huVector.push_back((float)HuMoments.hu6);
-	huVector.push_back((float)HuMoments.hu7);
+	huVector.push_back(HuMoments.hu1);
+	huVector.push_back(HuMoments.hu2);
+	huVector.push_back(HuMoments.hu3);
+	huVector.push_back(HuMoments.hu4);
+	huVector.push_back(HuMoments.hu5);
+	huVector.push_back(HuMoments.hu6);
+	huVector.push_back(HuMoments.hu7);
 
 	cvReleaseImage(&gray_img);
 	cvReleaseImage(&dst);
@@ -191,7 +193,7 @@ void MyCV::calHistogram(int histSize, const float* histRange)
 	calcHist(&grayImage, 1, 0, Mat(), hist, 1, &histSize, &histRange);
 
 	for (int i = 0; i < hist.rows; ++i) {
-		histVector.push_back(hist.at<float>(i));
+		histVector.push_back((double)hist.at<float>(i));
 	}
 
 	// Draw the histogram for intensity
@@ -228,9 +230,9 @@ void MyCV::detectSIFT()
 	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
 
 	// Skin Detection
-	int avg_cb = 120;  //YCbCré¡è‰²ç©ºé–“è†šè‰²cbçš„å¹³å‡å€¼
-	int avg_cr = 155;  //YCbCré¡è‰²ç©ºé–“è†šè‰²crçš„å¹³å‡å€¼
-	int skinRange = 22;  //YCbCré¡è‰²ç©ºé–“è†šè‰²çš„ç¯„åœ
+	int avg_cb = 120;  //YCbCrÃC¦âªÅ¶¡½§¦âcbªº¥­§¡­È
+	int avg_cr = 155;  //YCbCrÃC¦âªÅ¶¡½§¦âcrªº¥­§¡­È
+	int skinRange = 22;  //YCbCrÃC¦âªÅ¶¡½§¦âªº½d³ò
 	for (int x = 0; x < cvImage.rows; ++x)
 	{
 		for (int y = 0; y < cvImage.cols; ++y)
@@ -245,6 +247,11 @@ void MyCV::detectSIFT()
 	}
 
 	detector.detect(skinImage, keypoints);
+	if (keypoints.empty()) {
+		while (keypoints.size() < 50) {
+			keypoints.push_back(KeyPoint());
+		}
+	}
 	while (keypoints.size() < 50) {
 		keypoints.push_back(keypoints[keypoints.size() - 1]);
 	}
@@ -274,6 +281,12 @@ void MyCV::detectSIFT()
 void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
+	cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols / 2.0), cvRound(cvImage.rows / 2.0)));
+}
+
+void MyCV::readFrame(Mat frame)
+{
+	cvImage = frame;
 	cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols / 2.0), cvRound(cvImage.rows / 2.0)));
 }
 
