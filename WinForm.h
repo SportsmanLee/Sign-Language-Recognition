@@ -62,6 +62,7 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::Button^  testButton;
 
 	private: System::Windows::Forms::Button^  modelButton;
+	private: System::Windows::Forms::Button^  button1;
 	private:
 		/// <summary>
 		/// 設計工具所需的變數。
@@ -84,6 +85,7 @@ namespace CWinFormOpenCV {
 			this->trainButton = (gcnew System::Windows::Forms::Button());
 			this->testButton = (gcnew System::Windows::Forms::Button());
 			this->modelButton = (gcnew System::Windows::Forms::Button());
+			this->button1 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -142,7 +144,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->falseButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->falseButton->Location = System::Drawing::Point(41, 90);
+			this->falseButton->Location = System::Drawing::Point(41, 65);
 			this->falseButton->Name = L"falseButton";
 			this->falseButton->Size = System::Drawing::Size(213, 33);
 			this->falseButton->TabIndex = 10;
@@ -155,7 +157,7 @@ namespace CWinFormOpenCV {
 			this->trainButton->Enabled = false;
 			this->trainButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->trainButton->Location = System::Drawing::Point(41, 158);
+			this->trainButton->Location = System::Drawing::Point(41, 116);
 			this->trainButton->Name = L"trainButton";
 			this->trainButton->Size = System::Drawing::Size(213, 33);
 			this->trainButton->TabIndex = 11;
@@ -187,11 +189,23 @@ namespace CWinFormOpenCV {
 			this->modelButton->UseVisualStyleBackColor = true;
 			this->modelButton->Click += gcnew System::EventHandler(this, &WinForm::modelButton_Click);
 			// 
+			// button1
+			// 
+			this->button1->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
+			this->button1->Location = System::Drawing::Point(41, 165);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(213, 33);
+			this->button1->TabIndex = 15;
+			this->button1->Text = L"to .txt";
+			this->button1->UseVisualStyleBackColor = true;
+			this->button1->Click += gcnew System::EventHandler(this, &WinForm::button1_Click);
+			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(942, 437);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->modelButton);
 			this->Controls->Add(this->testButton);
 			this->Controls->Add(this->trainButton);
@@ -242,7 +256,8 @@ namespace CWinFormOpenCV {
 					 message = path + "\\" + filenames[i];
 					 all_files.push_back(message);
 				 }
-
+				 w_svm.setTXTName(filenames[3]);
+				 
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
 
@@ -479,5 +494,10 @@ namespace CWinFormOpenCV {
 				 
 				 
 			 }
+private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+			 //set file name
+			 w_svm.VectorToFile();
+			 MessageBoxA(0, "寫完了!", "Ground Truth", MB_OK);
+		 }
 };
 }
