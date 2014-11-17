@@ -25,6 +25,7 @@ public:
 	void calHistogram(int histSize, const float* histRange);
 	void detectSIFT();
 	void readImage(std::string fileName);
+	void readFrame(Mat frame);
 	Mat getImage();
 	vector<float> getHuVector();
 	vector<float> getHistVector();
@@ -33,6 +34,7 @@ public:
 
 private:
 	Mat cvImage;
+	Mat skin;
 	CvHuMoments HuMoments; 
 	vector<float> huVector;
 	vector<float> histVector;

@@ -134,8 +134,7 @@ void MyCV::HuMoment()
 	//==========================
 
 	//==========skin color detection=========
-	Skin_Color_Detection(YCbCr_img);
-	//===========YCbCrÂà¦Ç¶¥=============
+	Skin_Color_Detection(YCbCr_img);	//===========YCbCrÂà¦Ç¶¥=============
 	gray_img = cvCreateImage(cvGetSize(tmp), IPL_DEPTH_8U, 1);
 	dst = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 
