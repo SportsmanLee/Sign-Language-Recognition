@@ -86,3 +86,40 @@ void MySVM::clear_testVector()
 {
 	testVector.clear();
 }
+
+string MySVM::setTXTName(string filename)
+{
+	const char* chars = (const char*)(System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(filename.c_str()[0] + ".txt")).ToPointer();
+	txtname.assign(filename.c_str(), 1);
+	//txtname.append(filename);
+	txtname.append(".txt");
+	return txtname;
+}
+void MySVM::VectorToFile()
+{
+
+	const char * filename = txtname.c_str() ;
+	fstream fp;
+	fp.open(filename, ios::out);//開啟檔案
+	if(!fp){//如果開啟檔案失敗，fp為0；成功，fp為非0
+		cout<<"Fail to open file: "<<filename<<endl;
+	}
+
+	int rows = gtVectors.size();
+	int cols = gtVectors[0].size();
+	string vector_string ;
+	// Write to File
+	for(int i = 0 ; i < rows ; i ++)
+	{
+		vector_string = "";
+		for(int j = 0 ; j < cols ; j++)
+		{
+			std::ostringstream strs;
+			strs << gtVectors[i][j];
+			vector_string +=strs.str() + " ";
+			
+		}
+		fp<< vector_string<<endl;//寫入字串
+	}
+	fp.close();//關閉檔案
+}

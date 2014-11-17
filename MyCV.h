@@ -31,6 +31,7 @@ public:
 	vector<float> getSiftVector();
 	void clear();
 
+
 private:
 	Mat cvImage;
 	CvHuMoments HuMoments; 

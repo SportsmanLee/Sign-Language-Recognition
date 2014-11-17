@@ -4,7 +4,8 @@
 #include "include\opencv2\core\core.hpp"
 #include "include\opencv2\highgui\highgui.hpp"
 #include "include\opencv2\ml\ml.hpp"
-
+#include <iostream>
+#include <fstream>
 using namespace std;
 using namespace cv;
 
@@ -18,10 +19,13 @@ public:
 	void trainSVM();
 	float testSVM();
 	void setModel(string filename);
+	string setTXTName(string);
+	void VectorToFile();
 
 private:
 	vector< vector<float> > gtVectors;
 	vector< vector<float> > otherVectors;
 	vector<float> testVector;
 	string modelFile;
+	string txtname;
 };
