@@ -247,10 +247,10 @@ namespace CWinFormOpenCV {
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
 
-					 int histSize = 16;
+					 /*int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);
+					 w_opencv.calHistogram(histSize, histRange);*/
 
 					 w_opencv.detectSIFT();
 
@@ -302,10 +302,10 @@ namespace CWinFormOpenCV {
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
 
-					 int histSize = 16;
+					 /*int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);
+					 w_opencv.calHistogram(histSize, histRange);*/
 
 					 w_opencv.detectSIFT();
 
@@ -396,11 +396,12 @@ namespace CWinFormOpenCV {
 					 else {
 						 originPictureBox->Image = testImage;
 					 }
+					 originPictureBox->Refresh();
 
-					 int histSize = 16;
+					 /*int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);
+					 w_opencv.calHistogram(histSize, histRange);*/
 
 					 w_opencv.detectSIFT();
 

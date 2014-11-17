@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include <iostream>
 #include "MyCV.h"
 
@@ -75,20 +75,20 @@ void MyCV::RGBtoYCbCr(IplImage *img)
 	for( int i = 0; i < img->height; i++ )
 	for( int j = 0; j < img->width; j++ )
 	{
-		scalarImg = cvGet2D(img, i, j);   //±q¼v¹³¤¤¨úRGB­È
+		scalarImg = cvGet2D(img, i, j);   //å¾å½±åƒä¸­å–RGBå€¼
 		y =  (16 + scalarImg.val[2]*0.257 + scalarImg.val[1]*0.504 + scalarImg.val[0]*0.098);
 		cb = (128 - scalarImg.val[2]*0.148 - scalarImg.val[1]*0.291 + scalarImg.val[0]*0.439);
 		cr = (128 + scalarImg.val[2]*0.439 - scalarImg.val[1]*0.368 - scalarImg.val[0]*0.071);      
-		cvSet2D(img, i, j, cvScalar( y, cr, cb));  //¥HYCbCr¤è¦¡µeimg
+		cvSet2D(img, i, j, cvScalar( y, cr, cb));  //ä»¥YCbCræ–¹å¼ç•«img
 	}
 }
 
 void MyCV::Skin_Color_Detection(IplImage *img)
 {
 	//================
-	int avg_cb = 120;  //YCbCrÃC¦âªÅ¶¡½§¦âcbªº¥­§¡­È
-	int avg_cr = 155;  //YCbCrÃC¦âªÅ¶¡½§¦âcrªº¥­§¡­È
-	int skinRange = 22;  //YCbCrÃC¦âªÅ¶¡½§¦âªº½d³ò
+	int avg_cb = 120;  //YCbCré¡è‰²ç©ºé–“è†šè‰²cbçš„å¹³å‡å€¼
+	int avg_cr = 155;  //YCbCré¡è‰²ç©ºé–“è†šè‰²crçš„å¹³å‡å€¼
+	int skinRange = 22;  //YCbCré¡è‰²ç©ºé–“è†šè‰²çš„ç¯„åœ
 	//================
 
 	CvScalar scalarImg;
@@ -123,8 +123,8 @@ void MyCV::HuMoment()
 		
 	//Img = cvCreateImage(img_resize, tmp->depth, tmp->nChannels);
 	//YCbCr_img = cvCreateImage(cvGetSize(Img), Img->depth, Img->nChannels);
-	//cvResize(tmp, Img, CV_INTER_LINEAR);    //ÁY©ñ¨Ó·½¼v¹³¨ì¥Ø¼Ğ¼v¹³
-	// cvSaveImage("00010 004.jpg", img);		 //Àx¦s¼v¹³(ÂĞ»\­ìÀÉ)
+	//cvResize(tmp, Img, CV_INTER_LINEAR);    //ç¸®æ”¾ä¾†æºå½±åƒåˆ°ç›®æ¨™å½±åƒ
+	// cvSaveImage("00010 004.jpg", img);		 //å„²å­˜å½±åƒ(è¦†è“‹åŸæª”)
 	
 	YCbCr_img = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 
@@ -135,7 +135,7 @@ void MyCV::HuMoment()
 
 	//==========skin color detection=========
 	Skin_Color_Detection(YCbCr_img);
-	//===========YCbCrÂà¦Ç¶¥=============
+	//===========YCbCrè½‰ç°éš=============
 	gray_img = cvCreateImage(cvGetSize(tmp), IPL_DEPTH_8U, 1);
 	dst = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 
@@ -158,13 +158,13 @@ void MyCV::HuMoment()
 	cvContourMoments(mcont,&Moments);
 	cvGetHuMoments(&Moments, &HuMoments);
 	
-	huVector.push_back(HuMoments.hu1);
-	huVector.push_back(HuMoments.hu2);
-	huVector.push_back(HuMoments.hu3);
-	huVector.push_back(HuMoments.hu4);
-	huVector.push_back(HuMoments.hu5);
-	huVector.push_back(HuMoments.hu6);
-	huVector.push_back(HuMoments.hu7);
+	huVector.push_back((float)HuMoments.hu1);
+	huVector.push_back((float)HuMoments.hu2);
+	huVector.push_back((float)HuMoments.hu3);
+	huVector.push_back((float)HuMoments.hu4);
+	huVector.push_back((float)HuMoments.hu5);
+	huVector.push_back((float)HuMoments.hu6);
+	huVector.push_back((float)HuMoments.hu7);
 
 	cvReleaseImage(&gray_img);
 	cvReleaseImage(&dst);
@@ -191,7 +191,7 @@ void MyCV::calHistogram(int histSize, const float* histRange)
 	calcHist(&grayImage, 1, 0, Mat(), hist, 1, &histSize, &histRange);
 
 	for (int i = 0; i < hist.rows; ++i) {
-		histVector.push_back((double)hist.at<float>(i));
+		histVector.push_back(hist.at<float>(i));
 	}
 
 	// Draw the histogram for intensity
@@ -224,7 +224,27 @@ void MyCV::detectSIFT()
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
 
-	detector.detect(cvImage, keypoints);
+	Mat YImage, skinImage(cvImage.size(), CV_8UC3, Scalar(0, 0, 0));
+	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
+
+	// Skin Detection
+	int avg_cb = 120;  //YCbCré¡è‰²ç©ºé–“è†šè‰²cbçš„å¹³å‡å€¼
+	int avg_cr = 155;  //YCbCré¡è‰²ç©ºé–“è†šè‰²crçš„å¹³å‡å€¼
+	int skinRange = 22;  //YCbCré¡è‰²ç©ºé–“è†šè‰²çš„ç¯„åœ
+	for (int x = 0; x < cvImage.rows; ++x)
+	{
+		for (int y = 0; y < cvImage.cols; ++y)
+		{
+			int Cr = YImage.at<Vec3b>(x, y).val[1], Cb = YImage.at<Vec3b>(x, y).val[2];
+
+			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
+				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
+			else
+				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
+		}
+	}
+
+	detector.detect(skinImage, keypoints);
 	while (keypoints.size() < 50) {
 		keypoints.push_back(keypoints[keypoints.size() - 1]);
 	}
@@ -233,17 +253,17 @@ void MyCV::detectSIFT()
 	}
 
 	Mat descriptor;
-	extractor.compute(cvImage, keypoints, descriptor);
+	extractor.compute(skinImage, keypoints, descriptor);
 
-	for (unsigned int i = 0; i < descriptor.rows; ++i) {
-		for (unsigned int j = 0; j < descriptor.cols; ++j) {
+	for (int i = 0; i < descriptor.rows; ++i) {
+		for (int j = 0; j < descriptor.cols; ++j) {
 			siftVector.push_back(descriptor.at<float>(i, j));
 		}
 	}
 	
 	// Draw keypoints
 	/*Mat keypointsImg;
-	drawKeypoints( cvImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
+	drawKeypoints( skinImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
 	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
 	cv::putText(keypointsImg, std::to_string(descriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
 	cv::putText(keypointsImg, std::to_string(descriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
