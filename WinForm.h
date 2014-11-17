@@ -62,7 +62,8 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::Button^  testButton;
 
 	private: System::Windows::Forms::Button^  modelButton;
-	private: System::Windows::Forms::Button^  button1;
+	private: System::Windows::Forms::Button^  txtButton;
+
 	private:
 		/// <summary>
 		/// 設計工具所需的變數。
@@ -85,7 +86,7 @@ namespace CWinFormOpenCV {
 			this->trainButton = (gcnew System::Windows::Forms::Button());
 			this->testButton = (gcnew System::Windows::Forms::Button());
 			this->modelButton = (gcnew System::Windows::Forms::Button());
-			this->button1 = (gcnew System::Windows::Forms::Button());
+			this->txtButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -167,6 +168,7 @@ namespace CWinFormOpenCV {
 			// 
 			// testButton
 			// 
+			this->testButton->Enabled = false;
 			this->testButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
 			this->testButton->Location = System::Drawing::Point(41, 294);
@@ -189,23 +191,23 @@ namespace CWinFormOpenCV {
 			this->modelButton->UseVisualStyleBackColor = true;
 			this->modelButton->Click += gcnew System::EventHandler(this, &WinForm::modelButton_Click);
 			// 
-			// button1
+			// txtButton
 			// 
-			this->button1->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->button1->Location = System::Drawing::Point(41, 165);
-			this->button1->Name = L"button1";
-			this->button1->Size = System::Drawing::Size(213, 33);
-			this->button1->TabIndex = 15;
-			this->button1->Text = L"to .txt";
-			this->button1->UseVisualStyleBackColor = true;
-			this->button1->Click += gcnew System::EventHandler(this, &WinForm::button1_Click);
+			this->txtButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
+			this->txtButton->Location = System::Drawing::Point(41, 165);
+			this->txtButton->Name = L"txtButton";
+			this->txtButton->Size = System::Drawing::Size(213, 33);
+			this->txtButton->TabIndex = 15;
+			this->txtButton->Text = L"to .txt";
+			this->txtButton->UseVisualStyleBackColor = true;
+			this->txtButton->Click += gcnew System::EventHandler(this, &WinForm::txtButton_Click);
 			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(942, 437);
-			this->Controls->Add(this->button1);
+			this->Controls->Add(this->txtButton);
 			this->Controls->Add(this->modelButton);
 			this->Controls->Add(this->testButton);
 			this->Controls->Add(this->trainButton);
@@ -256,7 +258,6 @@ namespace CWinFormOpenCV {
 					 message = path + "\\" + filenames[i];
 					 all_files.push_back(message);
 				 }
-				 w_svm.setTXTName(filenames[3]);
 				 
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
@@ -368,69 +369,39 @@ namespace CWinFormOpenCV {
 				 testButton->Enabled = true;
 			 }
 	private: System::Void testButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 
+
 				 //w_svm.setModel("svm_data_auto_a_v2.xml");
-				 ofstream output("output.txt", ios::out);
-				 int fn=0;
-				 string output_file;
 
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
 				 openFileDialog1->InitialDirectory = "C:\\Users\\Roy\\Desktop";
-				 openFileDialog1->Filter = "Video Files (*.wmv,*.avi)|*.wmv;*.avi;*.* ";
+				 openFileDialog1->Filter = "Video Files (*.MTS,*.wmv,*.avi)|*.MTS*.wmv;*.avi;*.*";
 				 openFileDialog1->Title = "開啟影片檔";
 
 				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
-					return;
-				 
+					 return;
+
 				 std::string file;	
 				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
 				 //MessageBoxA(0, file.c_str(), "File name", MB_OK);
 				 VideoCapture cap(file);
-				 if(!cap.isOpened())
-				 {
+				 if(!cap.isOpened()) {
 					 MessageBoxA(0, "Cannot open the video!!", "Open file failed", MB_OK);
 					 return ;
 				 }
 
-				 while(1)
-				 {
-					 Mat frame;
+				 ofstream output("output.txt", ios::out);
+				 int fn = 0;
+				 Mat frame;
+
+				 while (1) {
 					 cap >> frame;
 					 fn++;
-					 if(fn%10 != 0)
-					 {
+					 if(fn%10 != 0) {
 						 continue;
 					 }
 
 					 if(frame.empty())
 						 break;
-					// imshow("image",frame);
-					// waitKey(30);
-				 
-
-
-				 /*
-				 FolderBrowserDialog^ folderBrowserDiaglog = gcnew FolderBrowserDialog();
-				 folderBrowserDiaglog->ShowDialog();
-				 std::string path = msclr::interop::marshal_as<std::string>(folderBrowserDiaglog->SelectedPath);
-
-				 vector<std::string> filenames = vector<std::string>();
-				 getdir(path,filenames);
-
-				 vector<std::string> all_files = vector<std::string>();
-				 std::string message;
-				 for(unsigned int i = 0; i < filenames.size(); i++)
-				 {
-					 if (filenames[i] == "." || filenames[i] == "..")
-						 continue;
-					 message = path + "\\" + filenames[i];
-					 all_files.push_back(message);
-				 }*/
-
-				 //ofstream output("output.txt", ios::out);
-				 
-				 //for (unsigned int i = 0; i < all_files.size(); ++i) {
-					// w_opencv.readImage(all_files[i]);
 					 w_opencv.readFrame(frame);
 
 					 Bitmap^ testImage = w_opencv.getBitmap();
@@ -459,14 +430,12 @@ namespace CWinFormOpenCV {
 
 					 w_svm.concatenateTest(features);
 
-					 output_file = "feature_" + to_string(fn) + ".txt";
+					 string output_file = "feature_" + to_string(fn) + ".txt";
 					 ofstream output(output_file, ios::out);
 
 					 std::vector<float> all_feature = w_svm.getTestVector();
 					 ostream_iterator<float> output_iterator(output, "\n");
 					 copy(all_feature.begin(), all_feature.end(), output_iterator);
-
-					 output.close();
 
 					 System::String^ string = gcnew System::String(std::to_string(fn).c_str());
 					 fileTextBox->Text = string;
@@ -477,27 +446,94 @@ namespace CWinFormOpenCV {
 
 					 char result[128];
 					 sprintf(result, "%s\t%f\r\n", std::to_string(fn).c_str(), res);  
-					 
+
 					 output << result;
 
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
 					 w_svm.clear_testVector();
-				 //}
-
-				 
 				 } // end while(1)
 				 output.close();
 				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
-
-				 
-				 
 			 }
-private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
-			 //set file name
-			 w_svm.VectorToFile();
-			 MessageBoxA(0, "寫完了!", "Ground Truth", MB_OK);
-		 }
+	private: System::Void txtButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				 openFileDialog1->InitialDirectory = "C:\\Users\\Roy\\Desktop";
+				 openFileDialog1->Filter = "Video Files (*.MTS,*.wmv,*.avi)|*.MTS*.wmv;*.avi;*.*";
+				 openFileDialog1->Title = "開啟影片檔";
+
+				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
+					 return;
+
+				 std::string file;	
+				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+				 VideoCapture cap(file);
+				 if(!cap.isOpened()) {
+					 MessageBoxA(0, "Cannot open the video!!", "Open file failed", MB_OK);
+					 return ;
+				 }
+
+				 int fn = 0;
+				 Mat frame;
+				 vector< vector<float> > featureVectors;
+
+				 while (1) {
+					 cap >> frame;
+					 fn++;
+					 if(frame.empty())
+						 break;
+
+					 if(fn%10 != 0) {
+						 continue;
+					 }
+
+					 w_opencv.readFrame(frame);
+
+					 Bitmap^ testImage = w_opencv.getBitmap();
+					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+						 originPictureBox->Image = resizeImage;
+					 }
+					 else {
+						 originPictureBox->Image = testImage;
+					 }
+					 originPictureBox->Refresh();
+
+					 System::String^ string = gcnew System::String(std::to_string(fn).c_str());
+					 fileTextBox->Text = string;
+					 fileTextBox->Refresh();
+
+					 w_opencv.detectSIFT();
+
+					 w_opencv.HuMoment();
+					 std::vector<float> huVector = w_opencv.getHuVector();
+
+					 w_fourier.image_process(w_opencv.getImage());
+
+					 vector< vector<float> > features;
+
+					 features.push_back(w_opencv.getHistVector());
+					 features.push_back(w_opencv.getHuVector());
+					 features.push_back(w_opencv.getSiftVector());
+					 features.push_back(w_fourier.get_vector());
+
+					 w_svm.concatenateTest(features);
+
+					 featureVectors.push_back(w_svm.getTestVector());
+
+					 features.clear();
+					 w_opencv.clear();
+					 w_fourier.clear_vector();
+					 w_svm.clear_testVector();
+				 } // end while(1)
+
+				 w_svm.setTXTName("output.txt");
+				 w_svm.VectorToFile(featureVectors);
+
+				 featureVectors.clear();
+
+				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
+			 }
 };
 }

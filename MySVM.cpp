@@ -38,6 +38,11 @@ void MySVM::concatenateTest(vector< vector<float> > features)
 	}
 }
 
+vector<float> MySVM::getTestVector()
+{
+	return testVector;
+}
+
 void MySVM::trainSVM()
 {
 	// Set up training data
@@ -76,7 +81,7 @@ float MySVM::testSVM()
 	CvSVM SVM;
 	SVM.load(modelFile.c_str());
 
-	return SVM.predict(testImage, false); // test result 
+	return SVM.predict(testImage, true); // test result 
 }
 
 void MySVM::setModel(string filename)
@@ -89,40 +94,31 @@ void MySVM::clear_testVector()
 	testVector.clear();
 }
 
-string MySVM::setTXTName(string filename)
+void MySVM::setTXTName(string filename)
 {
-	const char* chars = (const char*)(System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(filename.c_str()[0] + ".txt")).ToPointer();
-	txtname.assign(filename.c_str(), 1);
-	//txtname.append(filename);
-	txtname.append(".txt");
-	return txtname;
+	txtname = filename;
 }
 
-void MySVM::VectorToFile()
+void MySVM::VectorToFile(vector< vector<float> > features)
 {
-
-	const char * filename = txtname.c_str() ;
-	fstream fp;
-	fp.open(filename, ios::out);//開啟檔案
-	if(!fp){//如果開啟檔案失敗，fp為0；成功，fp為非0
-		cout<<"Fail to open file: "<<filename<<endl;
+	fstream fp(txtname, ios::out);//開啟檔案
+	if (!fp) {//如果開啟檔案失敗，fp為0；成功，fp為非0
+		cout << "Fail to open file: " << txtname << endl;
 	}
 
-	int rows = gtVectors.size();
-	int cols = gtVectors[0].size();
-	string vector_string ;
+	string vector_string;
 	// Write to File
-	for(int i = 0 ; i < rows ; i ++)
+	for (int i = 0; i < features.size(); i++)
 	{
-		vector_string = "";
-		for(int j = 0 ; j < cols ; j++)
+		vector_string.clear();
+		for (int j = 0; j < features[i].size(); j++)
 		{
 			std::ostringstream strs;
-			strs << gtVectors[i][j];
-			vector_string +=strs.str() + " ";
-			
+			strs << features[i][j];
+			vector_string += strs.str() + " ";
 		}
-		fp<< vector_string<<endl;//寫入字串
+		fp << vector_string << endl;//寫入字串
 	}
+
 	fp.close();//關閉檔案
 }
