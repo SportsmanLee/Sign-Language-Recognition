@@ -276,7 +276,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -331,7 +331,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -423,7 +423,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -476,7 +476,9 @@ namespace CWinFormOpenCV {
 
 				 int fn = 0;
 				 Mat frame;
-				 vector< vector<float> > featureVectors;
+				 vector<float> outputVector;
+
+				 fstream output("output.txt", ios::out);
 
 				 while (1) {
 					 cap >> frame;
@@ -484,6 +486,7 @@ namespace CWinFormOpenCV {
 					 if(frame.empty())
 						 break;
 
+					 // 每10張取1張
 					 if(fn%10 != 0) {
 						 continue;
 					 }
@@ -513,26 +516,28 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
 
 					 w_svm.concatenateTest(features);
 
-					 featureVectors.push_back(w_svm.getTestVector());
+					 outputVector = w_svm.getTestVector();
+
+					 for (unsigned int i = 0; i < outputVector.size(); ++i) {
+						 output << outputVector[i] << " ";
+					 }
+					 output << endl;
 
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
 					 w_svm.clear_testVector();
+					 outputVector.clear();
 				 } // end while(1)
 
-				 w_svm.setTXTName("output.txt");
-				 w_svm.VectorToFile(featureVectors);
-
-				 featureVectors.clear();
-
+				 output.close();
 				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
 			 }
 };

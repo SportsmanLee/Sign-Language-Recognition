@@ -8,5 +8,5 @@ Developing...
 Developing Tools
 ================
 
-Visual Studio 2012
-OpenCV 2.4.9
+*   Visual Studio 2012
+*   OpenCV 2.4.9

@@ -20,13 +20,10 @@ public:
 	void trainSVM();
 	float testSVM();
 	void setModel(string filename);
-	void setTXTName(string);
-	void VectorToFile(vector< vector<float> > features);
 
 private:
 	vector< vector<float> > gtVectors;
 	vector< vector<float> > otherVectors;
 	vector<float> testVector;
 	string modelFile;
-	string txtname;
 };

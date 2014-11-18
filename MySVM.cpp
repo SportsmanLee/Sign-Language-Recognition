@@ -93,32 +93,3 @@ void MySVM::clear_testVector()
 {
 	testVector.clear();
 }
-
-void MySVM::setTXTName(string filename)
-{
-	txtname = filename;
-}
-
-void MySVM::VectorToFile(vector< vector<float> > features)
-{
-	fstream fp(txtname, ios::out);//開啟檔案
-	if (!fp) {//如果開啟檔案失敗，fp為0；成功，fp為非0
-		cout << "Fail to open file: " << txtname << endl;
-	}
-
-	string vector_string;
-	// Write to File
-	for (int i = 0; i < features.size(); i++)
-	{
-		vector_string.clear();
-		for (int j = 0; j < features[i].size(); j++)
-		{
-			std::ostringstream strs;
-			strs << features[i][j];
-			vector_string += strs.str() + " ";
-		}
-		fp << vector_string << endl;//寫入字串
-	}
-
-	fp.close();//關閉檔案
-}
