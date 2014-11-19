@@ -3,11 +3,9 @@
 #include "MyCV.h"
 #include "fourier.h"
 #include "MySVM.h"
-#include "include\dirent.h"
+#include "dirent.h"
 #include <fstream>
 #include <msclr/marshal_cppstd.h>
-#include "include\opencv2\core\core.hpp"
-#include "include\opencv2\highgui\highgui.hpp"
 
 extern MyCV w_opencv;
 extern fourier w_fourier;
