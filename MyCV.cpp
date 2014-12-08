@@ -88,7 +88,7 @@ void MyCV::Skin_Color_Detection(IplImage *img)
 	//================
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 15;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
 	//================
 
 	CvScalar scalarImg;

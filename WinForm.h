@@ -61,6 +61,7 @@ namespace CWinFormOpenCV {
 
 	private: System::Windows::Forms::Button^  modelButton;
 	private: System::Windows::Forms::Button^  txtButton;
+	private: System::Windows::Forms::Button^  testVideoButton;
 
 	private:
 		/// <summary>
@@ -85,6 +86,7 @@ namespace CWinFormOpenCV {
 			this->testButton = (gcnew System::Windows::Forms::Button());
 			this->modelButton = (gcnew System::Windows::Forms::Button());
 			this->txtButton = (gcnew System::Windows::Forms::Button());
+			this->testVideoButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -169,11 +171,11 @@ namespace CWinFormOpenCV {
 			this->testButton->Enabled = false;
 			this->testButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->testButton->Location = System::Drawing::Point(41, 294);
+			this->testButton->Location = System::Drawing::Point(41, 267);
 			this->testButton->Name = L"testButton";
 			this->testButton->Size = System::Drawing::Size(213, 33);
 			this->testButton->TabIndex = 12;
-			this->testButton->Text = L"Test";
+			this->testButton->Text = L"Test Video";
 			this->testButton->UseVisualStyleBackColor = true;
 			this->testButton->Click += gcnew System::EventHandler(this, &WinForm::testButton_Click);
 			// 
@@ -181,7 +183,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->modelButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->modelButton->Location = System::Drawing::Point(41, 225);
+			this->modelButton->Location = System::Drawing::Point(41, 215);
 			this->modelButton->Name = L"modelButton";
 			this->modelButton->Size = System::Drawing::Size(213, 33);
 			this->modelButton->TabIndex = 13;
@@ -200,11 +202,25 @@ namespace CWinFormOpenCV {
 			this->txtButton->UseVisualStyleBackColor = true;
 			this->txtButton->Click += gcnew System::EventHandler(this, &WinForm::txtButton_Click);
 			// 
+			// testVideoButton
+			// 
+			this->testVideoButton->Enabled = false;
+			this->testVideoButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->testVideoButton->Location = System::Drawing::Point(41, 319);
+			this->testVideoButton->Name = L"testVideoButton";
+			this->testVideoButton->Size = System::Drawing::Size(213, 33);
+			this->testVideoButton->TabIndex = 16;
+			this->testVideoButton->Text = L"Test Image";
+			this->testVideoButton->UseVisualStyleBackColor = true;
+			this->testVideoButton->Click += gcnew System::EventHandler(this, &WinForm::testVideoButton_Click);
+			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(942, 437);
+			this->Controls->Add(this->testVideoButton);
 			this->Controls->Add(this->txtButton);
 			this->Controls->Add(this->modelButton);
 			this->Controls->Add(this->testButton);
@@ -371,7 +387,6 @@ namespace CWinFormOpenCV {
 				 //w_svm.setModel("svm_data_auto_a_v2.xml");
 
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
-				 openFileDialog1->InitialDirectory = "C:\\Users\\Roy\\Desktop";
 				 openFileDialog1->Filter = "Video Files (*.MTS,*.wmv,*.avi)|*.MTS*.wmv;*.avi;*.*";
 				 openFileDialog1->Title = "開啟影片檔";
 
@@ -453,11 +468,10 @@ namespace CWinFormOpenCV {
 					 w_svm.clear_testVector();
 				 } // end while(1)
 				 output.close();
-				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
+				 MessageBoxA(0, "跑完了!", "TEST", MB_OK);
 			 }
 	private: System::Void txtButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
-				 openFileDialog1->InitialDirectory = "C:\\Users\\Roy\\Desktop";
 				 openFileDialog1->Filter = "Video Files (*.MTS,*.wmv,*.avi)|*.MTS*.wmv;*.avi;*.*";
 				 openFileDialog1->Title = "開啟影片檔";
 
@@ -536,7 +550,58 @@ namespace CWinFormOpenCV {
 				 } // end while(1)
 
 				 output.close();
-				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
+				 MessageBoxA(0, "跑完了!", "TXT", MB_OK);
+			 }
+	private: System::Void testVideoButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				 openFileDialog1->Filter = "Image File (*.jpg,*.bmp)|*.jpg;*.bmp;*.*";
+				 openFileDialog1->Title = "開啟影像";
+
+				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
+					 return;
+
+				 std::string file;	
+				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+				 //MessageBoxA(0, file.c_str(), "File name", MB_OK);
+				 w_opencv.readImage(file);
+
+				 Bitmap^ testImage = w_opencv.getBitmap();
+				 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+					 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+					 originPictureBox->Image = resizeImage;
+				 }
+				 else {
+					 originPictureBox->Image = testImage;
+				 }
+				 originPictureBox->Refresh();
+
+				 w_opencv.detectSIFT();
+
+				 w_opencv.HuMoment();
+				 std::vector<float> huVector = w_opencv.getHuVector();
+
+				 w_fourier.image_process(w_opencv.getImage());
+
+				 vector< vector<float> > features;
+
+				 //features.push_back(w_opencv.getHistVector());
+				 features.push_back(w_opencv.getHuVector());
+				 features.push_back(w_opencv.getSiftVector());
+				 features.push_back(w_fourier.get_vector());
+
+				 w_svm.concatenateTest(features);
+
+				 System::String^ string = gcnew System::String(file.c_str());
+				 fileTextBox->Text = string;
+				 fileTextBox->Refresh();
+
+				 float res = w_svm.testSVM();
+				 MessageBoxA(0, std::to_string(res).c_str(), "SVM", MB_OK);
+
+				 features.clear();
+				 w_opencv.clear();
+				 w_fourier.clear_vector();
+				 w_svm.clear_testVector();
 			 }
 };
 }
