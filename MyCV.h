@@ -8,6 +8,7 @@
 #include "opencv2\nonfree\features2d.hpp"
 #include "opencv2\nonfree\nonfree.hpp"
 #include "opencv2\ml\ml.hpp"
+#include <opencv2/opencv.hpp>
 #include "opencv\cv.h"
 
 using namespace std;
@@ -26,6 +27,8 @@ public:
 	void detectSIFT();
 	void readImage(std::string fileName);
 	void readFrame(Mat frame);
+	void img_preproc();
+	void set_bg_frame();
 	Mat getImage();
 	vector<float> getHuVector();
 	vector<float> getHistVector();
@@ -35,6 +38,7 @@ public:
 private:
 	Mat cvImage;
 	Mat skin;
+	Mat first_frame;
 	CvHuMoments HuMoments; 
 	vector<float> huVector;
 	vector<float> histVector;
