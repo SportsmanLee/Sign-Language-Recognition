@@ -275,6 +275,83 @@ void MyCV::detectSIFT()
 	waitKey();*/
 }
 
+void MyCV::img_preproc()
+{
+	/*================================================
+	Use the third frame as the background frame(BG), in case the frames are blurred at the beginning
+	
+	Do Frame-Difference using frame(now) and BG
+	Convert the result into gray image(FD)
+	Do thresholding to FD, if the pixel value > threshold, fill in the original pixel value
+	Do skin-color detection to FD
+	Then do morphological operation to denoise
+	Thresholding again, and fill in original pixel value to get a clear image
+	================================================*/
+
+	// Skin Detection
+	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
+	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
+	int skinRange = 16;  //YCbCr顏色空間膚色的範圍
+	
+	Mat FD,skinMask;;
+	Mat filtered_image(first_frame.size(), CV_8UC3, Scalar(0, 0, 0));
+
+	absdiff(cvImage,first_frame,filtered_image);
+		
+	cvtColor(filtered_image,FD,CV_RGB2GRAY);
+	for (int x = 0; x < FD.rows; ++x)
+	{
+		for (int y = 0; y < FD.cols; ++y)
+		{
+			if(FD.at<uchar>(x,y) > 20)
+				filtered_image.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
+			else
+				filtered_image.at<Vec3b>(x, y) = Vec3b(0,0,0);
+		}
+	}
+	//imshow("filtered_image", filtered_image);
+		
+	Mat YImage, skinImage(cvImage.size(), CV_8UC3, Scalar(0, 0, 0));
+	cvtColor(filtered_image, YImage, CV_BGR2YCrCb);
+	for (int x = 0; x < cvImage.rows; ++x)
+	{
+		for (int y = 0; y < cvImage.cols; ++y)
+		{
+			int Cr = YImage.at<Vec3b>(x, y).val[1], Cb = YImage.at<Vec3b>(x, y).val[2];
+
+			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
+				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
+			else
+				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
+		}
+	}
+	/*
+	//get the frame number and write it on the current frame
+    rectangle(first_frame, cv::Point(10, 2), cv::Point(100,20),cv::Scalar(255,255,255), -1);
+	std::string frameNumberString = std::to_string(fn++);
+    putText(first_frame, frameNumberString.c_str(), cv::Point(15, 15),FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+	*/
+
+	//morphological operation
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
+	cv::morphologyEx(skinImage, skinImage, cv::MORPH_ELLIPSE, element);
+	cv::morphologyEx(skinImage, skinImage, cv::MORPH_DILATE, element);
+
+	cvtColor(skinImage, skinMask, CV_RGB2GRAY);
+
+	for (int x = 0; x < skinImage.rows; ++x)
+	{
+		for (int y = 0; y < skinImage.cols; ++y)
+		{
+			if(skinMask.at<uchar>(x,y) > 0)
+				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
+			else
+				skinImage.at<Vec3b>(x, y) = Vec3b(0,0,0);
+		}
+	}
+	cvImage = skinImage;
+}
+
 void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
@@ -283,7 +360,7 @@ void MyCV::readImage(std::string fileName)
 
 void MyCV::readFrame(Mat frame)
 {
-	cvImage = frame;
+	cvImage = frame.clone();
 	cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols / 2.0), cvRound(cvImage.rows / 2.0)));
 }
 
@@ -313,4 +390,9 @@ void MyCV::clear()
 	huVector.clear();
 	siftVector.clear();
 	cvImage.release();
+}
+
+void MyCV::set_bg_frame()
+{
+	first_frame = cvImage.clone();
 }
