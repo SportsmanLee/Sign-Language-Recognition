@@ -21,6 +21,7 @@ public:
 	void trainSVM();
 	float testSVM();
 	void setModel(string filename);
+	void clearVectors();
 
 private:
 	vector< vector<float> > gtVectors;

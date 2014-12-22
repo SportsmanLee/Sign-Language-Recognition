@@ -367,6 +367,7 @@ namespace CWinFormOpenCV {
 			 }
 	private: System::Void trainButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 w_svm.trainSVM();
+				 w_svm.clearVectors();
 				 MessageBoxA(0, "ถ]งนคF!", "SVM", MB_OK);
 			 }
 	private: System::Void modelButton_Click(System::Object^  sender, System::EventArgs^  e) {

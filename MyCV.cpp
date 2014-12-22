@@ -219,7 +219,7 @@ void MyCV::calHistogram(int histSize, const float* histRange)
 void MyCV::detectSIFT()
 {
 	// Detect the keypoints using SIFT Detector
-	SiftFeatureDetector detector(50, 3, 0.04, 10.0, 1.6f);
+	SiftFeatureDetector detector(30, 3, 0.04, 10.0, 1.6f);
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
 
@@ -245,14 +245,14 @@ void MyCV::detectSIFT()
 
 	detector.detect(skinImage, keypoints);
 	if (keypoints.empty()) {
-		while (keypoints.size() < 50) {
+		while (keypoints.size() < 30) {
 			keypoints.push_back(KeyPoint());
 		}
 	}
-	while (keypoints.size() < 50) {
+	while (keypoints.size() < 30) {
 		keypoints.push_back(keypoints[keypoints.size() - 1]);
 	}
-	while (keypoints.size() > 50) {
+	while (keypoints.size() > 30) {
 		keypoints.pop_back();
 	}
 
@@ -267,7 +267,7 @@ void MyCV::detectSIFT()
 	
 	// Draw keypoints
 	/*Mat keypointsImg;
-	drawKeypoints( skinImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
+	drawKeypoints( skinImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
 	cv::putText(keypointsImg, std::to_string(descriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
 	cv::putText(keypointsImg, std::to_string(descriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));

@@ -43,6 +43,12 @@ vector<float> MySVM::getTestVector()
 	return testVector;
 }
 
+void MySVM::clearVectors()
+{
+	gtVectors.clear();
+	otherVectors.clear();
+}
+
 void MySVM::trainSVM()
 {
 	// Set up training data
