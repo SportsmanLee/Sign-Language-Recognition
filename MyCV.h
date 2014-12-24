@@ -23,7 +23,6 @@ public:
 	void RGBtoYCbCr(IplImage *img);
 	void Skin_Color_Detection(IplImage *img);
 	void HuMoment();
-	void calHistogram(int histSize, const float* histRange);
 	void detectSIFT();
 	void readImage(std::string fileName);
 	void readFrame(Mat frame);
@@ -31,7 +30,6 @@ public:
 	void set_bg_frame();
 	Mat getImage();
 	vector<float> getHuVector();
-	vector<float> getHistVector();
 	vector<float> getSiftVector();
 	void clear();
 
@@ -41,6 +39,5 @@ private:
 	Mat first_frame;
 	CvHuMoments HuMoments; 
 	vector<float> huVector;
-	vector<float> histVector;
 	vector<float> siftVector;
 };

@@ -67,7 +67,7 @@ void MySVM::trainSVM()
     // Set up SVM's parameters
     CvSVMParams params;
     params.svm_type    = CvSVM::C_SVC;
-    params.kernel_type = CvSVM::LINEAR;
+	params.kernel_type = CvSVM::LINEAR;
     //params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
 
     // Train the SVM

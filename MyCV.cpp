@@ -181,41 +181,6 @@ void MyCV::HuMoment()
 	//cvReleaseMemStorage(&mcont->storage);
 }
 
-void MyCV::calHistogram(int histSize, const float* histRange)
-{
-	Mat grayImage;	cvtColor(cvImage, grayImage, CV_RGB2GRAY);
-
-	Mat hist, n_hist;
-	/// Compute the histogram
-	calcHist(&grayImage, 1, 0, Mat(), hist, 1, &histSize, &histRange);
-
-	for (int i = 0; i < hist.rows; ++i) {
-		histVector.push_back(hist.at<float>(i));
-	}
-
-	// Draw the histogram for intensity
-	int hist_w = 512; int hist_h = 400;
-	int bin_w = cvRound( (double) hist_w/histSize );
-
-	Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
-
-	/// Normalize the result to [ 0, histImage.rows ]
-	normalize(hist, n_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-
-	/// Draw
-	for(int i = 1; i < histSize; ++i) {
-		line( histImage, cv::Point( bin_w*(i-1), hist_h - cvRound(n_hist.at<float>(i-1)) ) ,
-						cv::Point( bin_w*(i), hist_h - cvRound(n_hist.at<float>(i)) ),
-						Scalar( 255, 255, 255), 2, 8, 0  );
-	}
-
-	/// Display
-	/*if (histVector.size() == 16) {
-		imshow("Histogram", histImage );
-		waitKey(0);
-	}*/
-}
-
 void MyCV::detectSIFT()
 {
 	// Detect the keypoints using SIFT Detector
@@ -374,11 +339,6 @@ vector<float> MyCV::getHuVector()
 	return huVector;
 }
 
-vector<float> MyCV::getHistVector()
-{
-	return histVector;
-}
-
 vector<float> MyCV::getSiftVector()
 {
 	return siftVector;
@@ -386,7 +346,6 @@ vector<float> MyCV::getSiftVector()
 
 void MyCV::clear()
 {
-	histVector.clear();
 	huVector.clear();
 	siftVector.clear();
 	cvImage.release();
