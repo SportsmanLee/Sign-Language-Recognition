@@ -28,6 +28,7 @@ public:
 	void readFrame(Mat frame);
 	void img_preproc();
 	void set_bg_frame();
+	void normalize();
 	Mat getImage();
 	vector<float> getHuVector();
 	vector<float> getSiftVector();

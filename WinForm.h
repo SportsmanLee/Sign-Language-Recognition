@@ -285,17 +285,18 @@ namespace CWinFormOpenCV {
 				 closedir(dp);//關閉資料夾指標
 				 return 0;
 			 }
-	private: System::Void truthButton_Click(System::Object^  sender, System::EventArgs^  e) {
+			 vector<std::string> loadImgsFromFolder() {
+				 vector<std::string> all_files = vector<std::string>();
+
 				 FolderBrowserDialog^ folderBrowserDiaglog = gcnew FolderBrowserDialog();
 				 if (folderBrowserDiaglog->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) {
-					 return;
+					 return all_files;
 				 }
 				 std::string path = msclr::interop::marshal_as<std::string>(folderBrowserDiaglog->SelectedPath);
 
 				 vector<std::string> filenames = vector<std::string>();
 				 getdir(path,filenames);
 
-				 vector<std::string> all_files = vector<std::string>();
 				 std::string message;
 				 for(unsigned int i = 0; i < filenames.size(); i++)
 				 {
@@ -306,6 +307,11 @@ namespace CWinFormOpenCV {
 					 message = path + "\\" + filenames[i];
 					 all_files.push_back(message);
 				 }
+
+				 return all_files;
+			 }
+	private: System::Void truthButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 vector<std::string> all_files = loadImgsFromFolder();
 				 
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
@@ -325,37 +331,30 @@ namespace CWinFormOpenCV {
 
 					 w_svm.concatenateGt(features);
 
-					 features.clear();
-					 w_opencv.clear();
-					 w_fourier.clear_vector();
+					 //===========display on window=============
+					 Bitmap^ testImage = w_opencv.getBitmap();
+					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+						 originPictureBox->Image = resizeImage;
+					 }
+					 else {
+						 originPictureBox->Image = testImage;
+					 }
+					 originPictureBox->Refresh();
 
 					 System::String^ string = gcnew System::String(all_files[i].c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
+					 //=========================================
+
+					 features.clear();
+					 w_opencv.clear();
+					 w_fourier.clear_vector();
 				 }
 				 MessageBoxA(0, "跑完了!", "Ground Truth", MB_OK);
 			 }
 	private: System::Void falseButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 FolderBrowserDialog^ folderBrowserDiaglog = gcnew FolderBrowserDialog();
-				 if (folderBrowserDiaglog->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) {
-					 return;
-				 }
-				 std::string path = msclr::interop::marshal_as<std::string>(folderBrowserDiaglog->SelectedPath);
-
-				 vector<std::string> filenames = vector<std::string>();
-				 getdir(path,filenames);
-
-				 vector<std::string> all_files = vector<std::string>();
-				 std::string message;
-				 for(unsigned int i = 0; i < filenames.size(); i++)
-				 {
-					 if (filenames[i] == "." || filenames[i] == "..")
-						 continue;
-					 if (filenames[i].find("jpg") == std::string::npos)
-						 continue;
-					 message = path + "\\" + filenames[i];
-					 all_files.push_back(message);
-				 }
+				 vector<std::string> all_files = loadImgsFromFolder();
 
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
@@ -375,13 +374,25 @@ namespace CWinFormOpenCV {
 
 					 w_svm.concatenateOther(features);
 
-					 features.clear();
-					 w_opencv.clear();
-					 w_fourier.clear_vector();
+					 //===========display on window==============
+					 Bitmap^ testImage = w_opencv.getBitmap();
+					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+						 originPictureBox->Image = resizeImage;
+					 }
+					 else {
+						 originPictureBox->Image = testImage;
+					 }
+					 originPictureBox->Refresh();
 
 					 System::String^ string = gcnew System::String(all_files[i].c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
+					 //==========================================
+
+					 features.clear();
+					 w_opencv.clear();
+					 w_fourier.clear_vector();
 				 }
 				 MessageBoxA(0, "跑完了!", "Ground False", MB_OK);
 
@@ -448,7 +459,7 @@ namespace CWinFormOpenCV {
 					 w_opencv.readFrame(frame);
 					 w_opencv.img_preproc();
 
-					 //===========display on window================
+					 //===========display on window==============
 					 Bitmap^ testImage = w_opencv.getBitmap();
 					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
@@ -458,7 +469,8 @@ namespace CWinFormOpenCV {
 						 originPictureBox->Image = testImage;
 					 }
 					 originPictureBox->Refresh();
-					 //================================
+					 //==========================================
+
 					 w_opencv.detectSIFT();
 
 					 w_opencv.HuMoment();
@@ -493,8 +505,62 @@ namespace CWinFormOpenCV {
 				 output.close();
 				 MessageBoxA(0, "跑完了!", "TEST", MB_OK);
 			 }
+			 // Read images from a folder & output feature vectors to text file.
 	private: System::Void imgTxtButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 // Read images from a folder & output feature vectors to text file.
+				 vector<std::string> all_files = loadImgsFromFolder();
+				 
+				 vector<float> outputVector;
+				 std::string string = all_files[0].substr(0, all_files[0].find_last_of('\\'));
+				 fstream output(string + "\\output.txt", ios::out);
+				 
+				 for (unsigned int i = 0; i < all_files.size(); ++i) {
+					 w_opencv.readImage(all_files[i]);
+
+					 w_opencv.detectSIFT();
+
+					 w_opencv.HuMoment();
+					 std::vector<float> huVector = w_opencv.getHuVector();
+
+					 w_fourier.image_process(w_opencv.getImage());
+
+					 vector< vector<float> > features;
+
+					 features.push_back(w_opencv.getHuVector());
+					 features.push_back(w_opencv.getSiftVector());
+					 features.push_back(w_fourier.get_vector());
+
+					 w_svm.concatenateTest(features);
+
+					 outputVector = w_svm.getTestVector();
+
+					 for (unsigned int j = 0; j < outputVector.size(); ++j) {
+						 output << outputVector[j] << " ";
+					 }
+					 output << endl;
+
+					 //=============display on window================
+					 Bitmap^ testImage = w_opencv.getBitmap();
+					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+						 originPictureBox->Image = resizeImage;
+					 }
+					 else {
+						 originPictureBox->Image = testImage;
+					 }
+					 originPictureBox->Refresh();
+					 
+					 System::String^ string = gcnew System::String(all_files[i].c_str());
+					 fileTextBox->Text = string;
+					 fileTextBox->Refresh();
+					 //==============================================
+
+					 features.clear();
+					 w_opencv.clear();
+					 w_fourier.clear_vector();
+					 w_svm.clear_testVector();
+					 outputVector.clear();
+					 output.close();
+				 }
 		 }
 	private: System::Void videoTxtButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
@@ -561,7 +627,7 @@ namespace CWinFormOpenCV {
 					 }
 					 output << endl;
 
-					 //===========display on window================
+					 //=============display on window================
 					 Bitmap^ testImage = w_opencv.getBitmap();
 					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
@@ -572,7 +638,7 @@ namespace CWinFormOpenCV {
 					 }
 					 originPictureBox->Refresh();
 
-					 System::String^ string = gcnew System::String(std::to_string(outputVector.size()).c_str());
+					 System::String^ string = gcnew System::String(std::to_string(fn).c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
 					 //==============================================

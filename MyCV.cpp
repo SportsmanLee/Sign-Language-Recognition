@@ -120,12 +120,6 @@ void MyCV::HuMoment()
 	CvSeq* mcont;
 	
 	tmp = cvCloneImage(&(IplImage)cvImage);
-		
-	//Img = cvCreateImage(img_resize, tmp->depth, tmp->nChannels);
-	//YCbCr_img = cvCreateImage(cvGetSize(Img), Img->depth, Img->nChannels);
-	//cvResize(tmp, Img, CV_INTER_LINEAR);    //縮放來源影像到目標影像
-	// cvSaveImage("00010 004.jpg", img);		 //儲存影像(覆蓋原檔)
-	
 	YCbCr_img = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 
 	//========RGB2YCrCb==========
@@ -315,6 +309,58 @@ void MyCV::img_preproc()
 		}
 	}
 	cvImage = skinImage;
+}
+
+void MyCV::normalize()
+{
+	float min = 0, max = 0;
+	float offset, d;
+
+	// *****************7Hu Moments*****************
+	for (unsigned int i = 0; i < huVector.size(); ++i) {
+		if (min > huVector[i]) {
+			min = huVector[i];
+		}
+		if (max < huVector[i]) {
+			max = huVector[i];
+		}
+	}
+
+	offset = -min;
+
+	for (unsigned int i = 0; i < huVector.size(); ++i) {
+		huVector[i] += offset;
+	}
+	
+	d = max - min;
+
+	for (unsigned int i = 0; i < huVector.size(); ++i) {
+		huVector[i] /= d;
+	}
+	// *****************End*****************
+
+	// *****************SIFT*****************
+	for (unsigned int i = 0; i < siftVector.size(); ++i) {
+		if (min > siftVector[i]) {
+			min = siftVector[i];
+		}
+		if (max < siftVector[i]) {
+			max = siftVector[i];
+		}
+	}
+
+	offset = -min;
+
+	for (unsigned int i = 0; i < siftVector.size(); ++i) {
+		siftVector[i] += offset;
+	}
+	
+	d = max - min;
+
+	for (unsigned int i = 0; i < siftVector.size(); ++i) {
+		siftVector[i] /= d;
+	}
+	// *****************End*****************
 }
 
 void MyCV::readImage(std::string fileName)

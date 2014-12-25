@@ -165,6 +165,33 @@ void fourier::fourier_descriptor()
 	
 }
 
+void fourier::normalize()
+{
+	float min = 0, max = 0;
+	float offset, d;
+
+	for (unsigned int i = 0; i < FD.size(); ++i) {
+		if (min > FD[i]) {
+			min = FD[i];
+		}
+		if (max < FD[i]) {
+			max = FD[i];
+		}
+	}
+
+	offset = -min;
+
+	for (unsigned int i = 0; i < FD.size(); ++i) {
+		FD[i] += offset;
+	}
+	
+	d = max - min;
+
+	for (unsigned int i = 0; i < FD.size(); ++i) {
+		FD[i] /= d;
+	}
+}
+
 vector<float> fourier::get_vector()
 {
 	return FD;
