@@ -559,8 +559,9 @@ namespace CWinFormOpenCV {
 					 w_fourier.clear_vector();
 					 w_svm.clear_testVector();
 					 outputVector.clear();
-					 output.close();
 				 }
+				 
+				 output.close();
 		 }
 	private: System::Void videoTxtButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
