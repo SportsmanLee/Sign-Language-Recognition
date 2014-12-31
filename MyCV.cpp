@@ -180,7 +180,7 @@ void MyCV::detectSIFT()
 	// Detect the keypoints using SIFT Detector
 	SiftFeatureDetector detector(30, 3, 0.04, 10.0, 1.6f);
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
-	vector<KeyPoint> keypoints;
+	keypoints.clear();
 
 	Mat YImage, skinImage(cvImage.size(), CV_8UC3, Scalar(0, 0, 0));
 	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
@@ -215,21 +215,22 @@ void MyCV::detectSIFT()
 		keypoints.pop_back();
 	}
 
-	Mat descriptor;
-	extractor.compute(skinImage, keypoints, descriptor);
+	//bowExtractor->compute(skinImage, keypoints, siftDescriptor);
 
-	for (int i = 0; i < descriptor.rows; ++i) {
-		for (int j = 0; j < descriptor.cols; ++j) {
-			siftVector.push_back(descriptor.at<float>(i, j));
+	extractor.compute(skinImage, keypoints, siftDescriptor);
+
+	/*for (int i = 0; i < siftDescriptor.rows; ++i) {
+		for (int j = 0; j < siftDescriptor.cols; ++j) {
+			siftVector.push_back(siftDescriptor.ptr<float>(i)[j]);
 		}
-	}
-	
+	}*/
+
 	// Draw keypoints
 	/*Mat keypointsImg;
 	drawKeypoints( skinImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
-	cv::putText(keypointsImg, std::to_string(descriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
-	cv::putText(keypointsImg, std::to_string(descriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
+	cv::putText(keypointsImg, std::to_string(siftDescriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
+	cv::putText(keypointsImg, std::to_string(siftDescriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
 	imshow("keypoints", keypointsImg);
 	waitKey();*/
 }
@@ -363,6 +364,15 @@ void MyCV::normalize()
 	// *****************End*****************
 }
 
+void MyCV::setBOWExtractor(Mat vocabulary)
+{
+	Ptr<DescriptorExtractor> descExtractor = DescriptorExtractor::create("SIFT"); //引號裡面修改特徵種類。  
+	Ptr<DescriptorMatcher> descMatcher = DescriptorMatcher::create("BruteForce"); //引號裡面修改匹配類型;  
+	bowExtractor = new BOWImgDescriptorExtractor( descExtractor, descMatcher );
+
+	bowExtractor->setVocabulary(vocabulary);
+}
+
 void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
@@ -390,11 +400,19 @@ vector<float> MyCV::getSiftVector()
 	return siftVector;
 }
 
+Mat MyCV::getSiftDescriptor()
+{
+	return siftDescriptor;
+}
+
 void MyCV::clear()
 {
 	huVector.clear();
 	siftVector.clear();
 	cvImage.release();
+	skin.release();
+	first_frame.release();
+	siftDescriptor.release();
 }
 
 void MyCV::set_bg_frame()

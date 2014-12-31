@@ -6,9 +6,9 @@
 #include "opencv2\imgproc\imgproc.hpp"
 #include "opencv2\features2d\features2d.hpp"
 #include "opencv2\nonfree\features2d.hpp"
+#include "opencv2\opencv_modules.hpp"
 #include "opencv2\nonfree\nonfree.hpp"
 #include "opencv2\ml\ml.hpp"
-#include <opencv2/opencv.hpp>
 #include "opencv\cv.h"
 
 using namespace std;
@@ -29,16 +29,21 @@ public:
 	void img_preproc();
 	void set_bg_frame();
 	void normalize();
+	void setBOWExtractor(Mat vocabulary);
 	Mat getImage();
 	vector<float> getHuVector();
 	vector<float> getSiftVector();
+	Mat getSiftDescriptor();
 	void clear();
 
 private:
 	Mat cvImage;
 	Mat skin;
 	Mat first_frame;
-	CvHuMoments HuMoments; 
+	Mat siftDescriptor;
+	CvHuMoments HuMoments;
+	vector<KeyPoint> keypoints;
 	vector<float> huVector;
 	vector<float> siftVector;
+	Ptr<BOWImgDescriptorExtractor> bowExtractor;
 };

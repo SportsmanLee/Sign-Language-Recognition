@@ -67,6 +67,9 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::Button^  testImageButton;
 	private: System::Windows::Forms::Button^  txtTrainButton;
 	private: System::Windows::Forms::Button^  imgTxtButton;
+	private: System::Windows::Forms::Button^  bagWordButton;
+	private: System::Windows::Forms::Button^  testBOWButton;
+	private: System::Windows::Forms::Button^  chooseVocButton;
 
 
 	private:
@@ -95,6 +98,9 @@ namespace CWinFormOpenCV {
 			this->testImageButton = (gcnew System::Windows::Forms::Button());
 			this->txtTrainButton = (gcnew System::Windows::Forms::Button());
 			this->imgTxtButton = (gcnew System::Windows::Forms::Button());
+			this->bagWordButton = (gcnew System::Windows::Forms::Button());
+			this->testBOWButton = (gcnew System::Windows::Forms::Button());
+			this->chooseVocButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -139,6 +145,7 @@ namespace CWinFormOpenCV {
 			// 
 			// truthButton
 			// 
+			this->truthButton->Enabled = false;
 			this->truthButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
 			this->truthButton->Location = System::Drawing::Point(41, 23);
@@ -151,9 +158,10 @@ namespace CWinFormOpenCV {
 			// 
 			// falseButton
 			// 
+			this->falseButton->Enabled = false;
 			this->falseButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->falseButton->Location = System::Drawing::Point(41, 62);
+			this->falseButton->Location = System::Drawing::Point(41, 61);
 			this->falseButton->Name = L"falseButton";
 			this->falseButton->Size = System::Drawing::Size(213, 33);
 			this->falseButton->TabIndex = 10;
@@ -166,7 +174,7 @@ namespace CWinFormOpenCV {
 			this->trainButton->Enabled = false;
 			this->trainButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->trainButton->Location = System::Drawing::Point(41, 101);
+			this->trainButton->Location = System::Drawing::Point(41, 99);
 			this->trainButton->Name = L"trainButton";
 			this->trainButton->Size = System::Drawing::Size(213, 33);
 			this->trainButton->TabIndex = 11;
@@ -179,7 +187,7 @@ namespace CWinFormOpenCV {
 			this->testVideoButton->Enabled = false;
 			this->testVideoButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->testVideoButton->Location = System::Drawing::Point(41, 405);
+			this->testVideoButton->Location = System::Drawing::Point(41, 403);
 			this->testVideoButton->Name = L"testVideoButton";
 			this->testVideoButton->Size = System::Drawing::Size(213, 33);
 			this->testVideoButton->TabIndex = 12;
@@ -191,7 +199,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->modelButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->modelButton->Location = System::Drawing::Point(41, 366);
+			this->modelButton->Location = System::Drawing::Point(41, 365);
 			this->modelButton->Name = L"modelButton";
 			this->modelButton->Size = System::Drawing::Size(213, 33);
 			this->modelButton->TabIndex = 13;
@@ -201,8 +209,9 @@ namespace CWinFormOpenCV {
 			// 
 			// videoTxtButton
 			// 
+			this->videoTxtButton->Enabled = false;
 			this->videoTxtButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->videoTxtButton->Location = System::Drawing::Point(41, 235);
+			this->videoTxtButton->Location = System::Drawing::Point(41, 289);
 			this->videoTxtButton->Name = L"videoTxtButton";
 			this->videoTxtButton->Size = System::Drawing::Size(213, 33);
 			this->videoTxtButton->TabIndex = 15;
@@ -215,7 +224,7 @@ namespace CWinFormOpenCV {
 			this->testImageButton->Enabled = false;
 			this->testImageButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->testImageButton->Location = System::Drawing::Point(41, 444);
+			this->testImageButton->Location = System::Drawing::Point(41, 441);
 			this->testImageButton->Name = L"testImageButton";
 			this->testImageButton->Size = System::Drawing::Size(213, 33);
 			this->testImageButton->TabIndex = 16;
@@ -226,7 +235,7 @@ namespace CWinFormOpenCV {
 			// txtTrainButton
 			// 
 			this->txtTrainButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->txtTrainButton->Location = System::Drawing::Point(41, 274);
+			this->txtTrainButton->Location = System::Drawing::Point(41, 327);
 			this->txtTrainButton->Name = L"txtTrainButton";
 			this->txtTrainButton->Size = System::Drawing::Size(213, 33);
 			this->txtTrainButton->TabIndex = 17;
@@ -236,8 +245,9 @@ namespace CWinFormOpenCV {
 			// 
 			// imgTxtButton
 			// 
+			this->imgTxtButton->Enabled = false;
 			this->imgTxtButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->imgTxtButton->Location = System::Drawing::Point(41, 196);
+			this->imgTxtButton->Location = System::Drawing::Point(41, 251);
 			this->imgTxtButton->Name = L"imgTxtButton";
 			this->imgTxtButton->Size = System::Drawing::Size(213, 33);
 			this->imgTxtButton->TabIndex = 18;
@@ -245,11 +255,48 @@ namespace CWinFormOpenCV {
 			this->imgTxtButton->UseVisualStyleBackColor = true;
 			this->imgTxtButton->Click += gcnew System::EventHandler(this, &WinForm::imgTxtButton_Click);
 			// 
+			// bagWordButton
+			// 
+			this->bagWordButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
+			this->bagWordButton->Location = System::Drawing::Point(41, 137);
+			this->bagWordButton->Name = L"bagWordButton";
+			this->bagWordButton->Size = System::Drawing::Size(213, 33);
+			this->bagWordButton->TabIndex = 19;
+			this->bagWordButton->Text = L"Train Bag of Words";
+			this->bagWordButton->UseVisualStyleBackColor = true;
+			this->bagWordButton->Click += gcnew System::EventHandler(this, &WinForm::bagWordButton_Click);
+			// 
+			// testBOWButton
+			// 
+			this->testBOWButton->Enabled = false;
+			this->testBOWButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
+			this->testBOWButton->Location = System::Drawing::Point(41, 213);
+			this->testBOWButton->Name = L"testBOWButton";
+			this->testBOWButton->Size = System::Drawing::Size(213, 33);
+			this->testBOWButton->TabIndex = 20;
+			this->testBOWButton->Text = L"Test BOW";
+			this->testBOWButton->UseVisualStyleBackColor = true;
+			this->testBOWButton->Click += gcnew System::EventHandler(this, &WinForm::testBOWButton_Click);
+			// 
+			// chooseVocButton
+			// 
+			this->chooseVocButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
+			this->chooseVocButton->Location = System::Drawing::Point(41, 175);
+			this->chooseVocButton->Name = L"chooseVocButton";
+			this->chooseVocButton->Size = System::Drawing::Size(213, 33);
+			this->chooseVocButton->TabIndex = 21;
+			this->chooseVocButton->Text = L"Choose Vocabulary";
+			this->chooseVocButton->UseVisualStyleBackColor = true;
+			this->chooseVocButton->Click += gcnew System::EventHandler(this, &WinForm::chooseVocButton_Click);
+			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1042, 534);
+			this->Controls->Add(this->chooseVocButton);
+			this->Controls->Add(this->testBOWButton);
+			this->Controls->Add(this->bagWordButton);
 			this->Controls->Add(this->imgTxtButton);
 			this->Controls->Add(this->txtTrainButton);
 			this->Controls->Add(this->testImageButton);
@@ -300,8 +347,6 @@ namespace CWinFormOpenCV {
 				 std::string message;
 				 for(unsigned int i = 0; i < filenames.size(); i++)
 				 {
-					 if (filenames[i] == "." || filenames[i] == "..")
-						 continue;
 					 if (filenames[i].find("jpg") == std::string::npos)
 						 continue;
 					 message = path + "\\" + filenames[i];
@@ -312,6 +357,7 @@ namespace CWinFormOpenCV {
 			 }
 	private: System::Void truthButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 vector<std::string> all_files = loadImgsFromFolder();
+				 if (all_files.empty())	return;
 				 
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
@@ -355,6 +401,7 @@ namespace CWinFormOpenCV {
 			 }
 	private: System::Void falseButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 vector<std::string> all_files = loadImgsFromFolder();
+				 if (all_files.empty())	return;
 
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
@@ -505,14 +552,169 @@ namespace CWinFormOpenCV {
 				 output.close();
 				 MessageBoxA(0, "跑完了!", "TEST", MB_OK);
 			 }
+			 // Read images from a folder & construct a bag of words with these images
+	private: System::Void bagWordButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 vector<std::string> all_files = loadImgsFromFolder();
+				 if (all_files.empty())	return;
+
+				 Mat allDescriptors;
+				 RNG& rng = theRNG();
+
+				 while (all_files.size() > 0) {
+					 int randImgIdx = rng((unsigned)all_files.size());
+					 w_opencv.readImage(all_files[randImgIdx]);
+
+					 //=============display on window================
+					 Bitmap^ testImage = w_opencv.getBitmap();
+					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+						 originPictureBox->Image = resizeImage;
+					 }
+					 else {
+						 originPictureBox->Image = testImage;
+					 }
+					 originPictureBox->Refresh();
+					 
+					 string message = std::to_string(all_files.size()) + " images left";
+					 System::String^ string = gcnew System::String(message.c_str());
+					 fileTextBox->Text = string;
+					 fileTextBox->Refresh();
+					 //==============================================
+
+					 w_opencv.detectSIFT();
+
+					 allDescriptors.push_back(w_opencv.getSiftDescriptor());
+
+					 w_opencv.clear();
+					 all_files.erase(all_files.begin() + randImgIdx);
+				 }
+
+				 /*
+				 for (unsigned int i = 0; i < all_files.size(); ++i) {
+					 w_opencv.readImage(all_files[i]);
+
+					 w_opencv.detectSIFT();
+
+					 //=============display on window================
+					 Bitmap^ testImage = w_opencv.getBitmap();
+					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+						 originPictureBox->Image = resizeImage;
+					 }
+					 else {
+						 originPictureBox->Image = testImage;
+					 }
+					 originPictureBox->Refresh();
+					 
+					 System::String^ string = gcnew System::String(all_files[i].c_str());
+					 fileTextBox->Text = string;
+					 fileTextBox->Refresh();
+					 //==============================================
+
+					 allDescriptors.push_back(w_opencv.getSiftDescriptor());
+
+					 w_opencv.clear();
+				 }*/
+
+				 // K Means & Training
+				 BOWKMeansTrainer bowTrainer(100);
+				 Mat vocabulary = bowTrainer.cluster(allDescriptors);
+
+				 std::string string = all_files[0].substr(0, all_files[0].find_last_of('\\'));
+				 FileStorage fs(string + "\\vocabulary_100.yaml", FileStorage::WRITE);
+				 if(fs.isOpened()) {
+					 fs << "vocabulary" << vocabulary;
+				 }
+				 fs.release();
+
+				 // K = 10
+				 vocabulary.release();
+				 BOWKMeansTrainer bowTrainer10(10);
+				 vocabulary = bowTrainer10.cluster(allDescriptors);
+
+				 fs.open(string + "\\vocabulary_10.yaml", FileStorage::WRITE);
+				 if(fs.isOpened()) {
+					 fs << "vocabulary" << vocabulary;
+				 }
+				 fs.release();
+			 }
+	private: System::Void chooseVocButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				 openFileDialog1->Filter = "Vocabulary File (*.yaml,*.*)|*.yaml;*.*";
+				 openFileDialog1->Title = "選擇Vocabulary";
+
+				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
+					 return;
+
+				 Mat vocabulary;
+
+				 std::string file;	
+				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+				 FileStorage fs( file, FileStorage::READ );
+				 if( fs.isOpened() )
+				 {
+					 fs["vocabulary"] >> vocabulary;
+				 }
+				 fs.release();
+
+				 /**********DEBUG************
+				 FileStorage fo(file.substr(0, file.find_last_of('\\')) + "\\debug.yaml", FileStorage::WRITE);
+				 if(fo.isOpened()) {
+					 fo << "vocabulary" << vocabulary;
+				 }
+				 fo.release();
+				 ***************************/
+
+				 w_opencv.setBOWExtractor(vocabulary);
+
+				 truthButton->Enabled = true;
+				 falseButton->Enabled = true;
+				 testBOWButton->Enabled = true;
+				 imgTxtButton->Enabled = true;
+				 videoTxtButton->Enabled = true;
+				 if (modelChooser->CheckFileExists == true) {
+					 testImageButton->Enabled = true;
+					 testVideoButton->Enabled = true;
+				 }
+			 }
+	private: System::Void testBOWButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				 openFileDialog1->Filter = "Image File (*.jpg,*.bmp)|*.jpg;*.bmp;*.*";
+				 openFileDialog1->Title = "開啟影像";
+
+				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
+					 return;
+
+				 std::string file;
+				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+				 w_opencv.readImage(file);
+
+				 Bitmap^ testImage = w_opencv.getBitmap();
+				 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+					 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+					 originPictureBox->Image = resizeImage;
+				 }
+				 else {
+					 originPictureBox->Image = testImage;
+				 }
+				 originPictureBox->Refresh();
+
+				 // Detect SIFT feature points
+				 w_opencv.detectSIFT();
+				 // Extract Bag of Words
+
+			 }
 			 // Read images from a folder & output feature vectors to text file.
 	private: System::Void imgTxtButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 vector<std::string> all_files = loadImgsFromFolder();
+				 if (all_files.empty())	return;
 				 
+				 // output feature vector
 				 vector<float> outputVector;
 				 std::string string = all_files[0].substr(0, all_files[0].find_last_of('\\'));
 				 fstream output(string + "\\output.txt", ios::out);
 				 
+				 // for each image, extract its features & combine them together, then output
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
 
