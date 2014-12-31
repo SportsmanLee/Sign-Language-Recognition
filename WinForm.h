@@ -557,6 +557,7 @@ namespace CWinFormOpenCV {
 				 vector<std::string> all_files = loadImgsFromFolder();
 				 if (all_files.empty())	return;
 
+				 std::string path = all_files[0].substr(0, all_files[0].find_last_of('\\'));
 				 Mat allDescriptors;
 				 RNG& rng = theRNG();
 
@@ -589,39 +590,11 @@ namespace CWinFormOpenCV {
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
 
-				 /*
-				 for (unsigned int i = 0; i < all_files.size(); ++i) {
-					 w_opencv.readImage(all_files[i]);
-
-					 w_opencv.detectSIFT();
-
-					 //=============display on window================
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
-					 }
-					 else {
-						 originPictureBox->Image = testImage;
-					 }
-					 originPictureBox->Refresh();
-					 
-					 System::String^ string = gcnew System::String(all_files[i].c_str());
-					 fileTextBox->Text = string;
-					 fileTextBox->Refresh();
-					 //==============================================
-
-					 allDescriptors.push_back(w_opencv.getSiftDescriptor());
-
-					 w_opencv.clear();
-				 }*/
-
 				 // K Means & Training
 				 BOWKMeansTrainer bowTrainer(100);
 				 Mat vocabulary = bowTrainer.cluster(allDescriptors);
 
-				 std::string string = all_files[0].substr(0, all_files[0].find_last_of('\\'));
-				 FileStorage fs(string + "\\vocabulary_100.yaml", FileStorage::WRITE);
+				 FileStorage fs(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
 				 if(fs.isOpened()) {
 					 fs << "vocabulary" << vocabulary;
 				 }
@@ -632,7 +605,7 @@ namespace CWinFormOpenCV {
 				 BOWKMeansTrainer bowTrainer10(10);
 				 vocabulary = bowTrainer10.cluster(allDescriptors);
 
-				 fs.open(string + "\\vocabulary_10.yaml", FileStorage::WRITE);
+				 fs.open(path + "\\vocabulary_10.yaml", FileStorage::WRITE);
 				 if(fs.isOpened()) {
 					 fs << "vocabulary" << vocabulary;
 				 }
