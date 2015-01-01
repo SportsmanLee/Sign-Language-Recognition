@@ -141,6 +141,9 @@ void fourier::fourier_descriptor()
 		FD.push_back(z[i].real());
 	}
 
+	normalize();
+	//cv::normalize(FD, FD, 0, 1, CV_MINMAX);
+
 	/*
 	dft(z,z,CV_DXT_INV_SCALE);
 	//complex to point

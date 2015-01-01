@@ -148,6 +148,7 @@ void MyCV::HuMoment()
 	}
 
 	CvMoments Moments;
+	CvHuMoments HuMoments;
 	cvContourMoments(mcont,&Moments);
 	cvGetHuMoments(&Moments, &HuMoments);
 	
@@ -159,6 +160,9 @@ void MyCV::HuMoment()
 	huVector.push_back((float)HuMoments.hu6);
 	huVector.push_back((float)HuMoments.hu7);
 
+	normalize();
+	//cv::normalize(huVector, huVector, 0, 1, CV_MINMAX);
+
 	cvReleaseImage(&gray_img);
 	cvReleaseImage(&dst);
 	cvReleaseImage(&YCbCr_img);
@@ -167,12 +171,6 @@ void MyCV::HuMoment()
 	cvClearMemStorage(storage1);
 	cvReleaseMemStorage(&storage);
 	cvReleaseMemStorage(&storage1);
-	//cvClearSeq(contour);
-	//cvClearSeq(cont);
-	//cvClearSeq(mcont);
-	//cvReleaseMemStorage(&contour->storage);
-	//cvReleaseMemStorage(&cont->storage);
-	//cvReleaseMemStorage(&mcont->storage);
 }
 
 void MyCV::detectSIFT()
@@ -180,15 +178,72 @@ void MyCV::detectSIFT()
 	// Detect the keypoints using SIFT Detector
 	SiftFeatureDetector detector(30, 3, 0.04, 10.0, 1.6f);
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
-	keypoints.clear();
+	vector<KeyPoint> keypoints;
 
-	Mat YImage, skinImage(cvImage.size(), CV_8UC3, Scalar(0, 0, 0));
+	Mat YImage;
 	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
+	Mat skinImage = cvImage.clone();
+	skinImage.create(cvImage.size(), CV_8UC3);
 
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
+	for (int x = 0; x < cvImage.rows; ++x)
+	{
+		for (int y = 0; y < cvImage.cols; ++y)
+		{
+			int Cr = YImage.at<Vec3b>(x, y).val[1], Cb = YImage.at<Vec3b>(x, y).val[2];
+
+			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
+				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
+			else
+				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
+		}
+	}
+	
+	// Detect SIFT keypoints & make sure the length of 30
+	detector.detect(skinImage, keypoints);
+	if (keypoints.empty()) {
+		while (keypoints.size() < 30) {
+			keypoints.push_back(KeyPoint());
+		}
+	}
+	while (keypoints.size() < 30) {
+		keypoints.push_back(keypoints[keypoints.size() - 1]);
+	}
+	while (keypoints.size() > 30) {
+		keypoints.pop_back();
+	}
+	
+	// Extract the SIFT Descriptor
+	extractor.compute(skinImage, keypoints, siftDescriptor);
+
+	// Draw keypoints
+	/*Mat keypointsImg;
+	drawKeypoints( skinImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
+	cv::putText(keypointsImg, std::to_string(siftDescriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
+	cv::putText(keypointsImg, std::to_string(siftDescriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
+	imshow("keypoints", keypointsImg);
+	waitKey();*/
+}
+
+void MyCV::extractBOW()
+{
+	// Detect the keypoints using SIFT Detector
+	SiftFeatureDetector detector(30, 3, 0.04, 10.0, 1.6f);
+	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
+	vector<KeyPoint> keypoints;
+
+	Mat YImage;
+	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
+	Mat skinImage = cvImage.clone();
+
+	// Skin Detection
+	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
+	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
+	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
 	for (int x = 0; x < cvImage.rows; ++x)
 	{
 		for (int y = 0; y < cvImage.cols; ++y)
@@ -202,6 +257,7 @@ void MyCV::detectSIFT()
 		}
 	}
 
+	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinImage, keypoints);
 	if (keypoints.empty()) {
 		while (keypoints.size() < 30) {
@@ -215,24 +271,15 @@ void MyCV::detectSIFT()
 		keypoints.pop_back();
 	}
 
-	//bowExtractor->compute(skinImage, keypoints, siftDescriptor);
+	// Extract the Bag-Of-Word
+	bowExtractor->compute(skinImage, keypoints, siftDescriptor);
 
-	extractor.compute(skinImage, keypoints, siftDescriptor);
-
-	/*for (int i = 0; i < siftDescriptor.rows; ++i) {
+	// Fill in the feature vector
+	for (int i = 0; i < siftDescriptor.rows; ++i) {
 		for (int j = 0; j < siftDescriptor.cols; ++j) {
 			siftVector.push_back(siftDescriptor.ptr<float>(i)[j]);
 		}
-	}*/
-
-	// Draw keypoints
-	/*Mat keypointsImg;
-	drawKeypoints( skinImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
-	cv::putText(keypointsImg, std::to_string(siftDescriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
-	cv::putText(keypointsImg, std::to_string(siftDescriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
-	imshow("keypoints", keypointsImg);
-	waitKey();*/
+	}
 }
 
 void MyCV::img_preproc()
@@ -340,35 +387,14 @@ void MyCV::normalize()
 	}
 	// *****************End*****************
 
-	// *****************SIFT*****************
-	for (unsigned int i = 0; i < siftVector.size(); ++i) {
-		if (min > siftVector[i]) {
-			min = siftVector[i];
-		}
-		if (max < siftVector[i]) {
-			max = siftVector[i];
-		}
-	}
-
-	offset = -min;
-
-	for (unsigned int i = 0; i < siftVector.size(); ++i) {
-		siftVector[i] += offset;
-	}
-	
-	d = max - min;
-
-	for (unsigned int i = 0; i < siftVector.size(); ++i) {
-		siftVector[i] /= d;
-	}
-	// *****************End*****************
+	// SIFT feature vector is already normalized.
 }
 
 void MyCV::setBOWExtractor(Mat vocabulary)
 {
 	Ptr<DescriptorExtractor> descExtractor = DescriptorExtractor::create("SIFT"); //引號裡面修改特徵種類。  
 	Ptr<DescriptorMatcher> descMatcher = DescriptorMatcher::create("BruteForce"); //引號裡面修改匹配類型;  
-	bowExtractor = new BOWImgDescriptorExtractor( descExtractor, descMatcher );
+	bowExtractor = new BOWImgDescriptorExtractor(descExtractor, descMatcher);
 
 	bowExtractor->setVocabulary(vocabulary);
 }
@@ -407,12 +433,11 @@ Mat MyCV::getSiftDescriptor()
 
 void MyCV::clear()
 {
-	huVector.clear();
-	siftVector.clear();
 	cvImage.release();
-	skin.release();
 	first_frame.release();
 	siftDescriptor.release();
+	huVector.clear();
+	siftVector.clear();
 }
 
 void MyCV::set_bg_frame()

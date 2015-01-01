@@ -24,6 +24,7 @@ public:
 	void Skin_Color_Detection(IplImage *img);
 	void HuMoment();
 	void detectSIFT();
+	void extractBOW();
 	void readImage(std::string fileName);
 	void readFrame(Mat frame);
 	void img_preproc();
@@ -38,11 +39,8 @@ public:
 
 private:
 	Mat cvImage;
-	Mat skin;
 	Mat first_frame;
 	Mat siftDescriptor;
-	CvHuMoments HuMoments;
-	vector<KeyPoint> keypoints;
 	vector<float> huVector;
 	vector<float> siftVector;
 	Ptr<BOWImgDescriptorExtractor> bowExtractor;

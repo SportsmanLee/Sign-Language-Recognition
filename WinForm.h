@@ -362,7 +362,7 @@ namespace CWinFormOpenCV {
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
 
-					 w_opencv.detectSIFT();
+					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
 					 std::vector<float> huVector = w_opencv.getHuVector();
@@ -406,7 +406,7 @@ namespace CWinFormOpenCV {
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
 
-					 w_opencv.detectSIFT();
+					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
 					 std::vector<float> huVector = w_opencv.getHuVector();
@@ -562,6 +562,8 @@ namespace CWinFormOpenCV {
 				 RNG& rng = theRNG();
 
 				 while (all_files.size() > 0) {
+					 w_opencv.clear();
+
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
@@ -586,7 +588,6 @@ namespace CWinFormOpenCV {
 
 					 allDescriptors.push_back(w_opencv.getSiftDescriptor());
 
-					 w_opencv.clear();
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
 
@@ -610,6 +611,8 @@ namespace CWinFormOpenCV {
 					 fs << "vocabulary" << vocabulary;
 				 }
 				 fs.release();
+
+				 w_opencv.clear();
 			 }
 	private: System::Void chooseVocButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
@@ -671,11 +674,11 @@ namespace CWinFormOpenCV {
 					 originPictureBox->Image = testImage;
 				 }
 				 originPictureBox->Refresh();
-
-				 // Detect SIFT feature points
-				 w_opencv.detectSIFT();
+				 
 				 // Extract Bag of Words
+				 w_opencv.extractBOW();
 
+				 w_opencv.clear();
 			 }
 			 // Read images from a folder & output feature vectors to text file.
 	private: System::Void imgTxtButton_Click(System::Object^  sender, System::EventArgs^  e) {
