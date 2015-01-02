@@ -365,7 +365,6 @@ namespace CWinFormOpenCV {
 					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
-					 std::vector<float> huVector = w_opencv.getHuVector();
 
 					 w_fourier.image_process(w_opencv.getImage());
 
@@ -403,13 +402,15 @@ namespace CWinFormOpenCV {
 				 vector<std::string> all_files = loadImgsFromFolder();
 				 if (all_files.empty())	return;
 
-				 for (unsigned int i = 0; i < all_files.size(); ++i) {
-					 w_opencv.readImage(all_files[i]);
+				 RNG& rng = theRNG();
+
+				 while (all_files.size() > 0) {
+					 int randImgIdx = rng((unsigned)all_files.size());
+					 w_opencv.readImage(all_files[randImgIdx]);
 
 					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
-					 std::vector<float> huVector = w_opencv.getHuVector();
 
 					 w_fourier.image_process(w_opencv.getImage());
 
@@ -432,7 +433,8 @@ namespace CWinFormOpenCV {
 					 }
 					 originPictureBox->Refresh();
 
-					 System::String^ string = gcnew System::String(all_files[i].c_str());
+					 string message = std::to_string(all_files.size()) + " images left";
+					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
 					 //==========================================
@@ -440,6 +442,7 @@ namespace CWinFormOpenCV {
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
+					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
 				 MessageBoxA(0, "ถ]งนคF!", "Ground False", MB_OK);
 
@@ -562,8 +565,6 @@ namespace CWinFormOpenCV {
 				 RNG& rng = theRNG();
 
 				 while (all_files.size() > 0) {
-					 w_opencv.clear();
-
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
@@ -587,26 +588,16 @@ namespace CWinFormOpenCV {
 					 w_opencv.detectSIFT();
 
 					 allDescriptors.push_back(w_opencv.getSiftDescriptor());
-
+					 
+					 w_opencv.clear();
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
 
 				 // K Means & Training
-				 BOWKMeansTrainer bowTrainer(100);
+				 BOWKMeansTrainer bowTrainer(50);
 				 Mat vocabulary = bowTrainer.cluster(allDescriptors);
 
-				 FileStorage fs(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
-				 if(fs.isOpened()) {
-					 fs << "vocabulary" << vocabulary;
-				 }
-				 fs.release();
-
-				 // K = 10
-				 vocabulary.release();
-				 BOWKMeansTrainer bowTrainer10(10);
-				 vocabulary = bowTrainer10.cluster(allDescriptors);
-
-				 fs.open(path + "\\vocabulary_10.yaml", FileStorage::WRITE);
+				 FileStorage fs(path + "\\vocabulary_50.yaml", FileStorage::WRITE);
 				 if(fs.isOpened()) {
 					 fs << "vocabulary" << vocabulary;
 				 }
