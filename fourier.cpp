@@ -132,6 +132,7 @@ void fourier::fourier_descriptor()
 	//dft
 	dft(z,z);
 	//cut 128 
+	
 	for(int i = 0 ; i < 64 ; i ++)
 	{
 		FD.push_back(z[i].real());
@@ -175,17 +176,37 @@ vector<float> fourier::get_vector()
 void fourier::clear_vector()
 {
 	FD.clear();
+	contours.clear();
+	contours_one_p.clear();
+	contours_one.clear();
+	inverse_contours.clear();
+	hierarchy.clear();
 }
 
 void fourier::image_process (Mat in_image)
 {
 	img = in_image;
+	
+	clear_vector();
 	cvtColor(img,img_gray,CV_RGB2GRAY);
-
 	//boundary of binary image , find contour
 	boundary();
 
 	//fourier 
 	fourier_descriptor();
+	//write transform to txt
+	char filename[]="fourier.txt";
+    FILE * fp = fopen(filename, "a ");//開啟檔案
+    if(!fp){//如果開啟檔案失敗，fp為0；成功，fp為非0
+        cout<<"Fail to open file: "<<filename<<endl;
+    }
+    cout<<"File Descriptor: "<<fp<<endl;
+	for(int i = 0 ; i < FD.size() ; i++)
+	{
+		fprintf (fp, "%f ", FD[i] );
+	}
+	fprintf (fp, "\n");
+
+	fclose (fp);
 }
 
