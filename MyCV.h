@@ -20,8 +20,6 @@ public:
 	MyCV();
 	System::Drawing::Bitmap^ getBitmap();
 	System::Drawing::Bitmap^ getOtherBitmap(cv::Mat cvImage);
-	void RGBtoYCbCr(IplImage *img);
-	void Skin_Color_Detection(IplImage *img);
 	void HuMoment();
 	void detectSIFT();
 	void extractBOW();

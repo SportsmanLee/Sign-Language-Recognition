@@ -87,7 +87,7 @@ float MySVM::testSVM()
 	CvSVM SVM;
 	SVM.load(modelFile.c_str());
 
-	return SVM.predict(testImage, true); // test result 
+	return SVM.predict(testImage, false); // test result 
 }
 
 void MySVM::setModel(string filename)
