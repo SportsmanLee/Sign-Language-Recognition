@@ -359,8 +359,11 @@ namespace CWinFormOpenCV {
 				 vector<std::string> all_files = loadImgsFromFolder();
 				 if (all_files.empty())	return;
 				 
-				 for (unsigned int i = 0; i < all_files.size(); ++i) {
-					 w_opencv.readImage(all_files[i]);
+				 RNG& rng = theRNG();
+
+				 while (all_files.size() > 0) {
+					 int randImgIdx = rng((unsigned)all_files.size());
+					 w_opencv.readImage(all_files[randImgIdx]);
 
 					 w_opencv.extractBOW();
 
@@ -376,25 +379,37 @@ namespace CWinFormOpenCV {
 
 					 w_svm.concatenateGt(features);
 
-					 //===========display on window=============
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
+					 //===========display on window==============
+					 // To avoid memory leakage
+					 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getBitmap();
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
+						 }
+						 else {
+							 originPictureBox->Image = testImage;
+						 }
+						 originPictureBox->Refresh();
 					 }
-					 else {
-						 originPictureBox->Image = testImage;
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
 					 }
-					 originPictureBox->Refresh();
 
-					 System::String^ string = gcnew System::String(all_files[i].c_str());
+					 string message = std::to_string(all_files.size()) + " images left";
+					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
-					 //=========================================
+					 //==========================================
 
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
+					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
 				 MessageBoxA(0, "ถ]งนคF!", "Ground Truth", MB_OK);
 			 }
@@ -423,15 +438,25 @@ namespace CWinFormOpenCV {
 					 w_svm.concatenateOther(features);
 
 					 //===========display on window==============
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
+					 // To avoid memory leakage
+					 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getBitmap();
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
+						 }
+						 else {
+							 originPictureBox->Image = testImage;
+						 }
+						 originPictureBox->Refresh();
 					 }
-					 else {
-						 originPictureBox->Image = testImage;
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
 					 }
-					 originPictureBox->Refresh();
 
 					 string message = std::to_string(all_files.size()) + " images left";
 					 System::String^ string = gcnew System::String(message.c_str());
@@ -568,22 +593,32 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
-					 //=============display on window================
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
+					 //===========display on window==============
+					 // To avoid memory leakage
+					 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getBitmap();
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
+						 }
+						 else {
+							 originPictureBox->Image = testImage;
+						 }
+						 originPictureBox->Refresh();
 					 }
-					 else {
-						 originPictureBox->Image = testImage;
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
 					 }
-					 originPictureBox->Refresh();
-					 
+
 					 string message = std::to_string(all_files.size()) + " images left";
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
-					 //==============================================
+					 //==========================================
 
 					 w_opencv.detectSIFT();
 
@@ -708,6 +743,7 @@ namespace CWinFormOpenCV {
 					 output << endl;
 
 					 //=============display on window================
+					 delete originPictureBox->Image;		// To avoid memory leakage
 					 Bitmap^ testImage = w_opencv.getBitmap();
 					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
