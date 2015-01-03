@@ -141,8 +141,7 @@ void fourier::fourier_descriptor()
 		FD.push_back(z[i].real());
 	}
 
-	normalize();
-	//cv::normalize(FD, FD, 0, 1, CV_MINMAX);
+	cv::normalize(FD, FD, 0, 1, CV_MINMAX);
 
 	/*
 	dft(z,z,CV_DXT_INV_SCALE);
@@ -166,33 +165,6 @@ void fourier::fourier_descriptor()
 	system("pause");
 	*/
 	
-}
-
-void fourier::normalize()
-{
-	float min = 0, max = 0;
-	float offset, d;
-
-	for (unsigned int i = 0; i < FD.size(); ++i) {
-		if (min > FD[i]) {
-			min = FD[i];
-		}
-		if (max < FD[i]) {
-			max = FD[i];
-		}
-	}
-
-	offset = -min;
-
-	for (unsigned int i = 0; i < FD.size(); ++i) {
-		FD[i] += offset;
-	}
-	
-	d = max - min;
-
-	for (unsigned int i = 0; i < FD.size(); ++i) {
-		FD[i] /= d;
-	}
 }
 
 vector<float> fourier::get_vector()

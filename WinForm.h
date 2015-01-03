@@ -638,6 +638,17 @@ namespace CWinFormOpenCV {
 				 }
 				 fs.release();
 
+				 // K = 100
+				 vocabulary.release();
+				 BOWKMeansTrainer bowTrainer100(100);
+				 vocabulary = bowTrainer100.cluster(allDescriptors);
+
+				 fs.open(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
+				 if(fs.isOpened()) {
+					 fs << "vocabulary" << vocabulary;
+				 }
+				 fs.release();
+
 				 w_opencv.clear();
 			 }
 	private: System::Void chooseVocButton_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -719,11 +730,10 @@ namespace CWinFormOpenCV {
 				 // for each image, extract its features & combine them together, then output
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
-
-					 w_opencv.detectSIFT();
+					 
+					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
-					 std::vector<float> huVector = w_opencv.getHuVector();
 
 					 w_fourier.image_process(w_opencv.getImage());
 
@@ -814,7 +824,6 @@ namespace CWinFormOpenCV {
 					 w_opencv.detectSIFT();
 
 					 w_opencv.HuMoment();
-					 std::vector<float> huVector = w_opencv.getHuVector();
 
 					 w_fourier.image_process(w_opencv.getImage());
 
@@ -965,7 +974,6 @@ namespace CWinFormOpenCV {
 				 w_opencv.detectSIFT();
 
 				 w_opencv.HuMoment();
-				 std::vector<float> huVector = w_opencv.getHuVector();
 
 				 w_fourier.image_process(w_opencv.getImage());
 
