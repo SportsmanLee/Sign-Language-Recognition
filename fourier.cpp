@@ -132,6 +132,7 @@ void fourier::fourier_descriptor()
 	//dft
 	dft(z,z);
 	//cut 128 
+	
 	for(int i = 0 ; i < 64 ; i ++)
 	{
 		FD.push_back(z[i].real());
@@ -140,9 +141,7 @@ void fourier::fourier_descriptor()
 	{
 		FD.push_back(z[i].real());
 	}
-
-	normalize();
-	//cv::normalize(FD, FD, 0, 1, CV_MINMAX);
+	
 
 	/*
 	dft(z,z,CV_DXT_INV_SCALE);
@@ -173,6 +172,7 @@ void fourier::normalize()
 	float min = 0, max = 0;
 	float offset, d;
 
+	// *****************7Hu Moments*****************
 	for (unsigned int i = 0; i < FD.size(); ++i) {
 		if (min > FD[i]) {
 			min = FD[i];
@@ -193,6 +193,7 @@ void fourier::normalize()
 	for (unsigned int i = 0; i < FD.size(); ++i) {
 		FD[i] /= d;
 	}
+	// *****************End*****************
 }
 
 vector<float> fourier::get_vector()
@@ -203,17 +204,38 @@ vector<float> fourier::get_vector()
 void fourier::clear_vector()
 {
 	FD.clear();
+	contours.clear();
+	contours_one_p.clear();
+	contours_one.clear();
+	inverse_contours.clear();
+	hierarchy.clear();
 }
 
 void fourier::image_process (Mat in_image)
 {
 	img = in_image;
+	
+	clear_vector();
 	cvtColor(img,img_gray,CV_RGB2GRAY);
-
 	//boundary of binary image , find contour
 	boundary();
 
 	//fourier 
 	fourier_descriptor();
+	normalize();
+	//write transform to txt
+	char filename[]="fourier.txt";
+    FILE * fp = fopen(filename, "a ");//開啟檔案
+    if(!fp){//如果開啟檔案失敗，fp為0；成功，fp為非0
+        cout<<"Fail to open file: "<<filename<<endl;
+    }
+    cout<<"File Descriptor: "<<fp<<endl;
+	for(int i = 0 ; i < FD.size() ; i++)
+	{
+		fprintf (fp, "%f ", FD[i] );
+	}
+	fprintf (fp, "\n");
+
+	fclose (fp);
 }
 
