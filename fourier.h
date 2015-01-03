@@ -2,6 +2,8 @@
 #include <string>
 #include <opencv2/opencv.hpp> 
 #include <complex>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace cv;
