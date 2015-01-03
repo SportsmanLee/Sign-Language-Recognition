@@ -68,109 +68,88 @@ System::Drawing::Bitmap^ MyCV::getOtherBitmap(Mat Image)
 	return bmpImage;
 }
 
-void MyCV::RGBtoYCbCr(IplImage *img)
+void MyCV::HuMoment()
 {
-	CvScalar scalarImg;
-	double cb, cr, y;
-	for( int i = 0; i < img->height; i++ )
-	for( int j = 0; j < img->width; j++ )
-	{
-		scalarImg = cvGet2D(img, i, j);   //從影像中取RGB值
-		y =  (16 + scalarImg.val[2]*0.257 + scalarImg.val[1]*0.504 + scalarImg.val[0]*0.098);
-		cb = (128 - scalarImg.val[2]*0.148 - scalarImg.val[1]*0.291 + scalarImg.val[0]*0.439);
-		cr = (128 + scalarImg.val[2]*0.439 - scalarImg.val[1]*0.368 - scalarImg.val[0]*0.071);      
-		cvSet2D(img, i, j, cvScalar( y, cr, cb));  //以YCbCr方式畫img
-	}
-}
-
-void MyCV::Skin_Color_Detection(IplImage *img)
-{
-	//================
+	int thresh = 100;
+	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
 	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
-	//================
 
-	CvScalar scalarImg;
-	double cb, cr;
-	for( int i = 0; i < img->height; i++ )
+	Mat dst = Mat::zeros(cvImage.rows, cvImage.cols, CV_8UC3);
+
+	Mat YImage, skinImage(cvImage.size(), CV_8UC3, Scalar(0, 0, 0));
+	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
+	for (int x = 0; x < cvImage.rows; ++x)
 	{
-		for( int j = 0; j < img->width; j++ )
+		for (int y = 0; y < cvImage.cols; ++y)
 		{
-			scalarImg = cvGet2D(img, i, j);
-			cr = scalarImg.val[1];
-			cb = scalarImg.val[2];
-			if((cb > avg_cb-skinRange && cb < avg_cb+skinRange) && (cr > avg_cr-skinRange && cr < avg_cr+skinRange))
-				cvSet2D(img, i, j, cvScalar( 255, 255, 255));
+			int Cr = YImage.at<Vec3b>(x, y).val[1], Cb = YImage.at<Vec3b>(x, y).val[2];
+
+			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
+				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
 			else
-				cvSet2D(img, i, j, cvScalar( 0, 0, 0));
+				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
 		}
 	}
-}
+	cvtColor(skinImage,skinImage,CV_RGB2GRAY);
 
-void MyCV::HuMoment()
-{
-	IplImage *tmp, *gray_img, *dst, *YCbCr_img; 
-
-	CvMemStorage* storage = cvCreateMemStorage(0);
-	CvMemStorage* storage1 = cvCreateMemStorage(0);
-
-	CvSeq* contour = 0;
-	CvSeq* cont;
-	CvSeq* mcont;
-	
-	tmp = cvCloneImage(&(IplImage)cvImage);
-	YCbCr_img = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
-
-	//========RGB2YCrCb==========
-	cvCopy(tmp, YCbCr_img, NULL);
-	RGBtoYCbCr(YCbCr_img);
-	//==========================
-
-	//==========skin color detection=========
-	Skin_Color_Detection(YCbCr_img);	//===========YCbCr轉灰階=============
-	gray_img = cvCreateImage(cvGetSize(tmp), IPL_DEPTH_8U, 1);
-	dst = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
-
-	cvCvtColor( YCbCr_img, gray_img, CV_RGB2GRAY );
-	//===========Find Contours & Draw=============
-	cvFindContours(gray_img, storage, &contour, sizeof(CvContour), CV_RETR_EXTERNAL , CV_CHAIN_APPROX_SIMPLE);
-
-	if(contour)
+	for (int x = 0; x < cvImage.rows; ++x)
 	{
-		CvTreeNodeIterator it;
-		cvInitTreeNodeIterator(&it, contour, 1);
-		while(0 != (cont = (CvSeq*)cvNextTreeNode (&it)))
+		for (int y = 0; y < cvImage.cols; ++y)
 		{
-			mcont = cvApproxPoly(cont, sizeof(CvContour), storage1, CV_POLY_APPROX_DP, cvContourPerimeter(cont)*0.02, 0);
-			cvDrawContours(dst, mcont, CV_RGB(0,255,0), CV_RGB(0,0,100), 1, 2, 8, cvPoint(0,0));
+			if( skinImage.at<uchar>(x, y) > 0)
+				skinImage.at<uchar>(x, y) = 255;
+			else
+				skinImage.at<uchar>(x, y) = 0;
 		}
 	}
 
-	CvMoments Moments;
-	CvHuMoments HuMoments;
-	cvContourMoments(mcont,&Moments);
-	cvGetHuMoments(&Moments, &HuMoments);
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
+	cv::morphologyEx(skinImage, skinImage, cv::MORPH_DILATE, element);
+
+    Mat canny_output;
+    vector<vector<cv::Point> > contours;
+    vector<Vec4i> hierarchy;
+
+    // Detect edges using canny
+    //Canny( skinImage, canny_output, thresh, thresh*2, 3 );
+    /// Find contours
+    findContours( skinImage, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+
+	/*
+    /// Draw contours
+    Mat drawing = Mat::zeros( skinImage.size(), CV_8UC3 );
+    for( int i = 0; i< contours.size(); i++ )
+    {
+		Scalar color = Scalar( 255,0,0);
+		drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
+    }
+	*/
+	/// Get the moments
+	vector<Moments> mu(contours.size() );
+    mu[0] = moments( contours[0], false ); 
+
+	/* //計算質心
+	vector<Point2f> mc( contours.size() );
+	for( int i = 0; i < contours.size(); i++ )
+      mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
+	*/
+
+	CvHuMoments Hu;
+	cv::Moments mom = cv::moments(contours[0]); 
+	double hu[7];
+	cv::HuMoments(mom, hu);
 	
-	huVector.push_back((float)HuMoments.hu1);
-	huVector.push_back((float)HuMoments.hu2);
-	huVector.push_back((float)HuMoments.hu3);
-	huVector.push_back((float)HuMoments.hu4);
-	huVector.push_back((float)HuMoments.hu5);
-	huVector.push_back((float)HuMoments.hu6);
-	huVector.push_back((float)HuMoments.hu7);
+	huVector.push_back((float)hu[1]);
+	huVector.push_back((float)hu[2]);
+	huVector.push_back((float)hu[3]);
+	huVector.push_back((float)hu[4]);
+	huVector.push_back((float)hu[5]);
+	huVector.push_back((float)hu[6]);
+	huVector.push_back((float)hu[7]);
 
-	normalize();
-	//cv::normalize(huVector, huVector, 0, 1, CV_MINMAX);
-
-	cvReleaseImage(&gray_img);
-	cvReleaseImage(&dst);
-	cvReleaseImage(&YCbCr_img);
-	cvReleaseImage(&tmp);
-	cvClearMemStorage(storage);
-	cvClearMemStorage(storage1);
-	cvReleaseMemStorage(&storage);
-	cvReleaseMemStorage(&storage1);
+	cv::normalize(huVector, huVector, 0, 1, CV_MINMAX);
 }
 
 void MyCV::detectSIFT()
