@@ -20,6 +20,7 @@ public:
 	void clear_testVector();
 	vector<float> getTestVector();
 	void trainSVM();
+	void trainSVM_lda();
 	float testSVM();
 	void setModel(string filename);
 	void clearVectors();

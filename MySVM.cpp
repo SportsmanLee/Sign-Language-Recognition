@@ -61,6 +61,45 @@ void MySVM::trainSVM()
 		else
 			classes.push_back(1);
 		//labels.at<float>(i, 0) = (float)i;
+	}
+
+	Mat trainingData(gtVectors.size() + otherVectors.size(),  gtVectors[0].size(), CV_32FC1);
+	//Mat trainingData(gtVectors.size() + otherVectors.size(),  7, CV_32FC1);
+	for (int i = 0; i < trainingData.rows; ++i) {
+		for (int j = 0; j < trainingData.cols; ++j) {
+			trainingData.at<float>(i, j) = (i < (int)gtVectors.size()) ? gtVectors[i][j] : otherVectors[i - gtVectors.size()][j];
+		}
+	}
+	
+	
+    // Set up SVM's parameters
+    CvSVMParams params;
+    params.svm_type    = CvSVM::C_SVC;
+    params.kernel_type = CvSVM::LINEAR;
+    //params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
+
+
+
+    // Train the SVM
+
+    CvSVM SVM;
+	if (SVM.train_auto(trainingData, labels, Mat(), Mat(), params)) {
+		SVM.save("svm_data_auto.xml");
+	}
+	
+}
+void MySVM::trainSVM_lda()
+{
+	vector<int> classes;
+	// Set up training data
+	Mat labels(gtVectors.size() + otherVectors.size(), 1, CV_32FC1, Scalar(0));
+	for (int i = 0; i < labels.rows; ++i) {
+		labels.at<float>(i, 0) = (i < (int)gtVectors.size()) ? 0 : 1;
+		if(labels.at<float>(i, 0)==0)
+			classes.push_back(0);
+		else
+			classes.push_back(1);
+		//labels.at<float>(i, 0) = (float)i;
 
 	}
 
@@ -82,6 +121,9 @@ void MySVM::trainSVM()
 	transform = lda.project(pca.project(trainingData));
 
 	transform.convertTo(transform , CV_32FC1);
+
+	//===========debug=========
+	/*
 	//write transform to txt
 	char filename[]="transform.txt";
     fstream fp;
@@ -98,11 +140,7 @@ void MySVM::trainSVM()
 		}
 		fp<<endl;
 	}
-  
- 
     fp.close();//關閉檔案
-
-
 	//write transform to txt
 	char filename2[]="trainingdata.txt";
     fstream fp2;
@@ -122,7 +160,7 @@ void MySVM::trainSVM()
   
  
     fp2.close();//關閉檔案
-
+	*/
 
 	//save pca & lda
 	FileStorage fo("pca.yaml", FileStorage::WRITE);
@@ -149,7 +187,6 @@ void MySVM::trainSVM()
 	}
 	
 }
-
 float MySVM::testSVM()
 {
 	Mat testImage(1, testVector.size(), CV_32FC1);
