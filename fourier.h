@@ -14,7 +14,6 @@ class fourier
 		vector<float> get_vector();
 		void clear_vector();
 		void image_process(Mat);
-		void normalize();
 	private:
 		void readimg(string);
 		void boundary();

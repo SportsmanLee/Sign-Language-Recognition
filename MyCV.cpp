@@ -74,8 +74,7 @@ void MyCV::HuMoment()
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
-
+	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
 	Mat dst = Mat::zeros(cvImage.rows, cvImage.cols, CV_8UC3);
 
 	Mat YImage, skinImage(cvImage.size(), CV_8UC3, Scalar(0, 0, 0));
@@ -167,7 +166,7 @@ void MyCV::detectSIFT()
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
 	for (int x = 0; x < cvImage.rows; ++x)
 	{
 		for (int y = 0; y < cvImage.cols; ++y)
@@ -222,7 +221,7 @@ void MyCV::extractBOW()
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
 	for (int x = 0; x < cvImage.rows; ++x)
 	{
 		for (int y = 0; y < cvImage.cols; ++y)
@@ -336,37 +335,6 @@ void MyCV::img_preproc()
 		}
 	}
 	cvImage = skinImage;
-}
-
-void MyCV::normalize()
-{
-	float min = 0, max = 0;
-	float offset, d;
-
-	// *****************7Hu Moments*****************
-	for (unsigned int i = 0; i < huVector.size(); ++i) {
-		if (min > huVector[i]) {
-			min = huVector[i];
-		}
-		if (max < huVector[i]) {
-			max = huVector[i];
-		}
-	}
-
-	offset = -min;
-
-	for (unsigned int i = 0; i < huVector.size(); ++i) {
-		huVector[i] += offset;
-	}
-	
-	d = max - min;
-
-	for (unsigned int i = 0; i < huVector.size(); ++i) {
-		huVector[i] /= d;
-	}
-	// *****************End*****************
-
-	// SIFT feature vector is already normalized.
 }
 
 void MyCV::setBOWExtractor(Mat vocabulary)

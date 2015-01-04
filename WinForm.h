@@ -359,8 +359,11 @@ namespace CWinFormOpenCV {
 				 vector<std::string> all_files = loadImgsFromFolder();
 				 if (all_files.empty())	return;
 				 
-				 for (unsigned int i = 0; i < all_files.size(); ++i) {
-					 w_opencv.readImage(all_files[i]);
+				 RNG& rng = theRNG();
+
+				 while (all_files.size() > 0) {
+					 int randImgIdx = rng((unsigned)all_files.size());
+					 w_opencv.readImage(all_files[randImgIdx]);
 
 					 w_opencv.extractBOW();
 
@@ -375,26 +378,38 @@ namespace CWinFormOpenCV {
 					 features.push_back(w_fourier.get_vector());
 
 					 w_svm.concatenateGt(features);
-					 /*
-					 //===========display on window=============
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
-					 }
-					 else {
-						 originPictureBox->Image = testImage;
-					 }
-					 originPictureBox->Refresh();
 
-					 System::String^ string = gcnew System::String(all_files[i].c_str());
+					 //===========display on window==============
+					 // To avoid memory leakage
+					 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getBitmap();
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
+						 }
+						 else {
+							 originPictureBox->Image = testImage;
+						 }
+						 originPictureBox->Refresh();
+					 }
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
+					 }
+
+					 string message = std::to_string(all_files.size()) + " images left";
+					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
-					 //=========================================
-					 */
+					 //==========================================
+
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
+					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
 				 MessageBoxA(0, "跑完了!", "Ground Truth", MB_OK);
 			 }
@@ -421,24 +436,34 @@ namespace CWinFormOpenCV {
 					 features.push_back(w_fourier.get_vector());
 
 					 w_svm.concatenateOther(features);
-					 /*
+
 					 //===========display on window==============
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
+					 // To avoid memory leakage
+					 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getBitmap();
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
+						 }
+						 else {
+							 originPictureBox->Image = testImage;
+						 }
+						 originPictureBox->Refresh();
 					 }
-					 else {
-						 originPictureBox->Image = testImage;
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
 					 }
-					 originPictureBox->Refresh();
 
 					 string message = std::to_string(all_files.size()) + " images left";
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
 					 //==========================================
-					 */
+
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
@@ -568,22 +593,32 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
-					 //=============display on window================
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
+					 //===========display on window==============
+					 // To avoid memory leakage
+					 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getBitmap();
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
+						 }
+						 else {
+							 originPictureBox->Image = testImage;
+						 }
+						 originPictureBox->Refresh();
 					 }
-					 else {
-						 originPictureBox->Image = testImage;
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
 					 }
-					 originPictureBox->Refresh();
-					 
+
 					 string message = std::to_string(all_files.size()) + " images left";
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
-					 //==============================================
+					 //==========================================
 
 					 w_opencv.detectSIFT();
 
@@ -598,6 +633,17 @@ namespace CWinFormOpenCV {
 				 Mat vocabulary = bowTrainer.cluster(allDescriptors);
 
 				 FileStorage fs(path + "\\vocabulary_50.yaml", FileStorage::WRITE);
+				 if(fs.isOpened()) {
+					 fs << "vocabulary" << vocabulary;
+				 }
+				 fs.release();
+
+				 // K = 100
+				 vocabulary.release();
+				 BOWKMeansTrainer bowTrainer100(100);
+				 vocabulary = bowTrainer100.cluster(allDescriptors);
+
+				 fs.open(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
 				 if(fs.isOpened()) {
 					 fs << "vocabulary" << vocabulary;
 				 }
@@ -684,11 +730,10 @@ namespace CWinFormOpenCV {
 				 // for each image, extract its features & combine them together, then output
 				 for (unsigned int i = 0; i < all_files.size(); ++i) {
 					 w_opencv.readImage(all_files[i]);
-
-					 w_opencv.detectSIFT();
+					 
+					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
-					 std::vector<float> huVector = w_opencv.getHuVector();
 
 					 w_fourier.image_process(w_opencv.getImage());
 
@@ -708,6 +753,7 @@ namespace CWinFormOpenCV {
 					 output << endl;
 
 					 //=============display on window================
+					 delete originPictureBox->Image;		// To avoid memory leakage
 					 Bitmap^ testImage = w_opencv.getBitmap();
 					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
@@ -778,7 +824,6 @@ namespace CWinFormOpenCV {
 					 w_opencv.detectSIFT();
 
 					 w_opencv.HuMoment();
-					 std::vector<float> huVector = w_opencv.getHuVector();
 
 					 w_fourier.image_process(w_opencv.getImage());
 
@@ -905,56 +950,52 @@ namespace CWinFormOpenCV {
 				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
 			 }
 	private: System::Void testImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 vector<std::string> all_files = loadImgsFromFolder();
-				 if (all_files.empty())	return;
+				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				 openFileDialog1->Filter = "Image File (*.jpg,*.bmp)|*.jpg;*.bmp;*.*";
+				 openFileDialog1->Title = "開啟影像";
 
-				 fstream output("result_auto.txt", ios::out);
+				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
+					 return;
 
-				 for (unsigned int i = 0; i < all_files.size(); ++i) {
-					 w_opencv.readImage(all_files[i]);
-					 /*
-					 //=============display on window================
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
-					 }
-					 else {
-						 originPictureBox->Image = testImage;
-					 }
-					 originPictureBox->Refresh();
-					 //==============================================
-					 */
-					 w_opencv.extractBOW();
+				 std::string file;
+				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+				 w_opencv.readImage(file);
 
-					 w_opencv.HuMoment();
-					 std::vector<float> huVector = w_opencv.getHuVector();
-
-					 w_fourier.image_process(w_opencv.getImage());
-
-					 vector< vector<float> > features;
-
-					 features.push_back(w_opencv.getHuVector());
-					 features.push_back(w_opencv.getSiftVector());
-					 features.push_back(w_fourier.get_vector());
-
-					 w_svm.concatenateTest(features);
-
-					 output << all_files[i] << " ";
-					 System::String^ string = gcnew System::String(all_files[i].c_str());
-					 fileTextBox->Text = string;
-					 fileTextBox->Refresh();
-
-					 float res = w_svm.testSVM();
-					 output << res << endl;
-					 
-					 features.clear();
-					 w_opencv.clear();
-					 w_fourier.clear_vector();
-					 w_svm.clear_testVector();
+				 Bitmap^ testImage = w_opencv.getBitmap();
+				 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+					 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+					 originPictureBox->Image = resizeImage;
 				 }
-				 MessageBoxA(0, "SVM Testing finish", "SVM", MB_OK);
-				 output.close();
+				 else {
+					 originPictureBox->Image = testImage;
+				 }
+				 originPictureBox->Refresh();
+
+				 w_opencv.detectSIFT();
+
+				 w_opencv.HuMoment();
+
+				 w_fourier.image_process(w_opencv.getImage());
+
+				 vector< vector<float> > features;
+
+				 features.push_back(w_opencv.getHuVector());
+				 features.push_back(w_opencv.getSiftVector());
+				 features.push_back(w_fourier.get_vector());
+
+				 w_svm.concatenateTest(features);
+
+				 System::String^ string = gcnew System::String(file.c_str());
+				 fileTextBox->Text = string;
+				 fileTextBox->Refresh();
+
+				 float res = w_svm.testSVM();
+				 MessageBoxA(0, std::to_string(res).c_str(), "SVM", MB_OK);
+
+				 features.clear();
+				 w_opencv.clear();
+				 w_fourier.clear_vector();
+				 w_svm.clear_testVector();
 			 }
 };
 }
