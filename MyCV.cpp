@@ -77,7 +77,8 @@ void MyCV::HuMoment()
 	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
 	Mat dst = Mat::zeros(cvImage.rows, cvImage.cols, CV_8UC3);
 
-	Mat YImage, skinImage(cvImage.size(), CV_8UC3, Scalar(0, 0, 0));
+	Mat YImage;
+	skinImage.create(cvImage.size(), cvImage.type());
 	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
 	for (int x = 0; x < cvImage.rows; ++x)
 	{
@@ -91,21 +92,22 @@ void MyCV::HuMoment()
 				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
 		}
 	}
-	cvtColor(skinImage,skinImage,CV_RGB2GRAY);
+	Mat skinGray;
+	cvtColor(skinImage,skinGray,CV_RGB2GRAY);
 
 	for (int x = 0; x < cvImage.rows; ++x)
 	{
 		for (int y = 0; y < cvImage.cols; ++y)
 		{
-			if( skinImage.at<uchar>(x, y) > 0)
-				skinImage.at<uchar>(x, y) = 255;
+			if( skinGray.at<uchar>(x, y) > 0)
+				skinGray.at<uchar>(x, y) = 255;
 			else
-				skinImage.at<uchar>(x, y) = 0;
+				skinGray.at<uchar>(x, y) = 0;
 		}
 	}
 
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
-	cv::morphologyEx(skinImage, skinImage, cv::MORPH_DILATE, element);
+	cv::morphologyEx(skinGray, skinGray, cv::MORPH_DILATE, element);
 
     Mat canny_output;
     vector<vector<cv::Point> > contours;
@@ -114,7 +116,7 @@ void MyCV::HuMoment()
     // Detect edges using canny
     //Canny( skinImage, canny_output, thresh, thresh*2, 3 );
     /// Find contours
-    findContours( skinImage, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    findContours( skinGray, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
 	/*
     /// Draw contours
@@ -135,7 +137,6 @@ void MyCV::HuMoment()
       mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
 	*/
 
-	CvHuMoments Hu;
 	cv::Moments mom = cv::moments(contours[0]); 
 	double hu[7];
 	cv::HuMoments(mom, hu);
@@ -151,6 +152,22 @@ void MyCV::HuMoment()
 	cv::normalize(huVector, huVector, 0, 1, CV_MINMAX);
 }
 
+void MyCV::calHistogram(int histSize, const float* histRange)
+{
+	Mat grayImage;	cvtColor(cvImage, grayImage, CV_RGB2GRAY);
+
+	Mat hist;
+	/// Compute the histogram
+	calcHist(&grayImage, 1, 0, Mat(), hist, 1, &histSize, &histRange);
+
+	for (int i = 0; i < hist.rows; ++i) {
+		histVector.push_back(hist.at<float>(i));
+	}
+
+	/// Normalize the result to [ 0, histImage.rows ]
+	normalize(histVector, histVector, 0, 1, CV_MINMAX);
+}
+
 void MyCV::detectSIFT()
 {
 	// Detect the keypoints using SIFT Detector
@@ -160,7 +177,6 @@ void MyCV::detectSIFT()
 
 	Mat YImage;
 	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
-	Mat skinImage = cvImage.clone();
 	skinImage.create(cvImage.size(), CV_8UC3);
 
 	// Skin Detection
@@ -216,7 +232,7 @@ void MyCV::extractBOW()
 
 	Mat YImage;
 	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
-	Mat skinImage = cvImage.clone();
+	skinImage = cvImage.clone();
 
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
@@ -349,18 +365,28 @@ void MyCV::setBOWExtractor(Mat vocabulary)
 void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
-	cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols / 2.0), cvRound(cvImage.rows / 2.0)));
+	cv::resize(cvImage, cvImage, cv::Size(960, 540));
 }
 
 void MyCV::readFrame(Mat frame)
 {
 	cvImage = frame.clone();
-	cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols / 2.0), cvRound(cvImage.rows / 2.0)));
+	cv::resize(cvImage, cvImage, cv::Size(960, 540));
 }
 
 Mat MyCV::getImage()
 {
 	return cvImage;
+}
+
+Mat MyCV::getSkinImage()
+{
+	return skinImage;
+}
+
+vector<float> MyCV::getHistVector()
+{
+	return histVector;
 }
 
 vector<float> MyCV::getHuVector()

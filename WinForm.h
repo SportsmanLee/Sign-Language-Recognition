@@ -368,6 +368,11 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
+					 int histSize = 16;
+					 float range[] = { 0, 256 } ;
+					 const float* histRange = { range };
+					 w_opencv.calHistogram(histSize, histRange);
+
 					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
@@ -376,6 +381,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
+					 features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -388,7 +394,7 @@ namespace CWinFormOpenCV {
 					 Bitmap^ testImage;
 					 Bitmap^ resizeImage;
 					 try {
-						 testImage = w_opencv.getBitmap();
+						 testImage = w_opencv.getOtherBitmap(w_opencv.getSkinImage());
 						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
 							 originPictureBox->Image = resizeImage;
@@ -427,6 +433,11 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
+					 int histSize = 16;
+					 float range[] = { 0, 256 } ;
+					 const float* histRange = { range };
+					 w_opencv.calHistogram(histSize, histRange);
+
 					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
@@ -434,7 +445,8 @@ namespace CWinFormOpenCV {
 					 w_fourier.image_process(w_opencv.getImage());
 
 					 vector< vector<float> > features;
-
+					 
+					 features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -447,7 +459,7 @@ namespace CWinFormOpenCV {
 					 Bitmap^ testImage;
 					 Bitmap^ resizeImage;
 					 try {
-						 testImage = w_opencv.getBitmap();
+						 testImage = w_opencv.getOtherBitmap(w_opencv.getSkinImage());
 						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
 							 originPictureBox->Image = resizeImage;
@@ -1002,6 +1014,11 @@ namespace CWinFormOpenCV {
 					 while(all_files.size() > 0) {
 						 w_opencv.readImage(all_files[0]);
 
+						 int histSize = 16;
+						 float range[] = { 0, 256 } ;
+						 const float* histRange = { range };
+						 w_opencv.calHistogram(histSize, histRange);
+
 						 w_opencv.extractBOW();
 
 						 w_opencv.HuMoment();
@@ -1009,12 +1026,16 @@ namespace CWinFormOpenCV {
 						 w_fourier.image_process(w_opencv.getImage());
 
 						 vector< vector<float> > features;
-
+						 
+						 features.push_back(w_opencv.getHistVector());
 						 features.push_back(w_opencv.getHuVector());
 						 features.push_back(w_opencv.getSiftVector());
 						 features.push_back(w_fourier.get_vector());
 
 						 w_svm.concatenateTest(features);
+
+						 float res = w_svm.testSVM();
+						 // distance[i][g_model] = res;
 
 						 //===========display on window==============
 						 // To avoid memory leakage
@@ -1023,7 +1044,7 @@ namespace CWinFormOpenCV {
 						 Bitmap^ testImage;
 						 Bitmap^ resizeImage;
 						 try {
-							 testImage = w_opencv.getBitmap();
+							 testImage = w_opencv.getOtherBitmap(w_opencv.getSkinImage());
 							 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 								 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
 								 originPictureBox->Image = resizeImage;
@@ -1038,16 +1059,12 @@ namespace CWinFormOpenCV {
 							 delete resizeImage;
 						 }
 
-						 //std::string message = "Group no." + std::to_string(g_model+1) + "," + std::to_string(all_files.size()-i) + " images left";
-						 string message = std::to_string(all_files.size()) + " images left\t" + all_files[0];
+						 string message = std::to_string(all_files.size()) + " images left\t" + all_files[0] + '\t' + std::to_string(res);
 						 System::String^ string = gcnew System::String(message.c_str());
 						 fileTextBox->Text = string;
 						 fileTextBox->Refresh();
-						 //==========================================					 
+						 //==========================================
 						 output << all_files[0] << " ";
-
-						 float res = w_svm.testSVM();
-						// distance[i][g_model] = res;
 						 output << res << endl;
 						 
 						 features.clear();

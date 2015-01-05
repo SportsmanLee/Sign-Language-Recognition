@@ -21,6 +21,7 @@ public:
 	System::Drawing::Bitmap^ getBitmap();
 	System::Drawing::Bitmap^ getOtherBitmap(cv::Mat cvImage);
 	void HuMoment();
+	void calHistogram(int histSize, const float* histRange);
 	void detectSIFT();
 	void extractBOW();
 	void readImage(std::string fileName);
@@ -29,16 +30,20 @@ public:
 	void set_bg_frame();
 	void setBOWExtractor(Mat vocabulary);
 	Mat getImage();
+	Mat getSkinImage();
 	vector<float> getHuVector();
+	vector<float> getHistVector();
 	vector<float> getSiftVector();
 	Mat getSiftDescriptor();
 	void clear();
 
 private:
 	Mat cvImage;
+	Mat skinImage;
 	Mat first_frame;
 	Mat siftDescriptor;
 	vector<float> huVector;
+	vector<float> histVector;
 	vector<float> siftVector;
 	Ptr<BOWImgDescriptorExtractor> bowExtractor;
 };
