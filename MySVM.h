@@ -15,21 +15,27 @@ class MySVM
 {
 public:
 	void concatenateGt(vector< vector<float> > features);
+	void concatenateAll(vector< vector<float> > features);
+	void concatenateAllclasses(int);
 	void concatenateOther(vector< vector<float> > features);
 	void concatenateTest(vector< vector<float> > features);
 	void clear_testVector();
 	vector<float> getTestVector();
 	void trainSVM();
 	void trainSVM_lda();
+	void get_pca_lda();
 	float testSVM();
 	void setModel(string filename);
 	void clearVectors();
 	Mat project(const Mat &,const Mat&,const Mat&);
-
+	int update_class();
 private:
 	vector< vector<float> > gtVectors;
+	vector< vector<float> > Allvectors;
 	vector< vector<float> > otherVectors;
+	vector<int> Allclasses;
 	vector<float> testVector;
 	string modelFile;
 	Mat transform;
+	int now_class;
 };

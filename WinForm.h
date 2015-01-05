@@ -252,7 +252,7 @@ namespace CWinFormOpenCV {
 			this->imgTxtButton->Name = L"imgTxtButton";
 			this->imgTxtButton->Size = System::Drawing::Size(213, 33);
 			this->imgTxtButton->TabIndex = 18;
-			this->imgTxtButton->Text = L"Images to Text";
+			this->imgTxtButton->Text = L"get PCA , LDA";
 			this->imgTxtButton->UseVisualStyleBackColor = true;
 			this->imgTxtButton->Click += gcnew System::EventHandler(this, &WinForm::imgTxtButton_Click);
 			// 
@@ -735,19 +735,79 @@ namespace CWinFormOpenCV {
 				 w_opencv.clear();
 			 }
 			 // Read images from a folder & output feature vectors to text file.
+	
+
 	private: System::Void imgTxtButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 vector<std::string> all_files = loadImgsFromFolder();
+				 //==========img to text code========
+				 //vector<std::string> all_files = loadImgsFromFolder();
+				 //if (all_files.empty())	return;
+				 //
+				 //// output feature vector
+				 //vector<float> outputVector;
+				 //std::string string = all_files[0].substr(0, all_files[0].find_last_of('\\'));
+				 //fstream output(string + "\\output.txt", ios::out);
+				 //
+				 //// for each image, extract its features & combine them together, then output
+				 //for (unsigned int i = 0; i < all_files.size(); ++i) {
+					// w_opencv.readImage(all_files[i]);
+					// 
+					// w_opencv.extractBOW();
+
+					// w_opencv.HuMoment();
+
+					// w_fourier.image_process(w_opencv.getImage());
+
+					// vector< vector<float> > features;
+
+					// features.push_back(w_opencv.getHuVector());
+					// features.push_back(w_opencv.getSiftVector());
+					// features.push_back(w_fourier.get_vector());
+
+					// w_svm.concatenateTest(features);
+
+					// outputVector = w_svm.getTestVector();
+
+					// for (unsigned int j = 0; j < outputVector.size(); ++j) {
+					//	 output << outputVector[j] << " ";
+					// }
+					// output << endl;
+
+					// //=============display on window================
+					// delete originPictureBox->Image;		// To avoid memory leakage
+					// Bitmap^ testImage = w_opencv.getBitmap();
+					// if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+					//	 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+					//	 originPictureBox->Image = resizeImage;
+					// }
+					// else {
+					//	 originPictureBox->Image = testImage;
+					// }
+					// originPictureBox->Refresh();
+					// 
+					// System::String^ string = gcnew System::String(all_files[i].c_str());
+					// fileTextBox->Text = string;
+					// fileTextBox->Refresh();
+					// //==============================================
+
+					// features.clear();
+					// w_opencv.clear();
+					// w_fourier.clear_vector();
+					// w_svm.clear_testVector();
+					// outputVector.clear();
+				 //}
+				 //
+				 //output.close();
+
+				int classes = w_svm.update_class();
+				vector<std::string> all_files = loadImgsFromFolder();
 				 if (all_files.empty())	return;
 				 
-				 // output feature vector
-				 vector<float> outputVector;
-				 std::string string = all_files[0].substr(0, all_files[0].find_last_of('\\'));
-				 fstream output(string + "\\output.txt", ios::out);
-				 
-				 // for each image, extract its features & combine them together, then output
-				 for (unsigned int i = 0; i < all_files.size(); ++i) {
-					 w_opencv.readImage(all_files[i]);
-					 
+				 RNG& rng = theRNG();
+
+				 while (all_files.size() > 0) {
+					 int randImgIdx = rng((unsigned)all_files.size());
+					 w_opencv.readImage(all_files[randImgIdx]);
+
 					 w_opencv.extractBOW();
 
 					 w_opencv.HuMoment();
@@ -760,40 +820,42 @@ namespace CWinFormOpenCV {
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
 
-					 w_svm.concatenateTest(features);
-
-					 outputVector = w_svm.getTestVector();
-
-					 for (unsigned int j = 0; j < outputVector.size(); ++j) {
-						 output << outputVector[j] << " ";
+					 w_svm.concatenateAll(features);
+					 w_svm.concatenateAllclasses(classes);
+					 //===========display on window==============
+					 // To avoid memory leakage
+					 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getBitmap();
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
+						 }
+						 else {
+							 originPictureBox->Image = testImage;
+						 }
+						 originPictureBox->Refresh();
 					 }
-					 output << endl;
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
+					 }
 
-					 //=============display on window================
-					 delete originPictureBox->Image;		// To avoid memory leakage
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
-					 }
-					 else {
-						 originPictureBox->Image = testImage;
-					 }
-					 originPictureBox->Refresh();
-					 
-					 System::String^ string = gcnew System::String(all_files[i].c_str());
+					 string message = std::to_string(all_files.size()) + " images left";
+					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
-					 //==============================================
+					 //==========================================
 
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
-					 w_svm.clear_testVector();
-					 outputVector.clear();
+					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
-				 
-				 output.close();
+				 std::string test1 = std::to_string(classes);
+				 MessageBoxA(0, test1.c_str(), "Ground Truth", MB_OK);
 		 }
 	private: System::Void videoTxtButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
