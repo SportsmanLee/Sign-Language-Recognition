@@ -17,6 +17,32 @@ void MySVM::concatenateGt(vector< vector<float> > features)
 	gtVectors.push_back(insertVector);
 }
 
+void MySVM::concatenateAll(vector< vector<float> > features)
+{
+	vector<float> insertVector;
+	for (unsigned int i = 0; i < features.size(); ++i) {
+		for (unsigned int j = 0; j < features[i].size(); ++j) {
+			insertVector.push_back(features[i][j]);
+		}
+	}
+
+	Allvectors.push_back(insertVector);
+}
+
+void MySVM::concatenateAllclasses(int classes)
+{
+	Allclasses.push_back(classes);
+}
+
+int MySVM::update_class()
+{
+	if(Allvectors.size()==0)
+		now_class = 0;
+	else
+		now_class++;
+	return now_class;
+}
+
 void MySVM::concatenateOther(vector< vector<float> > features)
 {
 	vector<float> insertVector;
@@ -177,17 +203,124 @@ void MySVM::trainSVM_lda()
 	
 }
 
+void MySVM::get_pca_lda()
+{
+	Mat trainingData(Allvectors.size() ,  Allvectors[0].size(), CV_32FC1);
+	for (int i = 0; i < trainingData.rows; ++i) {
+		for (int j = 0; j < trainingData.cols; ++j) {
+			trainingData.at<float>(i, j) = Allvectors[i][j];
+		}
+	}
+	int class_num = now_class + 1;
+
+	int N = trainingData.rows;
+    int D = trainingData.cols;
+	
+	PCA pca(trainingData , Mat(), CV_PCA_DATA_AS_ROW, N-class_num);
+	//get lda transform matrix 
+	LDA lda=LDA(pca.project(trainingData),Allclasses , 1); 
+	transform = lda.project(pca.project(trainingData));
+
+	FileStorage fo("pca.yaml", FileStorage::WRITE);
+	if(fo.isOpened()) {
+		fo << "pca mean" << pca.mean;
+		fo << "pca eigenvalues" << pca.eigenvalues;
+		fo << "pca eigenvectors" << pca.eigenvectors;
+	}
+	fo.release();
+	lda.save("lda.yaml");
+
+	//===========debug=========
+	if(Allclasses.size() == Allvectors.size())
+	{
+		//write transform to txt
+		char filename[]="transform.txt";
+		fstream fp;
+		fp.open(filename, ios::out);//開啟檔案
+		if(!fp){//如果開啟檔案失敗，fp為0；成功，fp為非0
+			cout<<"Fail to open file: "<<filename<<endl;
+		}
+		cout<<"File Descriptor: "<<fp<<endl;
+		for(int i = 0 ; i < transform.rows ; i++)
+		{
+			for(int j = 0 ; j < transform.cols ; j++)
+			{
+				fp<<transform.ptr<float>(i)[j] << '\t';//寫入字串
+			}
+			fp<<endl;
+		}
+		fp.close();//關閉檔案
+		//write transform to txt
+		char filename2[]="trainingdata.txt";
+		fstream fp2;
+		fp2.open(filename2, ios::out);//開啟檔案
+		if(!fp2){//如果開啟檔案失敗，fp為0；成功，fp為非0
+			cout<<"Fail to open file: "<<filename2<<endl;
+		}
+		cout<<"File Descriptor: "<<fp2<<endl;
+		for(int i = 0 ; i < trainingData.rows ; i++)
+		{
+			for(int j = 0 ; j < trainingData.cols ; j++)
+			{
+				fp2<<trainingData.ptr<float>(i)[j] << '\t';//寫入字串
+			}
+			fp2<<endl;
+		}
+
+
+		fp2.close();//關閉檔案
+	}
+	//===========debug end===============
+}
+
 float MySVM::testSVM()
 {
 	Mat testImage(1, testVector.size(), CV_32FC1);
 	for (unsigned int i = 0; i < testVector.size(); ++i) {
 		testImage.at<float>(0, i) = testVector[i];
 	}
-
 	CvSVM SVM;
 	SVM.load(modelFile.c_str());
 
-	return SVM.predict(testImage, false); // test result 
+
+	//read pca & lda
+	//string pca_file = "pca.yaml";
+	//FileStorage fs(pca_file, FileStorage::READ);
+
+	//PCA pca;
+
+	//fs["pca mean"] >> pca.mean;   // Read entire cv::Mat
+	//fs["pca eigenvalues"] >> pca.eigenvalues;   // Read entire cv::Mat
+	//fs["pca eigenvectors"] >> pca.eigenvectors;   // Read entire cv::Mat
+
+	//LDA lda;
+	//lda.load("lda.yaml");
+
+	//test data
+	//transform = lda.project(pca.project(testImage));
+
+	//transform.convertTo(transform, CV_32FC1);
+
+	//write
+	//char filename[]="test.txt";
+    //fstream fp;
+    //fp.open(filename, ios::out);//開啟檔案
+	//for(int i = 0 ; i < transform.rows ; i++)
+	//{
+		//for(int j = 0 ; j < transform.cols ; j++)
+		//{
+		//	fp<<transform.ptr<float>(i)[j] << '\t';//寫入字串
+		//}
+		//fp<<endl;
+	//}
+  
+ 
+    //fp.close();//關閉檔案
+
+
+
+	
+	return SVM.predict(testImage, true); // test result 
 }
 
 void MySVM::setModel(string filename)
@@ -199,3 +332,4 @@ void MySVM::clear_testVector()
 {
 	testVector.clear();
 }
+
