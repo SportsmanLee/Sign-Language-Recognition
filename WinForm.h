@@ -414,7 +414,10 @@ namespace CWinFormOpenCV {
 					 w_fourier.clear_vector();
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
-				 MessageBoxA(0, "跑完了!", "Ground Truth", MB_OK);
+				 string message = "Ground Truth finish";
+				 System::String^ string = gcnew System::String(message.c_str());
+				 fileTextBox->Text = string;
+				 fileTextBox->Refresh();
 				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 			 }
 	private: System::Void falseButton_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -473,7 +476,10 @@ namespace CWinFormOpenCV {
 					 w_fourier.clear_vector();
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
-				 MessageBoxA(0, "跑完了!", "Ground False", MB_OK);
+				 string message = "Ground False finish";
+				 System::String^ string = gcnew System::String(message.c_str());
+				 fileTextBox->Text = string;
+				 fileTextBox->Refresh();
 				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 
 				 trainButton->Enabled = true;
@@ -955,46 +961,115 @@ namespace CWinFormOpenCV {
 				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
 			 }
 	private: System::Void testImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
-				 openFileDialog1->Filter = "Image File (*.jpg,*.bmp)|*.jpg;*.bmp;*.*";
-				 openFileDialog1->Title = "開啟影像";
+				 /*
+				 vector<std::string> models = vector<std::string>();
 
-				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
-					 return;
+				 FolderBrowserDialog^ folderBrowserDiaglog = gcnew FolderBrowserDialog();
+				 if (folderBrowserDiaglog->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) {
+					 return ;
+				 }
+				 std::string path = msclr::interop::marshal_as<std::string>(folderBrowserDiaglog->SelectedPath);
 
-				 std::string file;
-				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
-				 w_opencv.readImage(file);
+				 vector<std::string> filenames = vector<std::string>();
+				 getdir(path,filenames);
 
-				 Bitmap^ testImage = w_opencv.getBitmap();
-				 originPictureBox->Image = testImage;
 				 originPictureBox->Refresh();
+				 fstream output("result_auto.txt", ios::out);
+				// testVideoButton->Enabled = true;
+				// testImageButton->Enabled = true;
+					
+				// for(int g_model=0; g_model<models.size(); g_model++) {
+				//	 w_svm.setModel(models[g_model]);
+				//	 modelTextBox->Text = gcnew System::String(models[g_model].c_str());
+				//	 modelTextBox->Refresh();
+					 /*
+					 string message = "Model NO." + std::to_string(g_model+1) + " is processing";
+					 System::String^ string = gcnew System::String(message.c_str());
+					 fileTextBox->Text = string;
+					 fileTextBox->Refresh();
+					 */
+					 //for(int i=0; i<all_files.size(); i++) {
+					 while(all_files.size() > 0) {
+						 w_opencv.readImage(all_files[0]);
 
-				 w_opencv.detectSIFT();
+						 w_opencv.extractBOW();
 
-				 w_opencv.HuMoment();
+						 w_opencv.HuMoment();
 
-				 w_fourier.image_process(w_opencv.getImage());
+						 w_fourier.image_process(w_opencv.getImage());
 
-				 vector< vector<float> > features;
+						 vector< vector<float> > features;
 
-				 features.push_back(w_opencv.getHuVector());
-				 features.push_back(w_opencv.getSiftVector());
-				 features.push_back(w_fourier.get_vector());
+						 features.push_back(w_opencv.getHuVector());
+						 features.push_back(w_opencv.getSiftVector());
+						 features.push_back(w_fourier.get_vector());
 
-				 w_svm.concatenateTest(features);
+						 w_svm.concatenateTest(features);
 
-				 System::String^ string = gcnew System::String(file.c_str());
-				 fileTextBox->Text = string;
-				 fileTextBox->Refresh();
+						 //===========display on window==============
+						 // To avoid memory leakage
+						 if(!originPictureBox->Image)
+							delete originPictureBox->Image;
+						 Bitmap^ testImage;
+						 Bitmap^ resizeImage;
+						 try {
+							 testImage = w_opencv.getBitmap();
+							 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+								 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+								 originPictureBox->Image = resizeImage;
+							 }
+							 else {
+								 originPictureBox->Image = testImage;
+							 }
+							 originPictureBox->Refresh();
+						 }
+						 finally {
+							 delete testImage;
+							 delete resizeImage;
+						 }
 
-				 float res = w_svm.testSVM();
-				 MessageBoxA(0, std::to_string(res).c_str(), "SVM", MB_OK);
+						 //std::string message = "Group no." + std::to_string(g_model+1) + "," + std::to_string(all_files.size()-i) + " images left";
+						 std::string message = std::to_string(all_files.size()) + " images left";
+						 System::String^ string = gcnew System::String(message.c_str());
+						 fileTextBox->Text = string;
+						 fileTextBox->Refresh();
+						 //==========================================					 
+						 output << all_files[0] << " ";
 
-				 features.clear();
-				 w_opencv.clear();
-				 w_fourier.clear_vector();
-				 w_svm.clear_testVector();
+						 float res = w_svm.testSVM();
+						// distance[i][g_model] = res;
+						 output << res << endl;
+						 
+						 features.clear();
+						 w_opencv.clear();
+						 w_fourier.clear_vector();
+						 all_files.erase(all_files.begin());
+						 w_svm.clear_testVector();
+					 }
+					 string message = "SVM Testing finish !!";
+					 System::String^ string = gcnew System::String(message.c_str());
+					 fileTextBox->Text = string;
+					 fileTextBox->Refresh();
+					 
+					 output.close();
+				/*
+				fstream output("5GROUP_result_auto.txt", ios::out);
+				
+				for(int i=0; i<all_files.size(); i++) {	
+					//int min=100,min_index=0;
+					output << all_files[i] << " ";
+					for(int g_model=0; g_model<5; g_model++) {
+						//if(min > distance[i][g_model]) {
+						//	min_index = g_model;
+						//	min = distance[i][g_model];
+						//}
+						output << distance[i][g_model] << " ";
+					}	
+					output << endl;
+					//output << min_index << endl;
+				}
+				output.close();
+				*/
 			 }
 };
 }
