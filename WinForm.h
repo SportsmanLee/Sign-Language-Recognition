@@ -348,6 +348,8 @@ namespace CWinFormOpenCV {
 				 std::string message;
 				 for(unsigned int i = 0; i < filenames.size(); i++)
 				 {
+					 if (filenames[i] == "." || filenames[i] == "..")
+						 continue;
 					 if (filenames[i].find("jpg") == std::string::npos)
 						 continue;
 					 message = path + "\\" + filenames[i];
@@ -401,7 +403,7 @@ namespace CWinFormOpenCV {
 						 delete resizeImage;
 					 }
 
-					 string message = std::to_string(all_files.size()) + " images left";
+					 string message = std::to_string(all_files.size()) + " images left\t" + all_files[randImgIdx];
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
@@ -412,10 +414,8 @@ namespace CWinFormOpenCV {
 					 w_fourier.clear_vector();
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
-				 string message = "Ground Truth finish";
-				 System::String^ string = gcnew System::String(message.c_str());
-				 fileTextBox->Text = string;
-				 fileTextBox->Refresh();
+				 MessageBoxA(0, "跑完了!", "Ground Truth", MB_OK);
+				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 			 }
 	private: System::Void falseButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 vector<std::string> all_files = loadImgsFromFolder();
@@ -462,7 +462,7 @@ namespace CWinFormOpenCV {
 						 delete resizeImage;
 					 }
 
-					 string message = std::to_string(all_files.size()) + " images left";
+					 string message = std::to_string(all_files.size()) + " images left\t" + all_files[randImgIdx];
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
@@ -473,10 +473,8 @@ namespace CWinFormOpenCV {
 					 w_fourier.clear_vector();
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
-				 string message = "Ground False finish";
-				 System::String^ string = gcnew System::String(message.c_str());
-				 fileTextBox->Text = string;
-				 fileTextBox->Refresh();
+				 MessageBoxA(0, "跑完了!", "Ground False", MB_OK);
+				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 
 				 trainButton->Enabled = true;
 			 }
@@ -1023,25 +1021,17 @@ namespace CWinFormOpenCV {
 						 if(!originPictureBox->Image)
 							delete originPictureBox->Image;
 						 Bitmap^ testImage;
-						 Bitmap^ resizeImage;
 						 try {
 							 testImage = w_opencv.getBitmap();
-							 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-								 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-								 originPictureBox->Image = resizeImage;
-							 }
-							 else {
-								 originPictureBox->Image = testImage;
-							 }
+							 originPictureBox->Image = testImage;
 							 originPictureBox->Refresh();
 						 }
 						 finally {
 							 delete testImage;
-							 delete resizeImage;
 						 }
 
 						 //std::string message = "Group no." + std::to_string(g_model+1) + "," + std::to_string(all_files.size()-i) + " images left";
-						 std::string message = std::to_string(all_files.size()) + " images left";
+						 string message = std::to_string(all_files.size()) + " images left\t" + all_files[0];
 						 System::String^ string = gcnew System::String(message.c_str());
 						 fileTextBox->Text = string;
 						 fileTextBox->Refresh();
@@ -1062,6 +1052,7 @@ namespace CWinFormOpenCV {
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
+					 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 					 
 					 output.close();
 				/*
