@@ -106,10 +106,11 @@ namespace CWinFormOpenCV {
 			// 
 			// originPictureBox
 			// 
+			this->originPictureBox->Enabled = false;
 			this->originPictureBox->Location = System::Drawing::Point(291, 65);
 			this->originPictureBox->Name = L"originPictureBox";
 			this->originPictureBox->Size = System::Drawing::Size(739, 457);
-			this->originPictureBox->SizeMode = System::Windows::Forms::PictureBoxSizeMode::CenterImage;
+			this->originPictureBox->SizeMode = System::Windows::Forms::PictureBoxSizeMode::AutoSize;
 			this->originPictureBox->TabIndex = 1;
 			this->originPictureBox->TabStop = false;
 			// 
@@ -347,6 +348,8 @@ namespace CWinFormOpenCV {
 				 std::string message;
 				 for(unsigned int i = 0; i < filenames.size(); i++)
 				 {
+					 if (filenames[i] == "." || filenames[i] == "..")
+						 continue;
 					 if (filenames[i].find("jpg") == std::string::npos)
 						 continue;
 					 message = path + "\\" + filenames[i];
@@ -400,7 +403,7 @@ namespace CWinFormOpenCV {
 						 delete resizeImage;
 					 }
 
-					 string message = std::to_string(all_files.size()) + " images left";
+					 string message = std::to_string(all_files.size()) + " images left\t" + all_files[randImgIdx];
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
@@ -412,6 +415,7 @@ namespace CWinFormOpenCV {
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
 				 MessageBoxA(0, "跑完了!", "Ground Truth", MB_OK);
+				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 			 }
 	private: System::Void falseButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 vector<std::string> all_files = loadImgsFromFolder();
@@ -458,7 +462,7 @@ namespace CWinFormOpenCV {
 						 delete resizeImage;
 					 }
 
-					 string message = std::to_string(all_files.size()) + " images left";
+					 string message = std::to_string(all_files.size()) + " images left\t" + all_files[randImgIdx];
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
@@ -470,6 +474,7 @@ namespace CWinFormOpenCV {
 					 all_files.erase(all_files.begin() + randImgIdx);
 				 }
 				 MessageBoxA(0, "跑完了!", "Ground False", MB_OK);
+				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 
 				 trainButton->Enabled = true;
 			 }
@@ -962,13 +967,7 @@ namespace CWinFormOpenCV {
 				 w_opencv.readImage(file);
 
 				 Bitmap^ testImage = w_opencv.getBitmap();
-				 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-					 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-					 originPictureBox->Image = resizeImage;
-				 }
-				 else {
-					 originPictureBox->Image = testImage;
-				 }
+				 originPictureBox->Image = testImage;
 				 originPictureBox->Refresh();
 
 				 w_opencv.detectSIFT();

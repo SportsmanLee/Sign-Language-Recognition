@@ -194,19 +194,5 @@ void fourier::image_process (Mat in_image)
 
 	//fourier 
 	fourier_descriptor();
-	//write transform to txt
-	char filename[]="fourier.txt";
-    FILE * fp = fopen(filename, "a ");//開啟檔案
-    if(!fp){//如果開啟檔案失敗，fp為0；成功，fp為非0
-        cout<<"Fail to open file: "<<filename<<endl;
-    }
-    cout<<"File Descriptor: "<<fp<<endl;
-	for(int i = 0 ; i < FD.size() ; i++)
-	{
-		fprintf (fp, "%f ", FD[i] );
-	}
-	fprintf (fp, "\n");
-
-	fclose (fp);
 }
 
