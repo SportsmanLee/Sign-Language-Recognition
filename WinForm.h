@@ -106,6 +106,7 @@ namespace CWinFormOpenCV {
 			// 
 			// originPictureBox
 			// 
+			this->originPictureBox->Enabled = false;
 			this->originPictureBox->Location = System::Drawing::Point(291, 65);
 			this->originPictureBox->Name = L"originPictureBox";
 			this->originPictureBox->Size = System::Drawing::Size(739, 457);
@@ -956,72 +957,131 @@ namespace CWinFormOpenCV {
 				 MessageBoxA(0, "ถ]งนคF!", "SVM", MB_OK);
 			 }
 	private: System::Void testImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 /*
+				 vector<std::string> models = vector<std::string>();
+
+				 FolderBrowserDialog^ folderBrowserDiaglog = gcnew FolderBrowserDialog();
+				 if (folderBrowserDiaglog->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) {
+					 return ;
+				 }
+				 std::string path = msclr::interop::marshal_as<std::string>(folderBrowserDiaglog->SelectedPath);
+
+				 vector<std::string> filenames = vector<std::string>();
+				 getdir(path,filenames);
+
+				 std::string message;
+				 for(unsigned int i = 0; i < filenames.size(); i++)
+				 {
+					 if (filenames[i].find("xml") == std::string::npos)
+						 continue;
+					 message = path + "\\" + filenames[i];
+					 models.push_back(message);
+				 }
+				 */
 				 vector<std::string> all_files = loadImgsFromFolder();
+				 /*
+				 vector<vector<float>> distance(all_files.size());
+				 for(int i=0; i<all_files.size(); i++)
+					distance[i].resize(5);
+				 */
 				 if (all_files.empty())	return;
 
 				 fstream output("result_auto.txt", ios::out);
-
-				 while (all_files.size() > 0) {
-					 w_opencv.readImage(all_files[0]);
-
-					 w_opencv.extractBOW();
-
-					 w_opencv.HuMoment();
-
-					 w_fourier.image_process(w_opencv.getImage());
-
-					 vector< vector<float> > features;
-
-					 features.push_back(w_opencv.getHuVector());
-					 features.push_back(w_opencv.getSiftVector());
-					 features.push_back(w_fourier.get_vector());
-
-					 w_svm.concatenateTest(features);
-
-					 //===========display on window==============
-					 // To avoid memory leakage
-					 if(!originPictureBox->Image)
-						delete originPictureBox->Image;
-					 Bitmap^ testImage;
-					 Bitmap^ resizeImage;
-					 try {
-						 testImage = w_opencv.getBitmap();
-						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-							 originPictureBox->Image = resizeImage;
-						 }
-						 else {
-							 originPictureBox->Image = testImage;
-						 }
-						 originPictureBox->Refresh();
-					 }
-					 finally {
-						 delete testImage;
-						 delete resizeImage;
-					 }
-
-					 string message = std::to_string(all_files.size()) + " images left";
+				// testVideoButton->Enabled = true;
+				// testImageButton->Enabled = true;
+					
+				// for(int g_model=0; g_model<models.size(); g_model++) {
+				//	 w_svm.setModel(models[g_model]);
+				//	 modelTextBox->Text = gcnew System::String(models[g_model].c_str());
+				//	 modelTextBox->Refresh();
+					 /*
+					 string message = "Model NO." + std::to_string(g_model+1) + " is processing";
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
-					 //==========================================					 
-					 output << all_files[0] << " ";
+					 */
+					 //for(int i=0; i<all_files.size(); i++) {
+					 while(all_files.size() > 0) {
+						 w_opencv.readImage(all_files[0]);
 
-					 float res = w_svm.testSVM();
-					 output << res << endl;
+						 w_opencv.extractBOW();
+
+						 w_opencv.HuMoment();
+
+						 w_fourier.image_process(w_opencv.getImage());
+
+						 vector< vector<float> > features;
+
+						 features.push_back(w_opencv.getHuVector());
+						 features.push_back(w_opencv.getSiftVector());
+						 features.push_back(w_fourier.get_vector());
+
+						 w_svm.concatenateTest(features);
+
+						 //===========display on window==============
+						 // To avoid memory leakage
+						 if(!originPictureBox->Image)
+							delete originPictureBox->Image;
+						 Bitmap^ testImage;
+						 Bitmap^ resizeImage;
+						 try {
+							 testImage = w_opencv.getBitmap();
+							 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+								 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+								 originPictureBox->Image = resizeImage;
+							 }
+							 else {
+								 originPictureBox->Image = testImage;
+							 }
+							 originPictureBox->Refresh();
+						 }
+						 finally {
+							 delete testImage;
+							 delete resizeImage;
+						 }
+
+						 //std::string message = "Group no." + std::to_string(g_model+1) + "," + std::to_string(all_files.size()-i) + " images left";
+						 std::string message = std::to_string(all_files.size()) + " images left";
+						 System::String^ string = gcnew System::String(message.c_str());
+						 fileTextBox->Text = string;
+						 fileTextBox->Refresh();
+						 //==========================================					 
+						 output << all_files[0] << " ";
+
+						 float res = w_svm.testSVM();
+						// distance[i][g_model] = res;
+						 output << res << endl;
+						 
+						 features.clear();
+						 w_opencv.clear();
+						 w_fourier.clear_vector();
+						 all_files.erase(all_files.begin());
+						 w_svm.clear_testVector();
+					 }
+					 string message = "SVM Testing finish !!";
+					 System::String^ string = gcnew System::String(message.c_str());
+					 fileTextBox->Text = string;
+					 fileTextBox->Refresh();
 					 
-					 features.clear();
-					 w_opencv.clear();
-					 w_fourier.clear_vector();
-					 all_files.erase(all_files.begin());
-					 w_svm.clear_testVector();
-				 }
-				 string message = "SVM Testing finish !!";
-				 System::String^ string = gcnew System::String(message.c_str());
-				 fileTextBox->Text = string;
-				 fileTextBox->Refresh();
-
-				 output.close();
+					 output.close();
+				/*
+				fstream output("5GROUP_result_auto.txt", ios::out);
+				
+				for(int i=0; i<all_files.size(); i++) {	
+					//int min=100,min_index=0;
+					output << all_files[i] << " ";
+					for(int g_model=0; g_model<5; g_model++) {
+						//if(min > distance[i][g_model]) {
+						//	min_index = g_model;
+						//	min = distance[i][g_model];
+						//}
+						output << distance[i][g_model] << " ";
+					}	
+					output << endl;
+					//output << min_index << endl;
+				}
+				output.close();
+				*/
 			 }
 };
 }
