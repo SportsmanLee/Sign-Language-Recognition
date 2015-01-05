@@ -110,7 +110,7 @@ namespace CWinFormOpenCV {
 			this->originPictureBox->Location = System::Drawing::Point(291, 65);
 			this->originPictureBox->Name = L"originPictureBox";
 			this->originPictureBox->Size = System::Drawing::Size(739, 457);
-			this->originPictureBox->SizeMode = System::Windows::Forms::PictureBoxSizeMode::AutoSize;
+			this->originPictureBox->SizeMode = System::Windows::Forms::PictureBoxSizeMode::CenterImage;
 			this->originPictureBox->TabIndex = 1;
 			this->originPictureBox->TabStop = false;
 			// 
@@ -348,8 +348,6 @@ namespace CWinFormOpenCV {
 				 std::string message;
 				 for(unsigned int i = 0; i < filenames.size(); i++)
 				 {
-					 if (filenames[i] == "." || filenames[i] == "..")
-						 continue;
 					 if (filenames[i].find("jpg") == std::string::npos)
 						 continue;
 					 message = path + "\\" + filenames[i];
@@ -403,7 +401,7 @@ namespace CWinFormOpenCV {
 						 delete resizeImage;
 					 }
 
-					 string message = std::to_string(all_files.size()) + " images left\t" + all_files[randImgIdx];
+					 string message = std::to_string(all_files.size()) + " images left";
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
@@ -418,7 +416,6 @@ namespace CWinFormOpenCV {
 				 System::String^ string = gcnew System::String(message.c_str());
 				 fileTextBox->Text = string;
 				 fileTextBox->Refresh();
-				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 			 }
 	private: System::Void falseButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 vector<std::string> all_files = loadImgsFromFolder();
@@ -465,7 +462,7 @@ namespace CWinFormOpenCV {
 						 delete resizeImage;
 					 }
 
-					 string message = std::to_string(all_files.size()) + " images left\t" + all_files[randImgIdx];
+					 string message = std::to_string(all_files.size()) + " images left";
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
@@ -480,7 +477,6 @@ namespace CWinFormOpenCV {
 				 System::String^ string = gcnew System::String(message.c_str());
 				 fileTextBox->Text = string;
 				 fileTextBox->Refresh();
-				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 
 				 trainButton->Enabled = true;
 			 }
@@ -973,7 +969,23 @@ namespace CWinFormOpenCV {
 				 vector<std::string> filenames = vector<std::string>();
 				 getdir(path,filenames);
 
-				 originPictureBox->Refresh();
+				 std::string message;
+				 for(unsigned int i = 0; i < filenames.size(); i++)
+				 {
+					 if (filenames[i].find("xml") == std::string::npos)
+						 continue;
+					 message = path + "\\" + filenames[i];
+					 models.push_back(message);
+				 }
+				 */
+				 vector<std::string> all_files = loadImgsFromFolder();
+				 /*
+				 vector<vector<float>> distance(all_files.size());
+				 for(int i=0; i<all_files.size(); i++)
+					distance[i].resize(5);
+				 */
+				 if (all_files.empty())	return;
+
 				 fstream output("result_auto.txt", ios::out);
 				// testVideoButton->Enabled = true;
 				// testImageButton->Enabled = true;
