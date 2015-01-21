@@ -20,10 +20,14 @@ public:
 	MyCV();
 	System::Drawing::Bitmap^ getBitmap();
 	System::Drawing::Bitmap^ getOtherBitmap(cv::Mat cvImage);
+	void detectSkin();
 	void HuMoment();
 	void calHistogram(int histSize, const float* histRange);
 	void detectSIFT();
 	void extractBOW();
+	void regionGrowing(int x, int y, int regionLabel);
+	void setROI(int regionLabel);
+	void regionCut();
 	void readImage(std::string fileName);
 	void readFrame(Mat frame);
 	void img_preproc();
@@ -42,6 +46,7 @@ private:
 	Mat skinImage;
 	Mat first_frame;
 	Mat siftDescriptor;
+	Mat regionMap;
 	vector<float> huVector;
 	vector<float> histVector;
 	vector<float> siftVector;

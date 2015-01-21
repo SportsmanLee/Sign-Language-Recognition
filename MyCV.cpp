@@ -68,30 +68,47 @@ System::Drawing::Bitmap^ MyCV::getOtherBitmap(Mat Image)
 	return bmpImage;
 }
 
-void MyCV::HuMoment()
+void MyCV::detectSkin()
 {
-	int thresh = 100;
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
 	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
-	Mat dst = Mat::zeros(cvImage.rows, cvImage.cols, CV_8UC3);
+	Mat resultImg = Mat::zeros(cvImage.size(), CV_8UC1);
 
-	Mat YImage;
-	skinImage.create(cvImage.size(), cvImage.type());
-	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
-	for (int x = 0; x < cvImage.rows; ++x)
+	Mat YCrCbImage;
+	vector<Mat> YCrCbMV;
+	cvtColor(cvImage, YCrCbImage, CV_BGR2YCrCb);
+	split(YCrCbImage, YCrCbMV);
+
+	int nRows = YCrCbMV[1].rows;
+    int nCols = YCrCbMV[1].cols * YCrCbMV[1].channels();
+    if (YCrCbMV[1].isContinuous()) {
+        nCols *= nRows;
+        nRows = 1;
+    }
+
+	uchar* CrPtr, * CbPtr;
+	uchar* resultPtr;
+	for (int x = 0; x < nRows; ++x)
 	{
-		for (int y = 0; y < cvImage.cols; ++y)
+		CrPtr = YCrCbMV[1].ptr<uchar>(x);	CbPtr = YCrCbMV[2].ptr<uchar>(x);
+		resultPtr = resultImg.ptr<uchar>(x);
+		for (int y = 0; y < nCols; ++y)
 		{
-			int Cr = YImage.at<Vec3b>(x, y).val[1], Cb = YImage.at<Vec3b>(x, y).val[2];
-
+			int Cr = CrPtr[y], Cb = CbPtr[y];
 			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
-				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
+				resultPtr[y] = 255;
 			else
-				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
+				resultPtr[y] = 0;
 		}
 	}
+
+	skinImage = resultImg;
+}
+
+void MyCV::HuMoment()
+{
 	Mat skinGray;
 	cvtColor(skinImage,skinGray,CV_RGB2GRAY);
 
@@ -174,34 +191,13 @@ void MyCV::detectSIFT()
 	SiftFeatureDetector detector(30, 3, 0.04, 10.0, 1.6f);
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
-
-	Mat YImage;
-	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
-	skinImage.create(cvImage.size(), CV_8UC3);
-
-	// Skin Detection
-	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
-	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
-	for (int x = 0; x < cvImage.rows; ++x)
-	{
-		for (int y = 0; y < cvImage.cols; ++y)
-		{
-			int Cr = YImage.at<Vec3b>(x, y).val[1], Cb = YImage.at<Vec3b>(x, y).val[2];
-
-			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
-				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
-			else
-				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
-		}
-	}
 	
 	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinImage, keypoints);
 	if (keypoints.empty()) {
-		while (keypoints.size() < 30) {
-			keypoints.push_back(KeyPoint());
-		}
+		// Debug
+		imshow("SIFT Empty!", skinImage);
+		waitKey();
 	}
 	while (keypoints.size() < 30) {
 		keypoints.push_back(keypoints[keypoints.size() - 1]);
@@ -230,33 +226,12 @@ void MyCV::extractBOW()
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
 
-	Mat YImage;
-	cvtColor(cvImage, YImage, CV_BGR2YCrCb);
-	skinImage = cvImage.clone();
-
-	// Skin Detection
-	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
-	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
-	for (int x = 0; x < cvImage.rows; ++x)
-	{
-		for (int y = 0; y < cvImage.cols; ++y)
-		{
-			int Cr = YImage.at<Vec3b>(x, y).val[1], Cb = YImage.at<Vec3b>(x, y).val[2];
-
-			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
-				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
-			else
-				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
-		}
-	}
-
 	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinImage, keypoints);
 	if (keypoints.empty()) {
-		while (keypoints.size() < 30) {
-			keypoints.push_back(KeyPoint());
-		}
+		// Debug
+		imshow("SIFT Empty!", skinImage);
+		waitKey();
 	}
 	while (keypoints.size() < 30) {
 		keypoints.push_back(keypoints[keypoints.size() - 1]);
@@ -274,6 +249,115 @@ void MyCV::extractBOW()
 			siftVector.push_back(siftDescriptor.ptr<float>(i)[j]);
 		}
 	}
+}
+
+// Dynamic Programming
+void MyCV::regionGrowing(int x, int y, int regionLabel)
+{
+	vector<cv::Point> checkList;
+	checkList.push_back(cv::Point(x, y));
+	Mat skinGray = skinImage.clone();	//cvtColor(skinImage, skinGray, CV_BGR2GRAY);
+
+	// candidates growing & set region labels
+	while (checkList.size() > 0) {
+		cv::Point candidate = checkList.front();
+		regionMap.ptr<ushort>(candidate.y)[candidate.x] = regionLabel;
+
+		for (int m = candidate.y - 1; m < candidate.y + 2; ++m) {
+				if (m < 1 || m >= skinGray.rows - 1)	continue;
+			for (int n = candidate.x - 1; n < candidate.x + 2; ++n) {
+				if (n < 1 || n >= skinGray.cols - 1)	continue;
+				if (m != candidate.y && n != candidate.x)	continue;
+
+				if (skinGray.ptr<uchar>(m)[n] > 10 && regionMap.ptr<ushort>(m)[n] == 0) {
+					//regionGrowing(n, m, regionLabel);	// Seed growing
+					cv::Point checkPoint(cv::Point(n, m));
+					bool isNew = true;
+					for (size_t j = 0; j < checkList.size(); ++j) {
+						if (checkPoint.x == checkList[j].x && checkPoint.y == checkList[j].y) {
+							isNew = false;
+							break;
+						}
+					}
+					if (isNew) {
+						checkList.push_back(cv::Point(n, m));
+					}
+				}
+			}
+		}
+
+		checkList.erase(checkList.begin());
+	}
+}
+
+void MyCV::setROI(int regionLabel)
+{
+	int upperBound = -1, lowerBound = -1, leftBound = -1, rightBound = -1;
+	int sumX = 0, sumY = 0;
+	int pixelCount = 0;
+	for (int i = 0; i < regionMap.rows; ++i) {
+		for (int j = 0; j < regionMap.cols; ++j) {
+			if (regionMap.ptr<ushort>(i)[j] == regionLabel) {
+				++pixelCount;
+				sumX += j;	sumY += i;
+				
+				if (upperBound == -1 || lowerBound == -1) {
+					upperBound = i;	lowerBound = i;
+				}
+				if (leftBound == -1 || rightBound == -1) {
+					leftBound = j;	rightBound = j;
+				}
+
+				if (i > lowerBound) {
+					lowerBound = i;
+				}
+				if (j < leftBound) {
+					leftBound = j;
+				}
+				if (j > rightBound) {
+					rightBound = j;
+				}
+			}
+		}
+	}
+
+	cv::Point tl(leftBound, upperBound), br(rightBound, lowerBound);
+	int height = lowerBound - upperBound, width = rightBound - leftBound;
+
+	Mat imageROI = cvImage(Rect(tl, br)).clone();
+	cvImage.release();	cvImage = imageROI;
+	skinImage.release();	skinImage = cvImage;
+}
+
+void MyCV::regionCut()
+{
+	Mat skinGray = skinImage.clone();
+	regionMap = Mat::zeros(skinGray.size(), CV_16U);
+	// Label Regions
+	int labelCount = 1, step = 8;
+	for (int i = step; i < skinGray.rows - 1; i += step) {
+		for (int j = step; j < skinGray.cols - 1; j += step) {
+			if (skinGray.ptr<uchar>(i)[j] > 10 && regionMap.ptr<ushort>(i)[j] == 0) {
+				regionGrowing(j, i, labelCount);	// Put a seed to grow
+				++labelCount;
+			}
+		}
+	}
+
+	int regionCount[256] = {0}, maxRegionIdx = 0, maxRegionNum;
+	for (int i = 1; i < regionMap.rows - 1; ++i) {
+		for (int j = 1; j < regionMap.cols - 1; ++j) {
+			++regionCount[regionMap.ptr<ushort>(i)[j]];
+		}
+	}
+	for (int i = 1; i < 256; ++i) {
+		if (maxRegionNum < regionCount[i]) {
+			maxRegionIdx = i;
+			maxRegionNum = regionCount[i];
+		}
+	}
+
+	setROI(maxRegionIdx);
 }
 
 void MyCV::img_preproc()
@@ -409,6 +493,7 @@ void MyCV::clear()
 	cvImage.release();
 	first_frame.release();
 	siftDescriptor.release();
+	histVector.clear();
 	huVector.clear();
 	siftVector.clear();
 }

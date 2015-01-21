@@ -70,6 +70,10 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::Button^  bagWordButton;
 	private: System::Windows::Forms::Button^  testBOWButton;
 	private: System::Windows::Forms::Button^  chooseVocButton;
+	private: System::Windows::Forms::GroupBox^  trainingGroupBox;
+	private: System::Windows::Forms::GroupBox^  processingGroupBox;
+	private: System::Windows::Forms::GroupBox^  testingGroupBox;
+
 
 
 	private:
@@ -85,6 +89,7 @@ namespace CWinFormOpenCV {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(WinForm::typeid));
 			this->originPictureBox = (gcnew System::Windows::Forms::PictureBox());
 			this->modelChooser = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->fileTextBox = (gcnew System::Windows::Forms::TextBox());
@@ -101,13 +106,19 @@ namespace CWinFormOpenCV {
 			this->bagWordButton = (gcnew System::Windows::Forms::Button());
 			this->testBOWButton = (gcnew System::Windows::Forms::Button());
 			this->chooseVocButton = (gcnew System::Windows::Forms::Button());
+			this->trainingGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->processingGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->testingGroupBox = (gcnew System::Windows::Forms::GroupBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
+			this->trainingGroupBox->SuspendLayout();
+			this->processingGroupBox->SuspendLayout();
+			this->testingGroupBox->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// originPictureBox
 			// 
 			this->originPictureBox->Enabled = false;
-			this->originPictureBox->Location = System::Drawing::Point(291, 65);
+			this->originPictureBox->Location = System::Drawing::Point(7, 65);
 			this->originPictureBox->Name = L"originPictureBox";
 			this->originPictureBox->Size = System::Drawing::Size(739, 457);
 			this->originPictureBox->SizeMode = System::Windows::Forms::PictureBoxSizeMode::CenterImage;
@@ -125,10 +136,10 @@ namespace CWinFormOpenCV {
 			// 
 			this->fileTextBox->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(255)), static_cast<System::Int32>(static_cast<System::Byte>(255)), 
 				static_cast<System::Int32>(static_cast<System::Byte>(192)));
-			this->fileTextBox->Location = System::Drawing::Point(12, 483);
+			this->fileTextBox->Location = System::Drawing::Point(7, 9);
 			this->fileTextBox->Multiline = true;
 			this->fileTextBox->Name = L"fileTextBox";
-			this->fileTextBox->Size = System::Drawing::Size(273, 39);
+			this->fileTextBox->Size = System::Drawing::Size(367, 50);
 			this->fileTextBox->TabIndex = 5;
 			// 
 			// modelTextBox
@@ -138,175 +149,247 @@ namespace CWinFormOpenCV {
 			this->modelTextBox->BorderStyle = System::Windows::Forms::BorderStyle::None;
 			this->modelTextBox->Font = (gcnew System::Drawing::Font(L"Consolas", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->modelTextBox->Location = System::Drawing::Point(291, 13);
+			this->modelTextBox->Location = System::Drawing::Point(379, 9);
 			this->modelTextBox->Multiline = true;
 			this->modelTextBox->Name = L"modelTextBox";
-			this->modelTextBox->Size = System::Drawing::Size(739, 50);
+			this->modelTextBox->Size = System::Drawing::Size(366, 50);
 			this->modelTextBox->TabIndex = 14;
 			// 
 			// truthButton
 			// 
+			this->truthButton->BackColor = System::Drawing::Color::Salmon;
+			this->truthButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->truthButton->Enabled = false;
+			this->truthButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->truthButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->truthButton->Location = System::Drawing::Point(41, 23);
+			this->truthButton->Location = System::Drawing::Point(6, 122);
 			this->truthButton->Name = L"truthButton";
 			this->truthButton->Size = System::Drawing::Size(213, 33);
 			this->truthButton->TabIndex = 9;
 			this->truthButton->Text = L"Ground Truth";
-			this->truthButton->UseVisualStyleBackColor = true;
+			this->truthButton->UseVisualStyleBackColor = false;
 			this->truthButton->Click += gcnew System::EventHandler(this, &WinForm::truthButton_Click);
 			// 
 			// falseButton
 			// 
+			this->falseButton->BackColor = System::Drawing::Color::Salmon;
+			this->falseButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->falseButton->Enabled = false;
+			this->falseButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->falseButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->falseButton->Location = System::Drawing::Point(41, 61);
+			this->falseButton->Location = System::Drawing::Point(6, 163);
 			this->falseButton->Name = L"falseButton";
 			this->falseButton->Size = System::Drawing::Size(213, 33);
 			this->falseButton->TabIndex = 10;
 			this->falseButton->Text = L"Ground False";
-			this->falseButton->UseVisualStyleBackColor = true;
+			this->falseButton->UseVisualStyleBackColor = false;
 			this->falseButton->Click += gcnew System::EventHandler(this, &WinForm::falseButton_Click);
 			// 
 			// trainButton
 			// 
+			this->trainButton->BackColor = System::Drawing::Color::Salmon;
+			this->trainButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->trainButton->Enabled = false;
+			this->trainButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->trainButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->trainButton->Location = System::Drawing::Point(41, 99);
+			this->trainButton->Location = System::Drawing::Point(6, 204);
 			this->trainButton->Name = L"trainButton";
 			this->trainButton->Size = System::Drawing::Size(213, 33);
 			this->trainButton->TabIndex = 11;
 			this->trainButton->Text = L"Train";
-			this->trainButton->UseVisualStyleBackColor = true;
+			this->trainButton->UseVisualStyleBackColor = false;
 			this->trainButton->Click += gcnew System::EventHandler(this, &WinForm::trainButton_Click);
 			// 
 			// testVideoButton
 			// 
+			this->testVideoButton->BackColor = System::Drawing::Color::LightSkyBlue;
+			this->testVideoButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->testVideoButton->Enabled = false;
+			this->testVideoButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->testVideoButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->testVideoButton->Location = System::Drawing::Point(41, 403);
+			this->testVideoButton->Location = System::Drawing::Point(6, 121);
 			this->testVideoButton->Name = L"testVideoButton";
 			this->testVideoButton->Size = System::Drawing::Size(213, 33);
 			this->testVideoButton->TabIndex = 12;
 			this->testVideoButton->Text = L"Test Video";
-			this->testVideoButton->UseVisualStyleBackColor = true;
+			this->testVideoButton->UseVisualStyleBackColor = false;
 			this->testVideoButton->Click += gcnew System::EventHandler(this, &WinForm::testVideoButton_Click);
 			// 
 			// modelButton
 			// 
+			this->modelButton->BackColor = System::Drawing::Color::LightSkyBlue;
+			this->modelButton->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->modelButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->modelButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->modelButton->Location = System::Drawing::Point(41, 365);
+			this->modelButton->Location = System::Drawing::Point(6, 39);
 			this->modelButton->Name = L"modelButton";
 			this->modelButton->Size = System::Drawing::Size(213, 33);
 			this->modelButton->TabIndex = 13;
 			this->modelButton->Text = L"Choose Model";
-			this->modelButton->UseVisualStyleBackColor = true;
+			this->modelButton->UseVisualStyleBackColor = false;
 			this->modelButton->Click += gcnew System::EventHandler(this, &WinForm::modelButton_Click);
 			// 
 			// videoTxtButton
 			// 
+			this->videoTxtButton->BackColor = System::Drawing::Color::PaleGreen;
+			this->videoTxtButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->videoTxtButton->Enabled = false;
+			this->videoTxtButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->videoTxtButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->videoTxtButton->Location = System::Drawing::Point(41, 289);
+			this->videoTxtButton->Location = System::Drawing::Point(7, 150);
 			this->videoTxtButton->Name = L"videoTxtButton";
 			this->videoTxtButton->Size = System::Drawing::Size(213, 33);
 			this->videoTxtButton->TabIndex = 15;
 			this->videoTxtButton->Text = L"Video to Text";
-			this->videoTxtButton->UseVisualStyleBackColor = true;
+			this->videoTxtButton->UseVisualStyleBackColor = false;
 			this->videoTxtButton->Click += gcnew System::EventHandler(this, &WinForm::videoTxtButton_Click);
 			// 
 			// testImageButton
 			// 
+			this->testImageButton->BackColor = System::Drawing::Color::LightSkyBlue;
+			this->testImageButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->testImageButton->Enabled = false;
+			this->testImageButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->testImageButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->testImageButton->Location = System::Drawing::Point(41, 441);
+			this->testImageButton->Location = System::Drawing::Point(6, 203);
 			this->testImageButton->Name = L"testImageButton";
 			this->testImageButton->Size = System::Drawing::Size(213, 33);
 			this->testImageButton->TabIndex = 16;
 			this->testImageButton->Text = L"Test Image";
-			this->testImageButton->UseVisualStyleBackColor = true;
+			this->testImageButton->UseVisualStyleBackColor = false;
 			this->testImageButton->Click += gcnew System::EventHandler(this, &WinForm::testImageButton_Click);
 			// 
 			// txtTrainButton
 			// 
+			this->txtTrainButton->BackColor = System::Drawing::Color::Salmon;
+			this->txtTrainButton->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->txtTrainButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->txtTrainButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->txtTrainButton->Location = System::Drawing::Point(41, 327);
+			this->txtTrainButton->Location = System::Drawing::Point(6, 81);
 			this->txtTrainButton->Name = L"txtTrainButton";
 			this->txtTrainButton->Size = System::Drawing::Size(213, 33);
 			this->txtTrainButton->TabIndex = 17;
 			this->txtTrainButton->Text = L"txt to train";
-			this->txtTrainButton->UseVisualStyleBackColor = true;
+			this->txtTrainButton->UseVisualStyleBackColor = false;
 			this->txtTrainButton->Click += gcnew System::EventHandler(this, &WinForm::txtTrainButton_Click);
 			// 
 			// imgTxtButton
 			// 
+			this->imgTxtButton->BackColor = System::Drawing::Color::PaleGreen;
+			this->imgTxtButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->imgTxtButton->Enabled = false;
+			this->imgTxtButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->imgTxtButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->imgTxtButton->Location = System::Drawing::Point(41, 251);
+			this->imgTxtButton->Location = System::Drawing::Point(6, 95);
 			this->imgTxtButton->Name = L"imgTxtButton";
 			this->imgTxtButton->Size = System::Drawing::Size(213, 33);
 			this->imgTxtButton->TabIndex = 18;
 			this->imgTxtButton->Text = L"get PCA , LDA";
-			this->imgTxtButton->UseVisualStyleBackColor = true;
+			this->imgTxtButton->UseVisualStyleBackColor = false;
 			this->imgTxtButton->Click += gcnew System::EventHandler(this, &WinForm::imgTxtButton_Click);
 			// 
 			// bagWordButton
 			// 
+			this->bagWordButton->BackColor = System::Drawing::Color::Salmon;
+			this->bagWordButton->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->bagWordButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->bagWordButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->bagWordButton->Location = System::Drawing::Point(41, 137);
+			this->bagWordButton->Location = System::Drawing::Point(6, 40);
 			this->bagWordButton->Name = L"bagWordButton";
 			this->bagWordButton->Size = System::Drawing::Size(213, 33);
 			this->bagWordButton->TabIndex = 19;
 			this->bagWordButton->Text = L"Train Bag of Words";
-			this->bagWordButton->UseVisualStyleBackColor = true;
+			this->bagWordButton->UseVisualStyleBackColor = false;
 			this->bagWordButton->Click += gcnew System::EventHandler(this, &WinForm::bagWordButton_Click);
 			// 
 			// testBOWButton
 			// 
+			this->testBOWButton->BackColor = System::Drawing::Color::PaleGreen;
+			this->testBOWButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->testBOWButton->Enabled = false;
+			this->testBOWButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->testBOWButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->testBOWButton->Location = System::Drawing::Point(41, 213);
+			this->testBOWButton->Location = System::Drawing::Point(6, 205);
 			this->testBOWButton->Name = L"testBOWButton";
 			this->testBOWButton->Size = System::Drawing::Size(213, 33);
 			this->testBOWButton->TabIndex = 20;
 			this->testBOWButton->Text = L"Test BOW";
-			this->testBOWButton->UseVisualStyleBackColor = true;
+			this->testBOWButton->UseVisualStyleBackColor = false;
 			this->testBOWButton->Click += gcnew System::EventHandler(this, &WinForm::testBOWButton_Click);
 			// 
 			// chooseVocButton
 			// 
+			this->chooseVocButton->BackColor = System::Drawing::Color::PaleGreen;
+			this->chooseVocButton->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->chooseVocButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->chooseVocButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->chooseVocButton->Location = System::Drawing::Point(41, 175);
+			this->chooseVocButton->Location = System::Drawing::Point(6, 40);
 			this->chooseVocButton->Name = L"chooseVocButton";
 			this->chooseVocButton->Size = System::Drawing::Size(213, 33);
 			this->chooseVocButton->TabIndex = 21;
 			this->chooseVocButton->Text = L"Choose Vocabulary";
-			this->chooseVocButton->UseVisualStyleBackColor = true;
+			this->chooseVocButton->UseVisualStyleBackColor = false;
 			this->chooseVocButton->Click += gcnew System::EventHandler(this, &WinForm::chooseVocButton_Click);
+			// 
+			// trainingGroupBox
+			// 
+			this->trainingGroupBox->Controls->Add(this->truthButton);
+			this->trainingGroupBox->Controls->Add(this->falseButton);
+			this->trainingGroupBox->Controls->Add(this->trainButton);
+			this->trainingGroupBox->Controls->Add(this->txtTrainButton);
+			this->trainingGroupBox->Controls->Add(this->bagWordButton);
+			this->trainingGroupBox->Font = (gcnew System::Drawing::Font(L"Consolas", 15.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->trainingGroupBox->Location = System::Drawing::Point(7, 528);
+			this->trainingGroupBox->Name = L"trainingGroupBox";
+			this->trainingGroupBox->Size = System::Drawing::Size(225, 256);
+			this->trainingGroupBox->TabIndex = 22;
+			this->trainingGroupBox->TabStop = false;
+			this->trainingGroupBox->Text = L"Training";
+			// 
+			// processingGroupBox
+			// 
+			this->processingGroupBox->Controls->Add(this->chooseVocButton);
+			this->processingGroupBox->Controls->Add(this->imgTxtButton);
+			this->processingGroupBox->Controls->Add(this->testBOWButton);
+			this->processingGroupBox->Controls->Add(this->videoTxtButton);
+			this->processingGroupBox->Font = (gcnew System::Drawing::Font(L"Consolas", 15.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->processingGroupBox->Location = System::Drawing::Point(263, 528);
+			this->processingGroupBox->Name = L"processingGroupBox";
+			this->processingGroupBox->Size = System::Drawing::Size(226, 256);
+			this->processingGroupBox->TabIndex = 23;
+			this->processingGroupBox->TabStop = false;
+			this->processingGroupBox->Text = L"Processing";
+			// 
+			// testingGroupBox
+			// 
+			this->testingGroupBox->Controls->Add(this->modelButton);
+			this->testingGroupBox->Controls->Add(this->testVideoButton);
+			this->testingGroupBox->Controls->Add(this->testImageButton);
+			this->testingGroupBox->Font = (gcnew System::Drawing::Font(L"Consolas", 15.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->testingGroupBox->Location = System::Drawing::Point(520, 529);
+			this->testingGroupBox->Name = L"testingGroupBox";
+			this->testingGroupBox->Size = System::Drawing::Size(225, 255);
+			this->testingGroupBox->TabIndex = 24;
+			this->testingGroupBox->TabStop = false;
+			this->testingGroupBox->Text = L"Testing";
 			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1042, 534);
-			this->Controls->Add(this->chooseVocButton);
-			this->Controls->Add(this->testBOWButton);
-			this->Controls->Add(this->bagWordButton);
-			this->Controls->Add(this->imgTxtButton);
-			this->Controls->Add(this->txtTrainButton);
-			this->Controls->Add(this->testImageButton);
-			this->Controls->Add(this->videoTxtButton);
-			this->Controls->Add(this->modelButton);
-			this->Controls->Add(this->testVideoButton);
-			this->Controls->Add(this->trainButton);
-			this->Controls->Add(this->falseButton);
-			this->Controls->Add(this->truthButton);
+			this->ClientSize = System::Drawing::Size(753, 796);
+			this->Controls->Add(this->testingGroupBox);
+			this->Controls->Add(this->processingGroupBox);
+			this->Controls->Add(this->trainingGroupBox);
 			this->Controls->Add(this->fileTextBox);
 			this->Controls->Add(this->modelTextBox);
 			this->Controls->Add(this->originPictureBox);
@@ -314,6 +397,9 @@ namespace CWinFormOpenCV {
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
 			this->Text = L"WinForm";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->EndInit();
+			this->trainingGroupBox->ResumeLayout(false);
+			this->processingGroupBox->ResumeLayout(false);
+			this->testingGroupBox->ResumeLayout(false);
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -368,10 +454,13 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
-					 int histSize = 16;
+					 /*int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);
+					 w_opencv.calHistogram(histSize, histRange);*/
+
+					 w_opencv.detectSkin();
+					 w_opencv.regionCut();
 
 					 w_opencv.extractBOW();
 
@@ -381,7 +470,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -433,10 +522,13 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
-					 int histSize = 16;
+					 /*int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);
+					 w_opencv.calHistogram(histSize, histRange);*/
+
+					 w_opencv.detectSkin();
+					 w_opencv.regionCut();
 
 					 w_opencv.extractBOW();
 
@@ -446,7 +538,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 					 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -610,6 +702,9 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
+					 w_opencv.detectSkin();
+					 w_opencv.regionCut();
+
 					 //===========display on window==============
 					 // To avoid memory leakage
 					 delete originPictureBox->Image;
@@ -635,6 +730,8 @@ namespace CWinFormOpenCV {
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
+					 modelTextBox->Text = gcnew System::String(all_files[randImgIdx].c_str());
+					 modelTextBox->Refresh();
 					 //==========================================
 
 					 w_opencv.detectSIFT();
@@ -646,21 +743,10 @@ namespace CWinFormOpenCV {
 				 }
 
 				 // K Means & Training
-				 BOWKMeansTrainer bowTrainer(50);
+				 BOWKMeansTrainer bowTrainer(100);
 				 Mat vocabulary = bowTrainer.cluster(allDescriptors);
 
-				 FileStorage fs(path + "\\vocabulary_50.yaml", FileStorage::WRITE);
-				 if(fs.isOpened()) {
-					 fs << "vocabulary" << vocabulary;
-				 }
-				 fs.release();
-
-				 // K = 100
-				 vocabulary.release();
-				 BOWKMeansTrainer bowTrainer100(100);
-				 vocabulary = bowTrainer100.cluster(allDescriptors);
-
-				 fs.open(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
+				 FileStorage fs(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
 				 if(fs.isOpened()) {
 					 fs << "vocabulary" << vocabulary;
 				 }
@@ -735,8 +821,6 @@ namespace CWinFormOpenCV {
 				 w_opencv.clear();
 			 }
 			 // Read images from a folder & output feature vectors to text file.
-	
-
 	private: System::Void imgTxtButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 //==========img to text code========
 				 //vector<std::string> all_files = loadImgsFromFolder();
@@ -1058,6 +1142,7 @@ namespace CWinFormOpenCV {
 				 */
 				 if (all_files.empty())	return;
 
+				 namedWindow("debug");
 				 fstream output("result_auto.txt", ios::out);
 				// testVideoButton->Enabled = true;
 				// testImageButton->Enabled = true;
@@ -1073,93 +1158,97 @@ namespace CWinFormOpenCV {
 					 fileTextBox->Refresh();
 					 */
 					 //for(int i=0; i<all_files.size(); i++) {
-					 while(all_files.size() > 0) {
-						 w_opencv.readImage(all_files[0]);
+				 while(all_files.size() > 0) {
+					 w_opencv.readImage(all_files[0]);
 
-						 int histSize = 16;
-						 float range[] = { 0, 256 } ;
-						 const float* histRange = { range };
-						 w_opencv.calHistogram(histSize, histRange);
+					 /*int histSize = 16;
+					 float range[] = { 0, 256 } ;
+					 const float* histRange = { range };
+					 w_opencv.calHistogram(histSize, histRange);*/
 
-						 w_opencv.extractBOW();
+					 w_opencv.detectSkin();
+					 w_opencv.regionCut();
 
-						 w_opencv.HuMoment();
+					 w_opencv.extractBOW();
 
-						 w_fourier.image_process(w_opencv.getImage());
+					 w_opencv.HuMoment();
 
-						 vector< vector<float> > features;
-						 
-						 features.push_back(w_opencv.getHistVector());
-						 features.push_back(w_opencv.getHuVector());
-						 features.push_back(w_opencv.getSiftVector());
-						 features.push_back(w_fourier.get_vector());
+					 w_fourier.image_process(w_opencv.getImage());
 
-						 w_svm.concatenateTest(features);
+					 vector< vector<float> > features;
 
-						 float res = w_svm.testSVM();
-						 // distance[i][g_model] = res;
+					 //features.push_back(w_opencv.getHistVector());
+					 features.push_back(w_opencv.getHuVector());
+					 features.push_back(w_opencv.getSiftVector());
+					 features.push_back(w_fourier.get_vector());
 
-						 //===========display on window==============
-						 // To avoid memory leakage
-						 if(!originPictureBox->Image)
-							 delete originPictureBox->Image;
-						 Bitmap^ testImage;
-						 Bitmap^ resizeImage;
-						 try {
-							 testImage = w_opencv.getOtherBitmap(w_opencv.getSkinImage());
-							 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-								 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-								 originPictureBox->Image = resizeImage;
-							 }
-							 else {
-								 originPictureBox->Image = testImage;
-							 }
-							 originPictureBox->Refresh();
+					 w_svm.concatenateTest(features);
+
+					 float res = w_svm.testSVM();
+					 // distance[i][g_model] = res;
+
+					 //===========display on window==============
+					 // To avoid memory leakage
+					 if(!originPictureBox->Image)
+						 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getOtherBitmap(w_opencv.getSkinImage());
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
 						 }
-						 finally {
-							 delete testImage;
-							 delete resizeImage;
+						 else {
+							 originPictureBox->Image = testImage;
 						 }
-
-						 string message = std::to_string(all_files.size()) + " images left\t" + all_files[0] + '\t' + std::to_string(res);
-						 System::String^ string = gcnew System::String(message.c_str());
-						 fileTextBox->Text = string;
-						 fileTextBox->Refresh();
-						 //==========================================
-						 output << all_files[0] << " ";
-						 output << res << endl;
-						 
-						 features.clear();
-						 w_opencv.clear();
-						 w_fourier.clear_vector();
-						 all_files.erase(all_files.begin());
-						 w_svm.clear_testVector();
+						 originPictureBox->Refresh();
 					 }
-					 string message = "SVM Testing finish !!";
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
+					 }
+					 waitKey(10);
+
+					 string message = std::to_string(all_files.size()) + " images left\t" + all_files[0] + '\t' + std::to_string(res);
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
-					 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
-					 
-					 output.close();
-				/*
-				fstream output("5GROUP_result_auto.txt", ios::out);
-				
-				for(int i=0; i<all_files.size(); i++) {	
-					//int min=100,min_index=0;
-					output << all_files[i] << " ";
-					for(int g_model=0; g_model<5; g_model++) {
-						//if(min > distance[i][g_model]) {
-						//	min_index = g_model;
-						//	min = distance[i][g_model];
-						//}
-						output << distance[i][g_model] << " ";
-					}	
-					output << endl;
-					//output << min_index << endl;
-				}
-				output.close();
-				*/
+					 //==========================================
+					 output << all_files[0] << " ";
+					 output << res << endl;
+
+					 features.clear();
+					 w_opencv.clear();
+					 w_fourier.clear_vector();
+					 all_files.erase(all_files.begin());
+					 w_svm.clear_testVector();
+				 }
+				 string message = "SVM Testing finish !!";
+				 System::String^ string = gcnew System::String(message.c_str());
+				 fileTextBox->Text = string;
+				 fileTextBox->Refresh();
+				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
+
+				 output.close();
+				 /*
+				 fstream output("5GROUP_result_auto.txt", ios::out);
+
+				 for(int i=0; i<all_files.size(); i++) {	
+				 //int min=100,min_index=0;
+				 output << all_files[i] << " ";
+				 for(int g_model=0; g_model<5; g_model++) {
+				 //if(min > distance[i][g_model]) {
+				 //	min_index = g_model;
+				 //	min = distance[i][g_model];
+				 //}
+				 output << distance[i][g_model] << " ";
+				 }	
+				 output << endl;
+				 //output << min_index << endl;
+				 }
+				 output.close();
+				 */
 			 }
 };
 }

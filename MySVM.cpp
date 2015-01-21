@@ -320,7 +320,7 @@ float MySVM::testSVM()
 
 
 	
-	return SVM.predict(testImage, true); // test result 
+	return SVM.predict(testImage, false); // test result 
 }
 
 void MySVM::setModel(string filename)
