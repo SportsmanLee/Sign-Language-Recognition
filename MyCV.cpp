@@ -73,7 +73,7 @@ void MyCV::detectSkin()
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
 	Mat resultImg = Mat::zeros(cvImage.size(), CV_8UC1);
 
 	Mat YCrCbImage;
@@ -105,16 +105,17 @@ void MyCV::detectSkin()
 	}
 
 	skinImage = resultImg;
+	imshow("Skin", skinImage);
+	waitKey(10);
 }
 
 void MyCV::HuMoment()
 {
-	Mat skinGray;
-	cvtColor(skinImage,skinGray,CV_RGB2GRAY);
+	Mat skinGray = skinImage.clone();
 
-	for (int x = 0; x < cvImage.rows; ++x)
+	for (int x = 0; x < skinGray.rows; ++x)
 	{
-		for (int y = 0; y < cvImage.cols; ++y)
+		for (int y = 0; y < skinGray.cols; ++y)
 		{
 			if( skinGray.at<uchar>(x, y) > 0)
 				skinGray.at<uchar>(x, y) = 255;
@@ -344,7 +345,7 @@ void MyCV::regionCut()
 		}
 	}
 
-	int regionCount[256] = {0}, maxRegionIdx = 0, maxRegionNum;
+	int regionCount[256] = {0}, maxRegionIdx = 0, maxRegionNum = 0;
 	for (int i = 1; i < regionMap.rows - 1; ++i) {
 		for (int j = 1; j < regionMap.cols - 1; ++j) {
 			++regionCount[regionMap.ptr<ushort>(i)[j]];

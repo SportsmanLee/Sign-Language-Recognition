@@ -617,7 +617,7 @@ namespace CWinFormOpenCV {
 					 return ;
 				 }
 
-				 ofstream output("output.txt", ios::out);
+				 ofstream output(file.substr(0, file.find_last_of('\\')) + "\\output.txt", ios::out);
 				 int fn = 0;
 				 Mat frame;
 
@@ -642,6 +642,9 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.readFrame(frame);
 					 w_opencv.img_preproc();
+
+					 w_opencv.detectSkin();
+					 w_opencv.regionCut();
 
 					 //===========display on window==============
 					 Bitmap^ testImage = w_opencv.getBitmap();
