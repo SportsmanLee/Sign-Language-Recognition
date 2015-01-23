@@ -461,6 +461,7 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
+					 w_opencv.detectSkin();	// Update skinImage
 
 					 w_opencv.extractBOW();
 
@@ -483,7 +484,7 @@ namespace CWinFormOpenCV {
 					 Bitmap^ testImage;
 					 Bitmap^ resizeImage;
 					 try {
-						 testImage = w_opencv.getOtherBitmap(w_opencv.getSkinImage());
+						 testImage = w_opencv.getBitmap();
 						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
 							 originPictureBox->Image = resizeImage;
@@ -529,6 +530,7 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
+					 w_opencv.detectSkin();	// Update skinImage
 
 					 w_opencv.extractBOW();
 
@@ -551,7 +553,7 @@ namespace CWinFormOpenCV {
 					 Bitmap^ testImage;
 					 Bitmap^ resizeImage;
 					 try {
-						 testImage = w_opencv.getOtherBitmap(w_opencv.getSkinImage());
+						 testImage = w_opencv.getBitmap();
 						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
 							 originPictureBox->Image = resizeImage;
@@ -645,6 +647,7 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
+					 w_opencv.detectSkin();	// Update skinImage
 
 					 //===========display on window==============
 					 Bitmap^ testImage = w_opencv.getBitmap();
@@ -707,6 +710,7 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
+					 w_opencv.detectSkin();	// Update skinImage
 
 					 //===========display on window==============
 					 // To avoid memory leakage
@@ -749,7 +753,7 @@ namespace CWinFormOpenCV {
 				 BOWKMeansTrainer bowTrainer(100);
 				 Mat vocabulary = bowTrainer.cluster(allDescriptors);
 
-				 FileStorage fs(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
+				 FileStorage fs(path + "\\vocabulary_region_100.yaml", FileStorage::WRITE);
 				 if(fs.isOpened()) {
 					 fs << "vocabulary" << vocabulary;
 				 }
@@ -1171,6 +1175,7 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
+					 w_opencv.detectSkin();	// Update skinImage
 
 					 w_opencv.extractBOW();
 
@@ -1197,7 +1202,7 @@ namespace CWinFormOpenCV {
 					 Bitmap^ testImage;
 					 Bitmap^ resizeImage;
 					 try {
-						 testImage = w_opencv.getOtherBitmap(w_opencv.getSkinImage());
+						 testImage = w_opencv.getBitmap();
 						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
 							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
 							 originPictureBox->Image = resizeImage;
