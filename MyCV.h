@@ -35,6 +35,7 @@ public:
 	void setBOWExtractor(Mat vocabulary);
 	Mat getImage();
 	Mat getSkinImage();
+	Mat getRegionMap();
 	vector<float> getHuVector();
 	vector<float> getHistVector();
 	vector<float> getSiftVector();

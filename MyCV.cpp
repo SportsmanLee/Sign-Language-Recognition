@@ -113,17 +113,6 @@ void MyCV::HuMoment()
 {
 	Mat skinGray = skinImage.clone();
 
-	for (int x = 0; x < skinGray.rows; ++x)
-	{
-		for (int y = 0; y < skinGray.cols; ++y)
-		{
-			if( skinGray.at<uchar>(x, y) > 0)
-				skinGray.at<uchar>(x, y) = 255;
-			else
-				skinGray.at<uchar>(x, y) = 0;
-		}
-	}
-
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
 	cv::morphologyEx(skinGray, skinGray, cv::MORPH_DILATE, element);
 
@@ -193,11 +182,37 @@ void MyCV::detectSIFT()
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
 	
+	Mat skinColor(skinImage.size(), CV_8UC3, Scalar(0, 0, 0));
+
+	int nRows = skinImage.rows;
+    int nCols = skinImage.cols * skinImage.channels();
+    if (skinImage.isContinuous()) {
+        nCols *= nRows;
+        nRows = 1;
+    }
+	
+	// Reserve skin color pixels with a 3-channels Mat
+	uchar* skinPtr;
+	Vec3b* dstPtr, * originPtr;
+	for (int x = 0; x < nRows; ++x)
+	{
+		skinPtr = skinImage.ptr<uchar>(x);
+		dstPtr = skinColor.ptr<Vec3b>(x);
+		originPtr = cvImage.ptr<Vec3b>(x);
+		for (int y = 0; y < nCols; ++y)
+		{
+			if (skinPtr[y] > 10)
+				dstPtr[y] = originPtr[y];
+			else
+				dstPtr[y] = Vec3b(0, 0, 0);
+		}
+	}
+
 	// Detect SIFT keypoints & make sure the length of 30
-	detector.detect(skinImage, keypoints);
+	detector.detect(skinColor, keypoints);
 	if (keypoints.empty()) {
 		// Debug
-		imshow("SIFT Empty!", skinImage);
+		imshow("SIFT Empty!", skinColor);
 		waitKey();
 	}
 	while (keypoints.size() < 30) {
@@ -208,7 +223,7 @@ void MyCV::detectSIFT()
 	}
 	
 	// Extract the SIFT Descriptor
-	extractor.compute(skinImage, keypoints, siftDescriptor);
+	extractor.compute(skinColor, keypoints, siftDescriptor);
 
 	// Draw keypoints
 	/*Mat keypointsImg;
@@ -227,11 +242,37 @@ void MyCV::extractBOW()
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
 
+	Mat skinColor(skinImage.size(), CV_8UC3, Scalar(0, 0, 0));
+
+	int nRows = skinImage.rows;
+    int nCols = skinImage.cols * skinImage.channels();
+    if (skinImage.isContinuous()) {
+        nCols *= nRows;
+        nRows = 1;
+    }
+
+	// Reserve skin color pixels with a 3-channels Mat
+	uchar* skinPtr;
+	Vec3b* dstPtr, * originPtr;
+	for (int x = 0; x < nRows; ++x)
+	{
+		skinPtr = skinImage.ptr<uchar>(x);
+		dstPtr = skinColor.ptr<Vec3b>(x);
+		originPtr = cvImage.ptr<Vec3b>(x);
+		for (int y = 0; y < nCols; ++y)
+		{
+			if (skinPtr[y] > 10)
+				dstPtr[y] = originPtr[y];
+			else
+				dstPtr[y] = Vec3b(0, 0, 0);
+		}
+	}
+
 	// Detect SIFT keypoints & make sure the length of 30
-	detector.detect(skinImage, keypoints);
+	detector.detect(skinColor, keypoints);
 	if (keypoints.empty()) {
 		// Debug
-		imshow("SIFT Empty!", skinImage);
+		imshow("SIFT Empty!", skinColor);
 		waitKey();
 	}
 	while (keypoints.size() < 30) {
@@ -242,7 +283,7 @@ void MyCV::extractBOW()
 	}
 
 	// Extract the Bag-Of-Word
-	bowExtractor->compute(skinImage, keypoints, siftDescriptor);
+	bowExtractor->compute(skinColor, keypoints, siftDescriptor);
 
 	// Fill in the feature vector
 	for (int i = 0; i < siftDescriptor.rows; ++i) {
@@ -323,11 +364,8 @@ void MyCV::setROI(int regionLabel)
 	}
 
 	cv::Point tl(leftBound, upperBound), br(rightBound, lowerBound);
-	int height = lowerBound - upperBound, width = rightBound - leftBound;
-
 	Mat imageROI = cvImage(Rect(tl, br)).clone();
 	cvImage.release();	cvImage = imageROI;
-	skinImage.release();	skinImage = cvImage;
 }
 
 void MyCV::regionCut()
@@ -359,6 +397,11 @@ void MyCV::regionCut()
 	}
 
 	setROI(maxRegionIdx);
+	// Debug
+	cv::normalize(regionMap, regionMap, 0, 255, CV_MINMAX);
+	Mat debug; regionMap.convertTo(debug, CV_8UC1);
+	imshow("regionMap", debug);
+	waitKey(10);
 }
 
 void MyCV::img_preproc()
@@ -377,7 +420,7 @@ void MyCV::img_preproc()
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 16;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
 	
 	Mat FD,skinMask;;
 	Mat filtered_image(first_frame.size(), CV_8UC3, Scalar(0, 0, 0));
@@ -469,6 +512,11 @@ Mat MyCV::getSkinImage()
 	return skinImage;
 }
 
+Mat MyCV::getRegionMap()
+{
+	return regionMap;
+}
+
 vector<float> MyCV::getHistVector()
 {
 	return histVector;
@@ -492,8 +540,10 @@ Mat MyCV::getSiftDescriptor()
 void MyCV::clear()
 {
 	cvImage.release();
+	skinImage.release();
 	first_frame.release();
 	siftDescriptor.release();
+	regionMap.release();
 	histVector.clear();
 	huVector.clear();
 	siftVector.clear();
