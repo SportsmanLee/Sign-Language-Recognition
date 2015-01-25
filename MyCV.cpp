@@ -90,17 +90,17 @@ void MyCV::detectSkin()
 
 	uchar* CrPtr, * CbPtr;
 	uchar* resultPtr;
-	for (int x = 0; x < nRows; ++x)
+	for (int y = 0; y < nRows; ++y)
 	{
-		CrPtr = YCrCbMV[1].ptr<uchar>(x);	CbPtr = YCrCbMV[2].ptr<uchar>(x);
-		resultPtr = resultImg.ptr<uchar>(x);
-		for (int y = 0; y < nCols; ++y)
+		CrPtr = YCrCbMV[1].ptr<uchar>(y);	CbPtr = YCrCbMV[2].ptr<uchar>(y);
+		resultPtr = resultImg.ptr<uchar>(y);
+		for (int x = 0; x < nCols; ++x)
 		{
-			int Cr = CrPtr[y], Cb = CbPtr[y];
+			int Cr = CrPtr[x], Cb = CbPtr[x];
 			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
-				resultPtr[y] = 255;
+				resultPtr[x] = 255;
 			else
-				resultPtr[y] = 0;
+				resultPtr[x] = 0;
 		}
 	}
 
@@ -182,7 +182,8 @@ void MyCV::detectSIFT()
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
 	
-	Mat skinColor(skinImage.size(), CV_8UC3, Scalar(0, 0, 0));
+	Mat skinColor = cvImage.clone();
+	/*Mat skinColor(skinImage.size(), CV_8UC3, Scalar(0, 0, 0));
 
 	int nRows = skinImage.rows;
     int nCols = skinImage.cols * skinImage.channels();
@@ -194,19 +195,19 @@ void MyCV::detectSIFT()
 	// Reserve skin color pixels with a 3-channels Mat
 	uchar* skinPtr;
 	Vec3b* dstPtr, * originPtr;
-	for (int x = 0; x < nRows; ++x)
+	for (int y = 0; y < nRows; ++y)
 	{
-		skinPtr = skinImage.ptr<uchar>(x);
-		dstPtr = skinColor.ptr<Vec3b>(x);
-		originPtr = cvImage.ptr<Vec3b>(x);
-		for (int y = 0; y < nCols; ++y)
+		skinPtr = skinImage.ptr<uchar>(y);
+		dstPtr = skinColor.ptr<Vec3b>(y);
+		originPtr = cvImage.ptr<Vec3b>(y);
+		for (int x = 0; x < nCols; ++x)
 		{
-			if (skinPtr[y] > 10)
-				dstPtr[y] = originPtr[y];
+			if (skinPtr[x] > 10)
+				dstPtr[x] = originPtr[x];
 			else
-				dstPtr[y] = Vec3b(0, 0, 0);
+				dstPtr[x] = Vec3b(0, 0, 0);
 		}
-	}
+	}*/
 
 	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinColor, keypoints);
@@ -242,7 +243,8 @@ void MyCV::extractBOW()
 	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
 	vector<KeyPoint> keypoints;
 
-	Mat skinColor(skinImage.size(), CV_8UC3, Scalar(0, 0, 0));
+	Mat skinColor = cvImage.clone();
+	/*Mat skinColor(skinImage.size(), CV_8UC3, Scalar(0, 0, 0));
 
 	int nRows = skinImage.rows;
     int nCols = skinImage.cols * skinImage.channels();
@@ -254,19 +256,17 @@ void MyCV::extractBOW()
 	// Reserve skin color pixels with a 3-channels Mat
 	uchar* skinPtr;
 	Vec3b* dstPtr, * originPtr;
-	for (int x = 0; x < nRows; ++x)
-	{
-		skinPtr = skinImage.ptr<uchar>(x);
-		dstPtr = skinColor.ptr<Vec3b>(x);
-		originPtr = cvImage.ptr<Vec3b>(x);
-		for (int y = 0; y < nCols; ++y)
-		{
-			if (skinPtr[y] > 10)
-				dstPtr[y] = originPtr[y];
+	for (int y = 0; y < nRows; ++y) {
+		skinPtr = skinImage.ptr<uchar>(y);
+		dstPtr = skinColor.ptr<Vec3b>(y);
+		originPtr = cvImage.ptr<Vec3b>(y);
+		for (int x = 0; x < nCols; ++x)	{
+			if (skinPtr[x] > 10)
+				dstPtr[x] = originPtr[x];
 			else
-				dstPtr[y] = Vec3b(0, 0, 0);
+				dstPtr[x] = Vec3b(0, 0, 0);
 		}
-	}
+	}*/
 
 	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinColor, keypoints);
@@ -365,6 +365,15 @@ void MyCV::setROI(int regionLabel)
 
 	cv::Point tl(leftBound, upperBound), br(rightBound, lowerBound);
 	Mat imageROI = cvImage(Rect(tl, br)).clone();
+
+	// Reserve skin color pixels which have specific region label
+	for (int i = 0; i < imageROI.rows; ++i) {
+		for (int j = 0; j < imageROI.cols; ++j) {
+			if (regionMap.ptr<ushort>(tl.y + i)[tl.x + j] != regionLabel)
+				imageROI.ptr<Vec3b>(i)[j] = Vec3b(0, 0, 0);
+		}
+	}
+
 	cvImage.release();	cvImage = imageROI;
 }
 

@@ -713,7 +713,7 @@ namespace CWinFormOpenCV {
 					 w_opencv.detectSkin();	// Update skinImage
 
 					 // debug output
-					 imwrite("skin\\" + all_files[randImgIdx].substr(all_files[randImgIdx].find_last_of('\\') + 1) + "_region.jpg", w_opencv.getSkinImage());
+					 //imwrite("skin\\" + all_files[randImgIdx].substr(all_files[randImgIdx].find_last_of('\\') + 1) + "_region.jpg", w_opencv.getSkinImage());
 
 					 //===========display on window==============
 					 // To avoid memory leakage
