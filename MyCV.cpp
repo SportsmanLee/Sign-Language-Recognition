@@ -374,6 +374,9 @@ void MyCV::setROI(int regionLabel)
 		}
 	}
 
+	// Applying Gaussian blur
+	GaussianBlur( imageROI, imageROI, cv::Size(3, 3), 0, 0);
+
 	cvImage.release();	cvImage = imageROI;
 }
 
