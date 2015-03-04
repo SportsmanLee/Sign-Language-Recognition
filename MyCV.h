@@ -26,6 +26,7 @@ public:
 	void detectSIFT();
 	void extractBOW();
 	void regionGrowing(int x, int y, int regionLabel);
+	vector<cv::Point> contourGrowing(cv::Point seedPoint, Mat& borderMap);
 	void setROI(int regionLabel);
 	void regionCut();
 	void readImage(std::string fileName);

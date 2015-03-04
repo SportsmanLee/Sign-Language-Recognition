@@ -461,7 +461,6 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
-					 w_opencv.detectSkin();	// Update skinImage
 
 					 w_opencv.extractBOW();
 
@@ -530,7 +529,6 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
-					 w_opencv.detectSkin();	// Update skinImage
 
 					 w_opencv.extractBOW();
 
@@ -647,7 +645,6 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
-					 w_opencv.detectSkin();	// Update skinImage
 
 					 //===========display on window==============
 					 Bitmap^ testImage = w_opencv.getBitmap();
@@ -710,7 +707,6 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
-					 w_opencv.detectSkin();	// Update skinImage
 
 					 // debug output
 					 //imwrite("skin\\" + all_files[randImgIdx].substr(all_files[randImgIdx].find_last_of('\\') + 1) + "_region.jpg", w_opencv.getSkinImage());
@@ -1178,7 +1174,6 @@ namespace CWinFormOpenCV {
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
-					 w_opencv.detectSkin();	// Update skinImage
 
 					 w_opencv.extractBOW();
 

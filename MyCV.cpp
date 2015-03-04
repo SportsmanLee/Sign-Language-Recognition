@@ -73,7 +73,7 @@ void MyCV::detectSkin()
 	// Skin Detection
 	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
 	Mat resultImg = Mat::zeros(cvImage.size(), CV_8UC1);
 
 	Mat YCrCbImage;
@@ -322,7 +322,7 @@ void MyCV::regionGrowing(int x, int y, int regionLabel)
 						}
 					}
 					if (isNew) {
-						checkList.push_back(cv::Point(n, m));
+						checkList.push_back(checkPoint);
 					}
 				}
 			}
@@ -330,6 +330,53 @@ void MyCV::regionGrowing(int x, int y, int regionLabel)
 
 		checkList.erase(checkList.begin());
 	}
+}
+
+vector<cv::Point> MyCV::contourGrowing(cv::Point seedPoint, Mat& borderMap)
+{
+	vector<cv::Point> checkList;
+	vector<cv::Point> contour;
+	contour.push_back(seedPoint);
+	checkList.push_back(seedPoint);
+
+	while(checkList.size() > 0) {
+		cv::Point candidate = checkList.front();
+
+		for (int m = candidate.y - 1; m < candidate.y + 2; ++m) {
+				if (m < 1 || m >= borderMap.rows - 1)	continue;
+			for (int n = candidate.x - 1; n < candidate.x + 2; ++n) {
+				if (n < 1 || n >= borderMap.cols - 1)	continue;
+				if (m == candidate.y && n == candidate.x)	continue;
+
+				if (borderMap.ptr<uchar>(m)[n] > 10) {
+					cv::Point checkPoint(cv::Point(n, m));
+					bool isNew = true;
+					for (size_t j = 0; j < contour.size(); ++j) {
+						if (checkPoint.x == contour[j].x && checkPoint.y == contour[j].y) {
+							isNew = false;
+							break;
+						}
+					}
+					if (isNew) {	// 確認新輪廓點為哪一端並加入輪廓中
+						cv::Point head = contour.front(), tail = contour.back();
+						int distanceH = abs(head.x - checkPoint.x) + abs(head.y - checkPoint.y);
+						int distanceT = abs(tail.x - checkPoint.x) + abs(tail.y - checkPoint.y);
+						if (distanceH < distanceT) {
+							contour.insert(contour.begin(), checkPoint);
+						}
+						else {
+							contour.insert(contour.end(), checkPoint);
+						}
+						checkList.push_back(checkPoint);
+					}
+				}
+			}
+		}
+
+		checkList.erase(checkList.begin());
+	}
+
+	return contour;
 }
 
 void MyCV::setROI(int regionLabel)
@@ -377,6 +424,54 @@ void MyCV::setROI(int regionLabel)
 	// Applying Gaussian blur
 	GaussianBlur( imageROI, imageROI, cv::Size(3, 3), 0, 0);
 
+	cvImage.release();	cvImage = imageROI;
+
+	detectSkin();
+
+	Mat borderMap(skinImage.size(), CV_8UC1, Scalar(0));
+	for (int i = 1; i < borderMap.rows - 1; ++i) {
+		for (int j = 1; j < borderMap.cols - 1; ++j) {
+			int neighbor[2] = {0};
+			for (int m = i - 1; m < i + 2; ++m) {
+                for (int n = j - 1; n < j + 2; ++n) {
+					if (m == i && n == j)
+						continue;
+					if (regionMap.ptr<ushort>(tl.y + m)[tl.x + n] == regionLabel)
+						++neighbor[1];
+					else
+						++neighbor[0];
+				}
+			}
+			
+			if (neighbor[0] > 2 && neighbor[1] > 2) {
+				borderMap.ptr<uchar>(i)[j] = 255;
+			}
+		}
+	}
+	imshow("border", borderMap);
+	waitKey(10);
+
+	vector< vector<cv::Point> > contours;
+	for (int i = 1; i < borderMap.rows - 1; ++i) {
+		for (int j = 1; j < borderMap.cols - 1; ++j) {
+			if (borderMap.ptr<uchar>(i)[j] > 10) {
+				cv::Point checkPoint(j, i);
+				bool isNew = true;
+				for (size_t m = 0; m < contours.size(); ++m) {
+					for (size_t n = 0; n < contours[m].size(); ++n) {
+						if (checkPoint.x == contours[m][n].x && checkPoint.y == contours[m][n].y) {
+							isNew = false;
+							break;
+						}
+					}
+				}
+				if (isNew) {
+					contours.push_back(contourGrowing(checkPoint, borderMap));
+				}
+			}
+		}
+	}
+	
 	cvImage.release();	cvImage = imageROI;
 }
 
