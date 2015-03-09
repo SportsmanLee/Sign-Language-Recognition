@@ -376,7 +376,41 @@ vector<cv::Point> MyCV::contourGrowing(cv::Point seedPoint, Mat& borderMap)
 		checkList.erase(checkList.begin());
 	}
 
-	return contour;
+	if (contour.size() > 100) {
+		return contour;
+	}
+	else {
+		return vector<cv::Point>();
+	}
+}
+
+vector<double> MyCV::calcCurvature(vector<cv::Point>& contour)
+{
+	// 只取第5個輪廓點至倒數第5個輪廓點計算曲率。
+	const int k = 5;
+	vector<double> curvature(5, 0.0);
+	for (int i = k; i < (int)contour.size() - k; ++i) {
+		cv::Point a(contour[i].x - contour[i + k].x, contour[i].y - contour[i + k].y);
+		cv::Point b(contour[i].x - contour[i - k].x, contour[i].y - contour[i - k].y);
+		
+		double c = (a.x * b.x + a.y * b.y) / (sqrt(a.x * a.x + a.y * a.y) * sqrt(b.x * b.x + b.y * b.y));
+		curvature.push_back(c);
+	}
+
+	curvature.insert(curvature.end(), 5, 0.0);
+
+	// display curvature histogram
+	vector<double> n_curvature(curvature);
+	Mat histImage(400, n_curvature.size() * 2, CV_8UC3, Scalar(0,0,0));
+	normalize(n_curvature, n_curvature, 0, histImage.rows, NORM_MINMAX, -1, Mat());
+	for (int i = 1; i < n_curvature.size(); ++i) {
+		line(histImage, cv::Point(2 * (i - 1), 400 - cvRound(n_curvature[i - 1])) ,
+			cv::Point(2 * i, 400 - cvRound(n_curvature[i])), Scalar(0, 0, 255), 1, 8, 0);
+	}
+	imshow("curvature", histImage);
+	waitKey(0);
+
+	return curvature;
 }
 
 void MyCV::setROI(int regionLabel)
@@ -443,7 +477,7 @@ void MyCV::setROI(int regionLabel)
 				}
 			}
 			
-			if (neighbor[0] > 2 && neighbor[1] > 2) {
+			if (neighbor[0] > 1 && neighbor[1] > 1) {
 				borderMap.ptr<uchar>(i)[j] = 255;
 			}
 		}
@@ -452,6 +486,7 @@ void MyCV::setROI(int regionLabel)
 	waitKey(10);
 
 	vector< vector<cv::Point> > contours;
+	vector< vector<double> > curvatures;
 	for (int i = 1; i < borderMap.rows - 1; ++i) {
 		for (int j = 1; j < borderMap.cols - 1; ++j) {
 			if (borderMap.ptr<uchar>(i)[j] > 10) {
@@ -467,6 +502,7 @@ void MyCV::setROI(int regionLabel)
 				}
 				if (isNew) {
 					contours.push_back(contourGrowing(checkPoint, borderMap));
+					curvatures.push_back(calcCurvature(contours.back()));
 				}
 			}
 		}

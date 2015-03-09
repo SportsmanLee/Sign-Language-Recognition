@@ -68,7 +68,8 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::Button^  txtTrainButton;
 	private: System::Windows::Forms::Button^  imgTxtButton;
 	private: System::Windows::Forms::Button^  bagWordButton;
-	private: System::Windows::Forms::Button^  testBOWButton;
+	private: System::Windows::Forms::Button^  testCurButton;
+
 	private: System::Windows::Forms::Button^  chooseVocButton;
 	private: System::Windows::Forms::GroupBox^  trainingGroupBox;
 	private: System::Windows::Forms::GroupBox^  processingGroupBox;
@@ -89,7 +90,6 @@ namespace CWinFormOpenCV {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(WinForm::typeid));
 			this->originPictureBox = (gcnew System::Windows::Forms::PictureBox());
 			this->modelChooser = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->fileTextBox = (gcnew System::Windows::Forms::TextBox());
@@ -104,7 +104,7 @@ namespace CWinFormOpenCV {
 			this->txtTrainButton = (gcnew System::Windows::Forms::Button());
 			this->imgTxtButton = (gcnew System::Windows::Forms::Button());
 			this->bagWordButton = (gcnew System::Windows::Forms::Button());
-			this->testBOWButton = (gcnew System::Windows::Forms::Button());
+			this->testCurButton = (gcnew System::Windows::Forms::Button());
 			this->chooseVocButton = (gcnew System::Windows::Forms::Button());
 			this->trainingGroupBox = (gcnew System::Windows::Forms::GroupBox());
 			this->processingGroupBox = (gcnew System::Windows::Forms::GroupBox());
@@ -308,20 +308,19 @@ namespace CWinFormOpenCV {
 			this->bagWordButton->UseVisualStyleBackColor = false;
 			this->bagWordButton->Click += gcnew System::EventHandler(this, &WinForm::bagWordButton_Click);
 			// 
-			// testBOWButton
+			// testCurButton
 			// 
-			this->testBOWButton->BackColor = System::Drawing::Color::PaleGreen;
-			this->testBOWButton->Cursor = System::Windows::Forms::Cursors::Hand;
-			this->testBOWButton->Enabled = false;
-			this->testBOWButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
-			this->testBOWButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->testBOWButton->Location = System::Drawing::Point(6, 205);
-			this->testBOWButton->Name = L"testBOWButton";
-			this->testBOWButton->Size = System::Drawing::Size(213, 33);
-			this->testBOWButton->TabIndex = 20;
-			this->testBOWButton->Text = L"Test BOW";
-			this->testBOWButton->UseVisualStyleBackColor = false;
-			this->testBOWButton->Click += gcnew System::EventHandler(this, &WinForm::testBOWButton_Click);
+			this->testCurButton->BackColor = System::Drawing::Color::PaleGreen;
+			this->testCurButton->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->testCurButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
+			this->testCurButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
+			this->testCurButton->Location = System::Drawing::Point(6, 205);
+			this->testCurButton->Name = L"testCurButton";
+			this->testCurButton->Size = System::Drawing::Size(213, 33);
+			this->testCurButton->TabIndex = 20;
+			this->testCurButton->Text = L"Test Curvature";
+			this->testCurButton->UseVisualStyleBackColor = false;
+			this->testCurButton->Click += gcnew System::EventHandler(this, &WinForm::testCurButton_Click);
 			// 
 			// chooseVocButton
 			// 
@@ -357,7 +356,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->processingGroupBox->Controls->Add(this->chooseVocButton);
 			this->processingGroupBox->Controls->Add(this->imgTxtButton);
-			this->processingGroupBox->Controls->Add(this->testBOWButton);
+			this->processingGroupBox->Controls->Add(this->testCurButton);
 			this->processingGroupBox->Controls->Add(this->videoTxtButton);
 			this->processingGroupBox->Font = (gcnew System::Drawing::Font(L"Consolas", 15.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
@@ -791,7 +790,6 @@ namespace CWinFormOpenCV {
 
 				 truthButton->Enabled = true;
 				 falseButton->Enabled = true;
-				 testBOWButton->Enabled = true;
 				 imgTxtButton->Enabled = true;
 				 videoTxtButton->Enabled = true;
 				 if (modelChooser->CheckFileExists == true) {
@@ -799,7 +797,7 @@ namespace CWinFormOpenCV {
 					 testVideoButton->Enabled = true;
 				 }
 			 }
-	private: System::Void testBOWButton_Click(System::Object^  sender, System::EventArgs^  e) {
+	private: System::Void testCurButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
 				 openFileDialog1->Filter = "Image File (*.jpg,*.bmp)|*.jpg;*.bmp;*.*";
 				 openFileDialog1->Title = "¶}±Ò¼v¹³";
@@ -811,18 +809,29 @@ namespace CWinFormOpenCV {
 				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
 				 w_opencv.readImage(file);
 
-				 Bitmap^ testImage = w_opencv.getBitmap();
-				 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-					 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-					 originPictureBox->Image = resizeImage;
+				 w_opencv.detectSkin();
+				 w_opencv.regionCut();
+
+				 //===========display on window==============
+				 // To avoid memory leakage
+				 delete originPictureBox->Image;
+				 Bitmap^ testImage;
+				 Bitmap^ resizeImage;
+				 try {
+					 testImage = w_opencv.getBitmap();
+					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+						 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+						 originPictureBox->Image = resizeImage;
+					 }
+					 else {
+						 originPictureBox->Image = testImage;
+					 }
+					 originPictureBox->Refresh();
 				 }
-				 else {
-					 originPictureBox->Image = testImage;
+				 finally {
+					 delete testImage;
+					 delete resizeImage;
 				 }
-				 originPictureBox->Refresh();
-				 
-				 // Extract Bag of Words
-				 w_opencv.extractBOW();
 
 				 w_opencv.clear();
 			 }
