@@ -453,10 +453,10 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
-					 /*int histSize = 16;
+					 int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);*/
+					 w_opencv.calHistogram(histSize, histRange);
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
@@ -469,7 +469,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 //features.push_back(w_opencv.getHistVector());
+					 features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -521,10 +521,10 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
-					 /*int histSize = 16;
+					 int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);*/
+					 w_opencv.calHistogram(histSize, histRange);
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
@@ -537,7 +537,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 					 
-					 //features.push_back(w_opencv.getHistVector());
+					 features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -751,7 +751,7 @@ namespace CWinFormOpenCV {
 				 BOWKMeansTrainer bowTrainer(100);
 				 Mat vocabulary = bowTrainer.cluster(allDescriptors);
 
-				 FileStorage fs(path + "\\vocabulary_region_100.yaml", FileStorage::WRITE);
+				 FileStorage fs(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
 				 if(fs.isOpened()) {
 					 fs << "vocabulary" << vocabulary;
 				 }

@@ -32,7 +32,6 @@ public:
 	void regionCut();
 	void readImage(std::string fileName);
 	void readFrame(Mat frame);
-	void img_preproc();
 	void set_bg_frame();
 	void setBOWExtractor(Mat vocabulary);
 	Mat getImage();

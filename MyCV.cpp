@@ -71,7 +71,7 @@ System::Drawing::Bitmap^ MyCV::getOtherBitmap(Mat Image)
 void MyCV::detectSkin()
 {
 	// Skin Detection
-	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
+	int avg_cb = 110;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
 	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
 	Mat resultImg = Mat::zeros(cvImage.size(), CV_8UC1);
@@ -134,17 +134,14 @@ void MyCV::HuMoment()
 		drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
     }
 	*/
-	/// Get the moments
-	vector<Moments> mu(contours.size() );
-    mu[0] = moments( contours[0], false ); 
+	int maxIdx = 0;
+	for (size_t i = 0; i < contours.size(); ++i) {
+		if (contours[maxIdx].size() < contours[i].size()) {
+			maxIdx = i;
+		}
+	}
 
-	/* //計算質心
-	vector<Point2f> mc( contours.size() );
-	for( int i = 0; i < contours.size(); i++ )
-      mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
-	*/
-
-	cv::Moments mom = cv::moments(contours[0]); 
+	cv::Moments mom = cv::moments(contours[maxIdx]); 
 	double hu[7];
 	cv::HuMoments(mom, hu);
 	
@@ -332,7 +329,7 @@ void MyCV::regionGrowing(int x, int y, int regionLabel)
 	}
 }
 
-vector<cv::Point> MyCV::contourGrowing(cv::Point seedPoint, Mat& borderMap)
+/*vector<cv::Point> MyCV::contourGrowing(cv::Point seedPoint, Mat& borderMap)
 {
 	vector<cv::Point> checkList;
 	vector<cv::Point> contour;
@@ -411,7 +408,7 @@ vector<double> MyCV::calcCurvature(vector<cv::Point>& contour)
 	waitKey(0);
 
 	return curvature;
-}
+}*/
 
 void MyCV::setROI(int regionLabel)
 {
@@ -443,6 +440,11 @@ void MyCV::setROI(int regionLabel)
 			}
 		}
 	}
+	// expand the bounding box slightly
+	leftBound = (leftBound - 3) < 0 ? 0 : (leftBound - 3);
+	upperBound = (upperBound - 3) < 0 ? 0 : (upperBound - 3);
+	rightBound = (rightBound + 3) >= regionMap.cols ? (regionMap.cols - 1) : (rightBound + 3);
+	lowerBound = (lowerBound + 3) >= regionMap.rows ? (regionMap.rows - 1) : (lowerBound + 3);
 
 	cv::Point tl(leftBound, upperBound), br(rightBound, lowerBound);
 	Mat imageROI = cvImage(Rect(tl, br)).clone();
@@ -459,56 +461,7 @@ void MyCV::setROI(int regionLabel)
 	GaussianBlur( imageROI, imageROI, cv::Size(3, 3), 0, 0);
 
 	cvImage.release();	cvImage = imageROI;
-
 	detectSkin();
-
-	Mat borderMap(skinImage.size(), CV_8UC1, Scalar(0));
-	for (int i = 1; i < borderMap.rows - 1; ++i) {
-		for (int j = 1; j < borderMap.cols - 1; ++j) {
-			int neighbor[2] = {0};
-			for (int m = i - 1; m < i + 2; ++m) {
-                for (int n = j - 1; n < j + 2; ++n) {
-					if (m == i && n == j)
-						continue;
-					if (regionMap.ptr<ushort>(tl.y + m)[tl.x + n] == regionLabel)
-						++neighbor[1];
-					else
-						++neighbor[0];
-				}
-			}
-			
-			if (neighbor[0] > 1 && neighbor[1] > 1) {
-				borderMap.ptr<uchar>(i)[j] = 255;
-			}
-		}
-	}
-	imshow("border", borderMap);
-	waitKey(10);
-
-	vector< vector<cv::Point> > contours;
-	vector< vector<double> > curvatures;
-	for (int i = 1; i < borderMap.rows - 1; ++i) {
-		for (int j = 1; j < borderMap.cols - 1; ++j) {
-			if (borderMap.ptr<uchar>(i)[j] > 10) {
-				cv::Point checkPoint(j, i);
-				bool isNew = true;
-				for (size_t m = 0; m < contours.size(); ++m) {
-					for (size_t n = 0; n < contours[m].size(); ++n) {
-						if (checkPoint.x == contours[m][n].x && checkPoint.y == contours[m][n].y) {
-							isNew = false;
-							break;
-						}
-					}
-				}
-				if (isNew) {
-					contours.push_back(contourGrowing(checkPoint, borderMap));
-					curvatures.push_back(calcCurvature(contours.back()));
-				}
-			}
-		}
-	}
-	
-	cvImage.release();	cvImage = imageROI;
 }
 
 void MyCV::regionCut()
@@ -539,89 +492,24 @@ void MyCV::regionCut()
 		}
 	}
 
-	setROI(maxRegionIdx);
+	/*setROI(maxRegionIdx);
 	// Debug
 	cv::normalize(regionMap, regionMap, 0, 255, CV_MINMAX);
 	Mat debug; regionMap.convertTo(debug, CV_8UC1);
 	imshow("regionMap", debug);
-	waitKey(10);
-}
-
-void MyCV::img_preproc()
-{
-	/*================================================
-	Use the third frame as the background frame(BG), in case the frames are blurred at the beginning
-	
-	Do Frame-Difference using frame(now) and BG
-	Convert the result into gray image(FD)
-	Do thresholding to FD, if the pixel value > threshold, fill in the original pixel value
-	Do skin-color detection to FD
-	Then do morphological operation to denoise
-	Thresholding again, and fill in original pixel value to get a clear image
-	================================================*/
-
-	// Skin Detection
-	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
-	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 18;  //YCbCr顏色空間膚色的範圍
-	
-	Mat FD,skinMask;;
-	Mat filtered_image(first_frame.size(), CV_8UC3, Scalar(0, 0, 0));
-
-	absdiff(cvImage,first_frame,filtered_image);
-		
-	cvtColor(filtered_image,FD,CV_RGB2GRAY);
-	for (int x = 0; x < FD.rows; ++x)
-	{
-		for (int y = 0; y < FD.cols; ++y)
-		{
-			if(FD.at<uchar>(x,y) > 20)
-				filtered_image.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
-			else
-				filtered_image.at<Vec3b>(x, y) = Vec3b(0,0,0);
+	waitKey(10);*/
+	// Reserve skin color pixels which have specific region label
+	for (int i = 0; i < cvImage.rows; ++i) {
+		for (int j = 0; j < cvImage.cols; ++j) {
+			if (regionMap.ptr<ushort>(i)[j] != maxRegionIdx)
+				cvImage.ptr<Vec3b>(i)[j] = Vec3b(0, 0, 0);
 		}
 	}
-	//imshow("filtered_image", filtered_image);
-		
-	Mat YImage, skinImage(cvImage.size(), CV_8UC3, Scalar(0, 0, 0));
-	cvtColor(filtered_image, YImage, CV_BGR2YCrCb);
-	for (int x = 0; x < cvImage.rows; ++x)
-	{
-		for (int y = 0; y < cvImage.cols; ++y)
-		{
-			int Cr = YImage.at<Vec3b>(x, y).val[1], Cb = YImage.at<Vec3b>(x, y).val[2];
 
-			if((Cb > avg_cb-skinRange && Cb < avg_cb+skinRange) && (Cr > avg_cr-skinRange && Cr < avg_cr+skinRange))
-				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
-			else
-				skinImage.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
-		}
-	}
-	/*
-	//get the frame number and write it on the current frame
-    rectangle(first_frame, cv::Point(10, 2), cv::Point(100,20),cv::Scalar(255,255,255), -1);
-	std::string frameNumberString = std::to_string(fn++);
-    putText(first_frame, frameNumberString.c_str(), cv::Point(15, 15),FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
-	*/
+	// Applying Gaussian blur
+	GaussianBlur( cvImage, cvImage, cv::Size(3, 3), 0, 0);
 
-	//morphological operation
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
-	cv::morphologyEx(skinImage, skinImage, cv::MORPH_ELLIPSE, element);
-	cv::morphologyEx(skinImage, skinImage, cv::MORPH_DILATE, element);
-
-	cvtColor(skinImage, skinMask, CV_RGB2GRAY);
-
-	for (int x = 0; x < skinImage.rows; ++x)
-	{
-		for (int y = 0; y < skinImage.cols; ++y)
-		{
-			if(skinMask.at<uchar>(x,y) > 0)
-				skinImage.at<Vec3b>(x, y) = cvImage.at<Vec3b>(x, y);
-			else
-				skinImage.at<Vec3b>(x, y) = Vec3b(0,0,0);
-		}
-	}
-	cvImage = skinImage;
+	detectSkin();
 }
 
 void MyCV::setBOWExtractor(Mat vocabulary)
