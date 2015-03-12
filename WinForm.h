@@ -640,7 +640,6 @@ namespace CWinFormOpenCV {
 						 break;
 
 					 w_opencv.readFrame(frame);
-					 w_opencv.img_preproc();
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
@@ -761,7 +760,7 @@ namespace CWinFormOpenCV {
 			 }
 	private: System::Void chooseVocButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
-				 openFileDialog1->Filter = "Vocabulary File (*.yaml,*.*)|*.yaml;*.*";
+				 openFileDialog1->Filter = "Vocabulary File (*.yaml)|*.yaml";
 				 openFileDialog1->Title = "選擇Vocabulary";
 
 				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
@@ -998,7 +997,6 @@ namespace CWinFormOpenCV {
 					 }
 
 					 w_opencv.readFrame(frame);
-					 w_opencv.img_preproc();
 					 w_opencv.detectSIFT();
 
 					 w_opencv.HuMoment();
@@ -1157,7 +1155,6 @@ namespace CWinFormOpenCV {
 				 */
 				 if (all_files.empty())	return;
 
-				 namedWindow("debug");
 				 fstream output("result_auto.txt", ios::out);
 				// testVideoButton->Enabled = true;
 				// testImageButton->Enabled = true;
@@ -1176,11 +1173,11 @@ namespace CWinFormOpenCV {
 				 while(all_files.size() > 0) {
 					 w_opencv.readImage(all_files[0]);
 
-					 /*int histSize = 16;
+					 int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);*/
-
+					 w_opencv.calHistogram(histSize, histRange);
+					 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
 
@@ -1192,7 +1189,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 //features.push_back(w_opencv.getHistVector());
+					 features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());

@@ -288,6 +288,8 @@ void MyCV::extractBOW()
 			siftVector.push_back(siftDescriptor.ptr<float>(i)[j]);
 		}
 	}
+
+	normalize(siftVector, siftVector, 0, 1, CV_MINMAX);
 }
 
 // Dynamic Programming
