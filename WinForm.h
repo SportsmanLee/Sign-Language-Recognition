@@ -8,6 +8,13 @@
 #include <sstream>
 #include <msclr/marshal_cppstd.h>
 
+#define array_size 5
+#define diff_threshold 0.0003
+#define move_threshold 0.008
+#define stable_threshold 0.0009
+#define background_threshold 0.0055
+
+
 extern MyCV w_opencv;
 extern fourier w_fourier;
 extern MySVM w_svm;
@@ -68,12 +75,13 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::Button^  txtTrainButton;
 	private: System::Windows::Forms::Button^  imgTxtButton;
 	private: System::Windows::Forms::Button^  bagWordButton;
-	private: System::Windows::Forms::Button^  testCurButton;
-
+	private: System::Windows::Forms::Button^  testBOWButton;
 	private: System::Windows::Forms::Button^  chooseVocButton;
 	private: System::Windows::Forms::GroupBox^  trainingGroupBox;
 	private: System::Windows::Forms::GroupBox^  processingGroupBox;
 	private: System::Windows::Forms::GroupBox^  testingGroupBox;
+	private: System::Windows::Forms::Button^  RealTimeButton;
+
 
 
 
@@ -104,11 +112,12 @@ namespace CWinFormOpenCV {
 			this->txtTrainButton = (gcnew System::Windows::Forms::Button());
 			this->imgTxtButton = (gcnew System::Windows::Forms::Button());
 			this->bagWordButton = (gcnew System::Windows::Forms::Button());
-			this->testCurButton = (gcnew System::Windows::Forms::Button());
+			this->testBOWButton = (gcnew System::Windows::Forms::Button());
 			this->chooseVocButton = (gcnew System::Windows::Forms::Button());
 			this->trainingGroupBox = (gcnew System::Windows::Forms::GroupBox());
 			this->processingGroupBox = (gcnew System::Windows::Forms::GroupBox());
 			this->testingGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->RealTimeButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->trainingGroupBox->SuspendLayout();
 			this->processingGroupBox->SuspendLayout();
@@ -211,7 +220,7 @@ namespace CWinFormOpenCV {
 			this->testVideoButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->testVideoButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->testVideoButton->Location = System::Drawing::Point(6, 121);
+			this->testVideoButton->Location = System::Drawing::Point(6, 94);
 			this->testVideoButton->Name = L"testVideoButton";
 			this->testVideoButton->Size = System::Drawing::Size(213, 33);
 			this->testVideoButton->TabIndex = 12;
@@ -257,7 +266,7 @@ namespace CWinFormOpenCV {
 			this->testImageButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->testImageButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->testImageButton->Location = System::Drawing::Point(6, 203);
+			this->testImageButton->Location = System::Drawing::Point(6, 149);
 			this->testImageButton->Name = L"testImageButton";
 			this->testImageButton->Size = System::Drawing::Size(213, 33);
 			this->testImageButton->TabIndex = 16;
@@ -308,19 +317,20 @@ namespace CWinFormOpenCV {
 			this->bagWordButton->UseVisualStyleBackColor = false;
 			this->bagWordButton->Click += gcnew System::EventHandler(this, &WinForm::bagWordButton_Click);
 			// 
-			// testCurButton
+			// testBOWButton
 			// 
-			this->testCurButton->BackColor = System::Drawing::Color::PaleGreen;
-			this->testCurButton->Cursor = System::Windows::Forms::Cursors::Hand;
-			this->testCurButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
-			this->testCurButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
-			this->testCurButton->Location = System::Drawing::Point(6, 205);
-			this->testCurButton->Name = L"testCurButton";
-			this->testCurButton->Size = System::Drawing::Size(213, 33);
-			this->testCurButton->TabIndex = 20;
-			this->testCurButton->Text = L"Test Curvature";
-			this->testCurButton->UseVisualStyleBackColor = false;
-			this->testCurButton->Click += gcnew System::EventHandler(this, &WinForm::testCurButton_Click);
+			this->testBOWButton->BackColor = System::Drawing::Color::PaleGreen;
+			this->testBOWButton->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->testBOWButton->Enabled = false;
+			this->testBOWButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
+			this->testBOWButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
+			this->testBOWButton->Location = System::Drawing::Point(6, 205);
+			this->testBOWButton->Name = L"testBOWButton";
+			this->testBOWButton->Size = System::Drawing::Size(213, 33);
+			this->testBOWButton->TabIndex = 20;
+			this->testBOWButton->Text = L"Test BOW";
+			this->testBOWButton->UseVisualStyleBackColor = false;
+			this->testBOWButton->Click += gcnew System::EventHandler(this, &WinForm::testBOWButton_Click);
 			// 
 			// chooseVocButton
 			// 
@@ -356,7 +366,7 @@ namespace CWinFormOpenCV {
 			// 
 			this->processingGroupBox->Controls->Add(this->chooseVocButton);
 			this->processingGroupBox->Controls->Add(this->imgTxtButton);
-			this->processingGroupBox->Controls->Add(this->testCurButton);
+			this->processingGroupBox->Controls->Add(this->testBOWButton);
 			this->processingGroupBox->Controls->Add(this->videoTxtButton);
 			this->processingGroupBox->Font = (gcnew System::Drawing::Font(L"Consolas", 15.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
@@ -369,6 +379,7 @@ namespace CWinFormOpenCV {
 			// 
 			// testingGroupBox
 			// 
+			this->testingGroupBox->Controls->Add(this->RealTimeButton);
 			this->testingGroupBox->Controls->Add(this->modelButton);
 			this->testingGroupBox->Controls->Add(this->testVideoButton);
 			this->testingGroupBox->Controls->Add(this->testImageButton);
@@ -380,6 +391,21 @@ namespace CWinFormOpenCV {
 			this->testingGroupBox->TabIndex = 24;
 			this->testingGroupBox->TabStop = false;
 			this->testingGroupBox->Text = L"Testing";
+			// 
+			// RealTimeButton
+			// 
+			this->RealTimeButton->BackColor = System::Drawing::Color::LightSkyBlue;
+			this->RealTimeButton->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->RealTimeButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
+			this->RealTimeButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->RealTimeButton->Location = System::Drawing::Point(6, 203);
+			this->RealTimeButton->Name = L"RealTimeButton";
+			this->RealTimeButton->Size = System::Drawing::Size(213, 33);
+			this->RealTimeButton->TabIndex = 17;
+			this->RealTimeButton->Text = L"Real time testing";
+			this->RealTimeButton->UseVisualStyleBackColor = false;
+			this->RealTimeButton->Click += gcnew System::EventHandler(this, &WinForm::RealTimeButton_Click);
 			// 
 			// WinForm
 			// 
@@ -459,7 +485,6 @@ namespace CWinFormOpenCV {
 					 w_opencv.calHistogram(histSize, histRange);
 
 					 w_opencv.detectSkin();
-					 w_opencv.regionCut();
 
 					 w_opencv.extractBOW();
 
@@ -518,8 +543,8 @@ namespace CWinFormOpenCV {
 				 RNG& rng = theRNG();
 
 				 while (all_files.size() > 0) {
-					 int randImgIdx = rng((unsigned)all_files.size());
-					 w_opencv.readImage(all_files[randImgIdx]);
+					 //int randImgIdx = rng((unsigned)all_files.size());
+					 w_opencv.readImage(all_files[0]);
 
 					 int histSize = 16;
 					 float range[] = { 0, 256 } ;
@@ -565,7 +590,7 @@ namespace CWinFormOpenCV {
 						 delete resizeImage;
 					 }
 
-					 string message = std::to_string(all_files.size()) + " images left\t" + all_files[randImgIdx];
+					 string message = std::to_string(all_files.size()) + " images left";
 					 System::String^ string = gcnew System::String(message.c_str());
 					 fileTextBox->Text = string;
 					 fileTextBox->Refresh();
@@ -574,7 +599,8 @@ namespace CWinFormOpenCV {
 					 features.clear();
 					 w_opencv.clear();
 					 w_fourier.clear_vector();
-					 all_files.erase(all_files.begin() + randImgIdx);
+					 //all_files.erase(all_files.begin() + randImgIdx);
+					 all_files.erase(all_files.begin());
 				 }
 				 MessageBoxA(0, "跑完了!", "Ground False", MB_OK);
 				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
@@ -599,97 +625,6 @@ namespace CWinFormOpenCV {
 
 				 testVideoButton->Enabled = true;
 				 testImageButton->Enabled = true;
-			 }
-	private: System::Void testVideoButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
-				 openFileDialog1->Filter = "Video Files (*.MTS,*.wmv,*.avi)|*.MTS*.wmv;*.avi;*.*";
-				 openFileDialog1->Title = "開啟影片檔";
-
-				 if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
-					 return;
-
-				 std::string file;	
-				 file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
-				 VideoCapture cap(file);
-				 if(!cap.isOpened()) {
-					 MessageBoxA(0, "Cannot open the video!!", "Open file failed", MB_OK);
-					 return ;
-				 }
-
-				 ofstream output(file.substr(0, file.find_last_of('\\')) + "\\output.txt", ios::out);
-				 int fn = 0;
-				 Mat frame;
-
-				 while(fn!=5) {
-				     cap >> frame;
-					 fn++;				 
-				 }
-				 w_opencv.readFrame(frame);
-				 w_opencv.set_bg_frame();
-
-				 while(1) {
-					 
-					 cap >> frame;
-					 fn++;
- 
-					 // 每10個frame取1張
-					 if(fn%10 != 0) {
-						 continue;
-					 }
-					 if(frame.empty() || fn > 300)
-						 break;
-
-					 w_opencv.readFrame(frame);
-					 w_opencv.img_preproc();
-
-					 w_opencv.detectSkin();
-					 w_opencv.regionCut();
-
-					 //===========display on window==============
-					 Bitmap^ testImage = w_opencv.getBitmap();
-					 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
-						 Bitmap^ resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
-						 originPictureBox->Image = resizeImage;
-					 }
-					 else {
-						 originPictureBox->Image = testImage;
-					 }
-					 originPictureBox->Refresh();
-					 //==========================================
-
-					 w_opencv.detectSIFT();
-
-					 w_opencv.HuMoment();
-					 std::vector<float> huVector = w_opencv.getHuVector();
-
-					 w_fourier.image_process(w_opencv.getImage());
-
-					 vector< vector<float> > features;
-
-					 features.push_back(w_opencv.getHuVector());
-					 features.push_back(w_opencv.getSiftVector());
-					 features.push_back(w_fourier.get_vector());
-
-					 w_svm.concatenateTest(features);
-
-					 System::String^ string = gcnew System::String(std::to_string(fn).c_str());
-					 fileTextBox->Text = string;
-					 fileTextBox->Refresh();
-
-					 float res = w_svm.testSVM();
-
-					 char result[128];
-					 sprintf(result, "%s\t%f\r\n", std::to_string(fn).c_str(), res);  
-
-					 output << result;
-
-					 features.clear();
-					 w_opencv.clear();
-					 w_fourier.clear_vector();
-					 w_svm.clear_testVector();
-				 } // end while(1)
-				 output.close();
-				 MessageBoxA(0, "跑完了!", "TEST", MB_OK);
 			 }
 			 // Read images from a folder & construct a bag of words with these images
 	private: System::Void bagWordButton_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -797,7 +732,7 @@ namespace CWinFormOpenCV {
 					 testVideoButton->Enabled = true;
 				 }
 			 }
-	private: System::Void testCurButton_Click(System::Object^  sender, System::EventArgs^  e) {
+	private: System::Void testBOWButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
 				 openFileDialog1->Filter = "Image File (*.jpg,*.bmp)|*.jpg;*.bmp;*.*";
 				 openFileDialog1->Title = "開啟影像";
@@ -1127,6 +1062,260 @@ namespace CWinFormOpenCV {
 				 w_svm.clearVectors();
 				 MessageBoxA(0, "跑完了!", "SVM", MB_OK);
 			 }
+	private: System::Void testVideoButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				std::string output_str;
+				int keyboard;
+				int fn=0,cnt=0,count=0;
+				bool START=false,STABLE=false,PRINT_FIVE=false;
+				Mat prev,frame,res,ori_frame;
+				float ratio_judge[array_size]={0};
+				int vote_array[array_size-2];
+
+				OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+				openFileDialog1->Filter = "Video Files (*.MTS,*.wmv,*.avi)|*.MTS;*.wmv;*.avi;";
+				openFileDialog1->Title = "開啟影片檔";
+
+				if (openFileDialog1->ShowDialog(this) == System::Windows::Forms::DialogResult::Cancel)   // 使用者沒有選檔案
+					 return;
+
+				std::string file;	
+				file = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+				VideoCapture capture(file);
+				if(!capture.isOpened()) {
+					 MessageBoxA(0, "Cannot open the video!!", "Open file failed", MB_OK);
+					 return ;
+				}
+				capture >> prev; 
+				fn++;
+				cv::resize(prev, prev, cv::Size(cvRound(prev.cols / 2.0), cvRound(prev.rows / 2.0)));
+				cv::cvtColor(prev,prev,CV_RGB2GRAY);
+
+				while( (char)keyboard != 'q' && (char)keyboard != 27 )
+				{	
+					if(!PRINT_FIVE)
+					{
+						if(!capture.read(frame)) 
+						{
+							return;
+						}
+						cv::resize(frame, frame, cv::Size(cvRound(frame.cols / 2.0), cvRound(frame.rows / 2.0)));
+						ori_frame = frame;
+						cv::cvtColor(frame,frame,CV_RGB2GRAY);
+
+						//=======get the frame number and write it on the current frame=======
+						rectangle(frame, cv::Point(10, 2), cv::Point(100,20),cv::Scalar(255,255,255), -1);
+						std::string frameNumberString = std::to_string(++fn);
+						putText(frame, frameNumberString.c_str(), cv::Point(15, 15),FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+
+						res = frame-prev;
+		
+						threshold(res, res, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+						cv::imshow("debug",frame);
+						//=============skin color ratio counting===============
+						int mat_size = res.rows * res.cols;
+						float ratio;
+						for(int i=0; i<res.rows; i++)
+						{
+							for(int j=0; j<res.cols; j++)
+							{
+								if(res.at<uchar>(i,j) == 255)
+									count++; 
+							}
+						}
+						ratio = (float)count / mat_size;
+						cout<< "!! " << fn << " !! " <<ratio << endl;
+						//==============================================
+						for(int k=array_size-1; k > 0; k--)  //array shift right
+						{
+							ratio_judge[k] = ratio_judge[k-1];
+						}
+						ratio_judge[0] = ratio;
+						//==============================================
+						for(int k=0; k<array_size; k++)  //selecting the region which changes dramatically
+						{
+							if(ratio_judge[k] > move_threshold)
+								cnt++;
+						}
+						if(cnt > array_size/2)   //voting
+						{
+							if(STABLE && START)
+							{
+								START = false; 
+								STABLE = false;
+							}
+							else
+								START = true;
+						}
+						//=============================================  //segmentation
+						if(ratio_judge[array_size-1] != 0 && START && cnt <= array_size/2 && ratio_judge[0] < stable_threshold && 
+							abs((ratio_judge[array_size/2] - ratio_judge[(array_size/2)-1])) < diff_threshold && 
+							abs((ratio_judge[array_size/2] - ratio_judge[(array_size/2)+1])) < diff_threshold)
+						{
+							string name = to_string(fn) + ".bmp";
+							imwrite(name,ori_frame);
+
+							//=============classification===============
+							 w_opencv.readFrame(ori_frame);
+
+							 w_opencv.detectSkin();
+							 w_opencv.regionCut();
+							 w_opencv.detectSkin();	// Update skinImage
+
+							 w_opencv.extractBOW();
+							 w_opencv.HuMoment();
+						//	 std::vector<float> huVector = w_opencv.getHuVector();
+
+							 w_fourier.image_process(w_opencv.getImage());
+
+							 vector< vector<float> > features;
+
+							 features.push_back(w_opencv.getHuVector());
+							 features.push_back(w_opencv.getSiftVector());
+							 features.push_back(w_fourier.get_vector());
+
+							 w_svm.concatenateTest(features);
+
+							 float res = w_svm.testSVM();
+							 //===========display on window==============
+							 // To avoid memory leakage
+							 if(!originPictureBox->Image)
+								 delete originPictureBox->Image;
+							 Bitmap^ testImage;
+							 Bitmap^ resizeImage;
+							 try {
+								 testImage = w_opencv.getBitmap();
+								 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+									 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+									 originPictureBox->Image = resizeImage;
+								 }
+								 else {
+									 originPictureBox->Image = testImage;
+								 }
+								 originPictureBox->Refresh();
+							 }
+							 finally {
+								 delete testImage;
+								 delete resizeImage;
+							 }
+							 waitKey(10);
+							//==========================================
+							 output_str += (char)((int)res+'A');
+
+							 System::String^ string = gcnew System::String(output_str.c_str());
+							 fileTextBox->Text = string;
+							 fileTextBox->Refresh();			
+
+							 features.clear();
+							 w_opencv.clear();
+							 w_fourier.clear_vector();
+							 w_svm.clear_testVector();
+						     //===============end classification================
+
+							 STABLE = true;
+							 PRINT_FIVE = true;
+						}
+					}
+					else
+					{
+						int times = array_size-3;
+						while(times--)
+						{
+							if(!capture.read(frame)) {
+								return;
+							}
+							cv::resize(frame, frame, cv::Size(cvRound(frame.cols / 2.0), cvRound(frame.rows / 2.0)));
+							ori_frame = frame;
+							cv::cvtColor(frame,frame,CV_RGB2GRAY);
+
+							//=======get the frame number and write it on the current frame=======
+							rectangle(frame, cv::Point(10, 2), cv::Point(100,20),cv::Scalar(255,255,255), -1);
+							std::string frameNumberString = std::to_string(++fn);
+							putText(frame, frameNumberString.c_str(), cv::Point(15, 15),FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+							cv::imshow("debug",frame);
+
+							string name = to_string(fn) + ".bmp";
+							imwrite(name,ori_frame);
+							//================classification================
+							w_opencv.readFrame(ori_frame);
+							//w_opencv.img_preproc();
+
+							w_opencv.detectSkin();
+							w_opencv.regionCut();
+							w_opencv.detectSkin();	// Update skinImage
+
+							w_opencv.extractBOW();
+							w_opencv.HuMoment();
+							//std::vector<float> huVector = w_opencv.getHuVector();
+
+							w_fourier.image_process(w_opencv.getImage());
+
+							vector< vector<float> > features;
+
+							features.push_back(w_opencv.getHuVector());
+							features.push_back(w_opencv.getSiftVector());
+							features.push_back(w_fourier.get_vector());
+
+							w_svm.concatenateTest(features);
+
+							float res = w_svm.testSVM();
+
+							//===========display on window==============
+							 // To avoid memory leakage
+							 if(!originPictureBox->Image)
+								 delete originPictureBox->Image;
+							 Bitmap^ testImage;
+							 Bitmap^ resizeImage;
+							 try {
+								 testImage = w_opencv.getBitmap();
+								 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+									 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+									 originPictureBox->Image = resizeImage;
+								 }
+								 else {
+									 originPictureBox->Image = testImage;
+								 }
+								 originPictureBox->Refresh();
+							 }
+							 finally {
+								 delete testImage;
+								 delete resizeImage;
+							 }
+							 waitKey(10);
+							//==========================================
+							
+							output_str += (char)((int)res+'A');
+
+							System::String^ string = gcnew System::String(output_str.c_str());
+							fileTextBox->Text = string;
+							fileTextBox->Refresh();		
+
+							features.clear();
+							w_opencv.clear();
+							w_fourier.clear_vector();
+							w_svm.clear_testVector();
+
+							//===============end classification================
+						}
+						output_str += " ";
+						PRINT_FIVE = false;
+						for(int i=0; i<array_size; i++)
+						{
+							ratio_judge[i] = 0;
+						}
+					}
+					//==============================================
+					keyboard = waitKey( 30 );
+
+					prev = frame;
+					count = 0;
+					cnt=0;
+				}   //end while
+				std::string message = output_str + "\t\t" + "SVM Video Testing is done !!";
+				System::String^ string = gcnew System::String(message.c_str());
+				fileTextBox->Text = string;
+				fileTextBox->Refresh();
+				delete originPictureBox->Image;		originPictureBox->Image = nullptr;
+			 }
 	private: System::Void testImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 /*
 				 vector<std::string> models = vector<std::string>();
@@ -1159,27 +1348,13 @@ namespace CWinFormOpenCV {
 
 				 namedWindow("debug");
 				 fstream output("result_auto.txt", ios::out);
+				 //fstream f_output("feature_image.txt", ios::out);
+				 //fstream input("image_iiiput.txt", ios::out);
 				// testVideoButton->Enabled = true;
 				// testImageButton->Enabled = true;
 					
-				// for(int g_model=0; g_model<models.size(); g_model++) {
-				//	 w_svm.setModel(models[g_model]);
-				//	 modelTextBox->Text = gcnew System::String(models[g_model].c_str());
-				//	 modelTextBox->Refresh();
-					 /*
-					 string message = "Model NO." + std::to_string(g_model+1) + " is processing";
-					 System::String^ string = gcnew System::String(message.c_str());
-					 fileTextBox->Text = string;
-					 fileTextBox->Refresh();
-					 */
-					 //for(int i=0; i<all_files.size(); i++) {
 				 while(all_files.size() > 0) {
 					 w_opencv.readImage(all_files[0]);
-
-					 /*int histSize = 16;
-					 float range[] = { 0, 256 } ;
-					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);*/
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
@@ -1200,7 +1375,6 @@ namespace CWinFormOpenCV {
 					 w_svm.concatenateTest(features);
 
 					 float res = w_svm.testSVM();
-					 // distance[i][g_model] = res;
 
 					 //===========display on window==============
 					 // To avoid memory leakage
@@ -1231,7 +1405,7 @@ namespace CWinFormOpenCV {
 					 fileTextBox->Refresh();
 					 //==========================================
 					 output << all_files[0] << " ";
-					 output << res << endl;
+					 output << (char)((int)res + 'A') << endl;
 
 					 features.clear();
 					 w_opencv.clear();
@@ -1239,31 +1413,284 @@ namespace CWinFormOpenCV {
 					 all_files.erase(all_files.begin());
 					 w_svm.clear_testVector();
 				 }
-				 string message = "SVM Testing finish !!";
+				 string message = "SVM Image Testing is done !!";
 				 System::String^ string = gcnew System::String(message.c_str());
 				 fileTextBox->Text = string;
 				 fileTextBox->Refresh();
 				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 
 				 output.close();
-				 /*
-				 fstream output("5GROUP_result_auto.txt", ios::out);
-
-				 for(int i=0; i<all_files.size(); i++) {	
-				 //int min=100,min_index=0;
-				 output << all_files[i] << " ";
-				 for(int g_model=0; g_model<5; g_model++) {
-				 //if(min > distance[i][g_model]) {
-				 //	min_index = g_model;
-				 //	min = distance[i][g_model];
-				 //}
-				 output << distance[i][g_model] << " ";
-				 }	
-				 output << endl;
-				 //output << min_index << endl;
-				 }
-				 output.close();
-				 */
 			 }
+	private: System::Void RealTimeButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				std::string output_str;
+				int fn=0,cnt=0,count=0,back_count=0,keyboard,vote_cnt=0;
+				bool START=false,STABLE=false,PRINT_FIVE=false;
+				Mat prev,frame,res,ori_frame,background,diff_back;
+				float ratio_judge[array_size]={0};
+				int vote_array[array_size-2];
+
+				std::string message = "Press Q to quit.";
+				System::String^ string = gcnew System::String(message.c_str());
+				fileTextBox->Text = string;
+				fileTextBox->Refresh();
+
+				VideoCapture capture(0);
+				if(!capture.isOpened())
+				{
+					cout << "can't open video file !!" << endl;
+					return;
+				}
+				while(fn<3)
+				{
+					capture >> background;
+					fn++;
+				}
+				cv::cvtColor(background,background,CV_RGB2GRAY);
+				fn++;
+
+				capture >> prev; 
+				fn++;
+				cv::cvtColor(prev,prev,CV_RGB2GRAY);
+
+				while( (char)keyboard != 'q' && (char)keyboard != 27 )
+				{	
+					if(!PRINT_FIVE)
+					{
+						if(!capture.read(frame)) 
+							return;
+						ori_frame = frame;
+						cv::cvtColor(frame,frame,CV_RGB2GRAY);
+
+						//=======get the frame number and write it on the current frame=======
+						rectangle(frame, cv::Point(10, 2), cv::Point(100,20),cv::Scalar(255,255,255), -1);
+						std::string frameNumberString = std::to_string(++fn);
+						putText(frame, frameNumberString.c_str(), cv::Point(15, 15),FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+
+						res = frame-prev;
+						diff_back = frame-background;
+		
+						threshold(res, res, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+						threshold(diff_back, diff_back, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+						//cv::imshow("",ori_frame);
+						//=============skin color ratio counting===============
+						int mat_size = res.rows * res.cols;
+						float ratio, back_ratio;
+						for(int i=0; i<res.rows; i++)
+						{
+							for(int j=0; j<res.cols; j++)
+							{
+								if(res.at<uchar>(i,j) == 255)
+									count++; 
+								if(diff_back.at<uchar>(i,j) == 255)
+									back_count++; 
+							}
+						}
+						ratio = (float)count / mat_size;
+						back_ratio = (float)back_count / mat_size;
+						cout<< "!! " << fn << " !! " <<ratio << endl;
+						//==============================================
+						for(int k=array_size-1; k > 0; k--)  //array shift right
+						{
+							ratio_judge[k] = ratio_judge[k-1];
+						}
+						ratio_judge[0] = ratio;
+						//==============================================
+						for(int k=0; k<array_size; k++)  //selecting the region which changes dramatically
+						{
+							if(ratio_judge[k] > move_threshold)
+								cnt++;
+						}
+						if(cnt > array_size/2)   //voting
+						{
+							if(STABLE && START)
+							{
+								START = false; 
+								STABLE = false;
+							}
+							else
+								START = true;
+						}
+						//=============================================  //segmentation
+						if(ratio_judge[array_size-1] != 0 && START && cnt <= array_size/2 && ratio_judge[0] < stable_threshold && 
+							back_ratio >= background_threshold &&
+							abs((ratio_judge[array_size/2] - ratio_judge[(array_size/2)-1])) < diff_threshold && 
+							abs((ratio_judge[array_size/2] - ratio_judge[(array_size/2)+1])) < diff_threshold)
+						{
+							//std::string name = to_string(fn) + ".bmp";
+							//imwrite(name,ori_frame);
+
+							//=============classification===============
+							 w_opencv.readFrame(ori_frame);
+							 cv::imshow("",ori_frame);
+
+							 w_opencv.detectSkin();
+							 w_opencv.regionCut();
+							 w_opencv.detectSkin();	// Update skinImage
+
+							 w_opencv.extractBOW();
+							 w_opencv.HuMoment();
+
+							 w_fourier.image_process(w_opencv.getImage());
+
+							 vector< vector<float> > features;
+
+							 features.push_back(w_opencv.getHuVector());
+							 features.push_back(w_opencv.getSiftVector());
+							 features.push_back(w_fourier.get_vector());
+
+							 w_svm.concatenateTest(features);
+
+							 float svm_res = w_svm.testSVM();
+							 
+							 vote_array[vote_cnt++] = (int)svm_res;		
+
+							 features.clear();
+							 w_opencv.clear();
+							 w_fourier.clear_vector();
+							 w_svm.clear_testVector();
+						     //===============end classification================
+
+							 STABLE = true;
+							 PRINT_FIVE = true;
+						}
+						else   //沒有分析時,在面板上顯示實況
+						{
+							 w_opencv.readFrame(ori_frame);
+							 //===========display on window==============
+							 // To avoid memory leakage
+							 if(!originPictureBox->Image)
+								 delete originPictureBox->Image;
+							 Bitmap^ testImage;
+							 Bitmap^ resizeImage;
+							 try {
+								 testImage = w_opencv.getBitmap();
+								 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+									 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+									 originPictureBox->Image = resizeImage;
+								 }
+								 else {
+									 originPictureBox->Image = testImage;
+								 }
+								 originPictureBox->Refresh();
+							 }
+							 finally {
+								 delete testImage;
+								 delete resizeImage;
+							 }
+							 waitKey(10);
+							//==========================================
+						}
+
+					}
+					else
+					{
+						int times = array_size-3;
+						while(times--)
+						{
+							if(!capture.read(frame)) {
+								return;
+							}
+							ori_frame = frame;
+							cv::cvtColor(frame,frame,CV_RGB2GRAY);
+
+							//=======get the frame number and write it on the current frame=======
+							rectangle(frame, cv::Point(10, 2), cv::Point(100,20),cv::Scalar(255,255,255), -1);
+							std::string frameNumberString = std::to_string(++fn);
+							putText(frame, frameNumberString.c_str(), cv::Point(15, 15),FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+							//cv::imshow("debug",frame);
+
+							//std::string name = to_string(fn) + ".bmp";
+							//imwrite(name,ori_frame);
+							//================classification================
+							w_opencv.readFrame(ori_frame);
+							cv::imshow("",ori_frame);
+
+							w_opencv.detectSkin();
+							w_opencv.regionCut();
+							w_opencv.detectSkin();	// Update skinImage
+
+							w_opencv.extractBOW();
+							w_opencv.HuMoment();
+
+							w_fourier.image_process(w_opencv.getImage());
+
+							vector< vector<float> > features;
+
+							features.push_back(w_opencv.getHuVector());
+							features.push_back(w_opencv.getSiftVector());
+							features.push_back(w_fourier.get_vector());
+
+							w_svm.concatenateTest(features);
+
+							float svm_res = w_svm.testSVM();
+							
+							//===========display on window==============
+							 // To avoid memory leakage
+							w_opencv.readFrame(ori_frame);
+
+							 if(!originPictureBox->Image)
+								 delete originPictureBox->Image;
+							 Bitmap^ testImage;
+							 Bitmap^ resizeImage;
+							 try {
+								 testImage = w_opencv.getBitmap();
+								 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+									 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+									 originPictureBox->Image = resizeImage;
+								 }
+								 else {
+									 originPictureBox->Image = testImage;
+								 }
+								 originPictureBox->Refresh();
+							 }
+							 finally {
+								 delete testImage;
+								 delete resizeImage;
+							 }
+							 waitKey(10);
+							//==========================================
+						    
+							vote_array[vote_cnt++] = (int)svm_res;
+
+							features.clear();
+							w_opencv.clear();
+							w_fourier.clear_vector();
+							w_svm.clear_testVector();
+
+							//===============end classification================
+						}
+						PRINT_FIVE = false;
+
+						if(vote_array[1] == vote_array[2])
+							output_str += (char)(vote_array[1]+'A');
+						else
+							output_str += (char)(vote_array[0]+'A');
+
+						System::String^ string = gcnew System::String(output_str.c_str());
+						fileTextBox->Text = string;
+						fileTextBox->Refresh();		
+						
+						for(int i=0; i<array_size; i++)
+						{
+							ratio_judge[i] = 0;
+							if(i<3)
+								vote_array[i] = 0;
+						}
+					}
+					//==============================================
+					keyboard = waitKey( 30 );
+
+					prev = frame;
+					count = 0;
+					cnt = 0;
+					back_count = 0;
+					vote_cnt = 0;
+				}   //end while
+				message = output_str + "\t\t" + "SVM Video Testing is done !!";
+				string = gcnew System::String(message.c_str());
+				fileTextBox->Text = string;
+				fileTextBox->Refresh();
+				delete originPictureBox->Image;		originPictureBox->Image = nullptr;
+			}
 };
 }
