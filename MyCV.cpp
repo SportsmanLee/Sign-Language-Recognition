@@ -494,24 +494,23 @@ void MyCV::regionCut()
 		}
 	}
 
-	/*setROI(maxRegionIdx);
+	setROI(maxRegionIdx);
 	// Debug
-	cv::normalize(regionMap, regionMap, 0, 255, CV_MINMAX);
+	/*cv::normalize(regionMap, regionMap, 0, 255, CV_MINMAX);
 	Mat debug; regionMap.convertTo(debug, CV_8UC1);
 	imshow("regionMap", debug);
 	waitKey(10);*/
 	// Reserve skin color pixels which have specific region label
-	for (int i = 0; i < cvImage.rows; ++i) {
+	/*for (int i = 0; i < cvImage.rows; ++i) {
 		for (int j = 0; j < cvImage.cols; ++j) {
 			if (regionMap.ptr<ushort>(i)[j] != maxRegionIdx)
 				cvImage.ptr<Vec3b>(i)[j] = Vec3b(0, 0, 0);
 		}
-	}
+	}*/
 
 	// Applying Gaussian blur
-	GaussianBlur( cvImage, cvImage, cv::Size(3, 3), 0, 0);
-
-	detectSkin();
+	/*GaussianBlur( cvImage, cvImage, cv::Size(3, 3), 0, 0);
+	detectSkin();*/
 }
 
 void MyCV::setBOWExtractor(Mat vocabulary)

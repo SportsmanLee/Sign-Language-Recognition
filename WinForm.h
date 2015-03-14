@@ -453,10 +453,10 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
-					 int histSize = 16;
+					 /*int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);
+					 w_opencv.calHistogram(histSize, histRange);*/
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
@@ -469,7 +469,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -521,10 +521,10 @@ namespace CWinFormOpenCV {
 					 int randImgIdx = rng((unsigned)all_files.size());
 					 w_opencv.readImage(all_files[randImgIdx]);
 
-					 int histSize = 16;
+					 /*int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);
+					 w_opencv.calHistogram(histSize, histRange);*/
 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
@@ -537,7 +537,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 					 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -750,7 +750,7 @@ namespace CWinFormOpenCV {
 				 BOWKMeansTrainer bowTrainer(100);
 				 Mat vocabulary = bowTrainer.cluster(allDescriptors);
 
-				 FileStorage fs(path + "\\vocabulary_100.yaml", FileStorage::WRITE);
+				 FileStorage fs(path + "\\vocabulary_region_100.yaml", FileStorage::WRITE);
 				 if(fs.isOpened()) {
 					 fs << "vocabulary" << vocabulary;
 				 }
@@ -1126,57 +1126,18 @@ namespace CWinFormOpenCV {
 				 MessageBoxA(0, "ถ]งนคF!", "SVM", MB_OK);
 			 }
 	private: System::Void testImageButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 /*
-				 vector<std::string> models = vector<std::string>();
-
-				 FolderBrowserDialog^ folderBrowserDiaglog = gcnew FolderBrowserDialog();
-				 if (folderBrowserDiaglog->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) {
-					 return ;
-				 }
-				 std::string path = msclr::interop::marshal_as<std::string>(folderBrowserDiaglog->SelectedPath);
-
-				 vector<std::string> filenames = vector<std::string>();
-				 getdir(path,filenames);
-
-				 std::string message;
-				 for(unsigned int i = 0; i < filenames.size(); i++)
-				 {
-					 if (filenames[i].find("xml") == std::string::npos)
-						 continue;
-					 message = path + "\\" + filenames[i];
-					 models.push_back(message);
-				 }
-				 */
 				 vector<std::string> all_files = loadImgsFromFolder();
-				 /*
-				 vector<vector<float>> distance(all_files.size());
-				 for(int i=0; i<all_files.size(); i++)
-					distance[i].resize(5);
-				 */
 				 if (all_files.empty())	return;
 
 				 fstream output("result_auto.txt", ios::out);
-				// testVideoButton->Enabled = true;
-				// testImageButton->Enabled = true;
-					
-				// for(int g_model=0; g_model<models.size(); g_model++) {
-				//	 w_svm.setModel(models[g_model]);
-				//	 modelTextBox->Text = gcnew System::String(models[g_model].c_str());
-				//	 modelTextBox->Refresh();
-					 /*
-					 string message = "Model NO." + std::to_string(g_model+1) + " is processing";
-					 System::String^ string = gcnew System::String(message.c_str());
-					 fileTextBox->Text = string;
-					 fileTextBox->Refresh();
-					 */
-					 //for(int i=0; i<all_files.size(); i++) {
+
 				 while(all_files.size() > 0) {
 					 w_opencv.readImage(all_files[0]);
 
-					 int histSize = 16;
+					 /*int histSize = 16;
 					 float range[] = { 0, 256 } ;
 					 const float* histRange = { range };
-					 w_opencv.calHistogram(histSize, histRange);
+					 w_opencv.calHistogram(histSize, histRange);*/
 					 
 					 w_opencv.detectSkin();
 					 w_opencv.regionCut();
@@ -1189,7 +1150,7 @@ namespace CWinFormOpenCV {
 
 					 vector< vector<float> > features;
 
-					 features.push_back(w_opencv.getHistVector());
+					 //features.push_back(w_opencv.getHistVector());
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
@@ -1197,7 +1158,6 @@ namespace CWinFormOpenCV {
 					 w_svm.concatenateTest(features);
 
 					 float res = w_svm.testSVM();
-					 // distance[i][g_model] = res;
 
 					 //===========display on window==============
 					 // To avoid memory leakage
@@ -1243,24 +1203,6 @@ namespace CWinFormOpenCV {
 				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
 
 				 output.close();
-				 /*
-				 fstream output("5GROUP_result_auto.txt", ios::out);
-
-				 for(int i=0; i<all_files.size(); i++) {	
-				 //int min=100,min_index=0;
-				 output << all_files[i] << " ";
-				 for(int g_model=0; g_model<5; g_model++) {
-				 //if(min > distance[i][g_model]) {
-				 //	min_index = g_model;
-				 //	min = distance[i][g_model];
-				 //}
-				 output << distance[i][g_model] << " ";
-				 }	
-				 output << endl;
-				 //output << min_index << endl;
-				 }
-				 output.close();
-				 */
 			 }
 };
 }
