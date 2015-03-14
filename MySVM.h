@@ -24,7 +24,11 @@ public:
 	void trainSVM();
 	void trainSVM_lda();
 	void get_pca_lda();
+	void k_means(int);
+	void k_means_lda(Mat,int);
 	float testSVM();
+	float testSVM_lda();
+	double distance(Mat , Mat , int);
 	void setModel(string filename);
 	void clearVectors();
 	Mat project(const Mat &,const Mat&,const Mat&);
