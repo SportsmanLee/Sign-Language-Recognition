@@ -278,6 +278,12 @@ void MyCV::extractBOW()
 	while (keypoints.size() > 30) {
 		keypoints.pop_back();
 	}
+	// Draw keypoints
+	Mat keypointsImg;
+	drawKeypoints( skinColor, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
+	imshow("keypoints", keypointsImg);
+	waitKey(10);
 
 	// Extract the Bag-Of-Word
 	bowExtractor->compute(skinColor, keypoints, siftDescriptor);
