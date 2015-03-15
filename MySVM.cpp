@@ -189,7 +189,7 @@ void MySVM::trainSVM_lda()
 
 	CvSVM SVM;
 	if (SVM.train_auto(transform, labels, Mat(), Mat(), params)) {
-		SVM.save("svm_lda.xml");
+		SVM.save("group0.xml");
 	}
 	fs.release();
 }
@@ -365,9 +365,107 @@ float MySVM::testSVM_lda()
 
 
 	//	fp.close();//關閉檔案
-	CvSVM SVM;
-	SVM.load(kmeans_path.c_str());
-	return SVM.predict(testImage, false); // test result 
+
+	if(min_index !=4)
+	{
+		CvSVM SVM;
+		SVM.load(kmeans_path.c_str());
+		int res = SVM.predict(transform, true);
+		if(min_index == 0)
+		{
+			switch (res)
+			{
+				case 1:
+					return 3;
+				case 2:
+					return 5;
+				case 3:
+					return 6;
+				case 4:
+					return 7;
+				case 5:
+					return 10;
+				case 6:
+					return 11;
+				case 7:
+					return 12;
+				case 8:
+					return 15;
+				case 9:
+					return 16;
+				case 10:
+					return 17;
+				case 11:
+					return 18;
+				case 12:
+					return 20;
+				case 13:
+					return 25;
+				case 14:
+					return 26;
+			default:
+				return -1;
+				break;
+			}
+		}else if(min_index == 1)
+		{
+			switch (res)
+			{
+				case 1:
+					return 8;
+				case 2:
+					return 9;
+				case 3:
+					return 20;
+				case 4:
+					return 22;
+				case 5:
+					return 24;
+
+			default:
+				return -1;
+				break;
+			}
+		}else if(min_index == 2)
+		{
+			switch (res)
+			{
+				case 1:
+					return 22;
+				case 2:
+					return 23;
+
+			default:
+				return -1;
+				break;
+			}
+		}else if(min_index == 3)
+		{
+			switch (res)
+			{
+				case 1:
+					return 1;
+				case 2:
+					return 2;
+				case 3:
+					return 4;
+				case 4:
+					return 13;
+				case 5:
+					return 14;
+				case 6:
+					return 21;
+			default:
+				return -1;
+				break;
+			}
+		}
+		return SVM.predict(transform, true); // test result 
+	}
+	else
+	{
+		return 4.0;
+	}
 
 }
 void MySVM::k_means(int k)
