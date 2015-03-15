@@ -178,17 +178,19 @@ void MySVM::trainSVM_lda()
 
 	fp2.close();//關閉檔案
 	*/
-
 	// Set up SVM's parameters
-	CvSVMParams params;
-	params.svm_type    = CvSVM::C_SVC;
-	params.kernel_type = CvSVM::LINEAR;
-	params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
+    CvSVMParams params;
+  //  params.svm_type    = CvSVM::C_SVC;
+  //  params.kernel_type = CvSVM::LINEAR;
 
-	// Train the SVM
+	CvTermCriteria criteria;        
+    criteria = cvTermCriteria( CV_TERMCRIT_EPS, 1000, FLT_EPSILON );  
+	params = CvSVMParams( CvSVM::C_SVC, CvSVM::RBF, 10.0, 0.09, 1.0, 10.0, 0.5, 1.0, NULL, criteria );
+    //params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
 
-	CvSVM SVM;
-	if (SVM.train_auto(transform, labels, Mat(), Mat(), params)) {
+    // Train the SVM
+    CvSVM SVM;
+    if (SVM.train(transform, labels, Mat(), Mat(), params)) {
 		SVM.save("group0.xml");
 	}
 	fs.release();
@@ -318,7 +320,7 @@ float MySVM::testSVM_lda()
 	FileStorage fs_kmeans(kmeans_file, FileStorage::READ);
 	Mat k_mean_centers;
 	double min_distance=0.0;
-	int min_index;
+	int min_index = -1;
 	fs_kmeans["means"] >> k_mean_centers;   // Read entire cv::Mat
 
 	for(int i = 0 ; i < k_mean_centers.rows ; i++)
@@ -365,12 +367,13 @@ float MySVM::testSVM_lda()
 
 
 	//	fp.close();//關閉檔案
-
+	
 	if(min_index !=4)
 	{
 		CvSVM SVM;
 		SVM.load(kmeans_path.c_str());
-		int res = SVM.predict(transform, true);
+		int res = SVM.predict(transform, false);
+		
 		if(min_index == 0)
 		{
 			switch (res)
@@ -609,5 +612,6 @@ void MySVM::setModel(string filename)
 void MySVM::clear_testVector()
 {
 	testVector.clear();
+	transform.release();
 }
 
