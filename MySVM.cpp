@@ -464,7 +464,7 @@ float MySVM::testSVM_lda()
 	}
 	else
 	{
-		return 4.0;
+		return 19;
 	}
 
 }
