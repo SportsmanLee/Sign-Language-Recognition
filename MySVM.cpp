@@ -136,8 +136,8 @@ void MySVM::trainSVM_lda()
 
 	//test data
 	transform = lda.project(pca.project(trainingData));
-
-	transform.convertTo(transform, CV_32FC1);
+	Mat transform_32f;
+	transform.convertTo(transform_32f, CV_32FC1);
 
 	//===========debug=========
 	/*
@@ -190,7 +190,7 @@ void MySVM::trainSVM_lda()
 
     // Train the SVM
     CvSVM SVM;
-    if (SVM.train(transform, labels, Mat(), Mat(), params)) {
+    if (SVM.train(transform_32f, labels, Mat(), Mat(), params)) {
 		SVM.save("group0.xml");
 	}
 	fs.release();
@@ -313,13 +313,13 @@ float MySVM::testSVM_lda()
 	//test data
 	transform = lda.project(pca.project(testImage));
 
-	transform.convertTo(transform, CV_32FC1);
+	
 	//k means
 	//load 
 	string kmeans_file = "kmeans.yaml";
 	FileStorage fs_kmeans(kmeans_file, FileStorage::READ);
 	Mat k_mean_centers;
-	double min_distance=0.0;
+	double min_distance = 0.0;
 	int min_index = -1;
 	fs_kmeans["means"] >> k_mean_centers;   // Read entire cv::Mat
 
@@ -332,6 +332,8 @@ float MySVM::testSVM_lda()
 			min_index = i;
 		}
 	}
+	Mat trandform_64f;
+	transform.convertTo(trandform_64f, CV_32FC1);
 	string kmeans_path = "group";
 	string add ;
 	stringstream ss(add);
@@ -353,26 +355,27 @@ float MySVM::testSVM_lda()
 	//fp.close();//關閉檔案
 	//=====================================
 	//write
-	//	char filename[]="test.txt";
-	//	fstream fp;
-	//	fp.open(filename, ios::out);//開啟檔案
-	//	for(int i = 0 ; i < transform.rows ; i++)
-	//	{
-	//		for(int j = 0 ; j < transform.cols ; j++)
-	//		{
-	//			fp<<transform.ptr<float>(i)[j] << '\t';//寫入字串
-	//		}
-	//		fp<<endl;
-	//	}
+		char filename[]="test.txt";
+		fstream fp;
+		fp.open(filename, ios::out);//開啟檔案
+		for(int i = 0 ; i < transform.rows ; i++)
+		{
+			for(int j = 0 ; j < transform.cols ; j++)
+			{
+				fp<<transform.ptr<double>(i)[j] << '\t';//寫入字串
+			}
+			fp<<endl;
+		}
 
 
-	//	fp.close();//關閉檔案
+		fp.close();//關閉檔案
 	
 	if(min_index !=4)
 	{
 		CvSVM SVM;
 		SVM.load(kmeans_path.c_str());
-		int res = SVM.predict(transform, false);
+		int res = -1;
+		res=SVM.predict(trandform_64f, false);
 		
 		if(min_index == 0)
 		{
@@ -463,7 +466,7 @@ float MySVM::testSVM_lda()
 				break;
 			}
 		}
-		return SVM.predict(transform, true); // test result 
+		return SVM.predict(trandform_64f, true); // test result 
 	}
 	else
 	{
@@ -541,8 +544,9 @@ void MySVM::k_means(int k)
 void MySVM::k_means_lda(Mat trainingData , int k){
 	//k means
 	Mat clusters , centers;
-	trainingData.convertTo(trainingData, CV_32FC1);
-	cv::kmeans(trainingData,k,clusters,TermCriteria(CV_TERMCRIT_ITER,10,1.0),10,KMEANS_PP_CENTERS , centers);  
+	Mat trainingData_64f ;
+	trainingData.convertTo(trainingData_64f, CV_32FC1);
+	cv::kmeans(trainingData_64f,k,clusters,TermCriteria(CV_TERMCRIT_ITER,10,1.0),10,KMEANS_PP_CENTERS , centers);  
 
 
 	//==============debug=====================
@@ -562,11 +566,11 @@ void MySVM::k_means_lda(Mat trainingData , int k){
 		cout<<"Fail to open file: "<<filename2<<endl;
 	}
 	cout<<"File Descriptor: "<<fp2<<endl;
-	for(int i = 0 ; i < trainingData.rows ; i++)
+	for(int i = 0 ; i < trainingData_64f.rows ; i++)
 	{
-		for(int j = 0 ; j < trainingData.cols ; j++)
+		for(int j = 0 ; j < trainingData_64f.cols ; j++)
 		{
-			fp2<<trainingData.ptr<float>(i)[j] << '\t';//寫入字串
+			fp2<<trainingData_64f.ptr<float>(i)[j] << '\t';//寫入字串
 		}
 		fp2<<endl;
 	}
@@ -590,16 +594,17 @@ void MySVM::k_means_lda(Mat trainingData , int k){
 
 double MySVM::distance(Mat center , Mat data , int index)
 {
-	center.convertTo(center,CV_64FC1);
-	data.convertTo(data,CV_64FC1);
-	Mat a = data.clone();
-	Mat buff = center.row(index).clone();
-	Mat result = abs(a-buff);
+	Mat center_b;
+	Mat data_b;
+	center.convertTo(center_b,CV_64FC1);
+	data.convertTo(data_b,CV_64FC1);
+	Mat a = data_b.clone();
+	Mat buff = center_b.row(index).clone();
 
-	double dis ;
-	for(int i = 0 ; i < result.cols ; i++)
+	double dis = 0.0;
+	for(int i = 0 ; i < buff.cols ; i++)
 	{
-		dis+=abs(result.ptr<double>(0)[i]);
+		dis += abs(a.ptr<double>(0)[i] - buff.ptr<double>(0)[i]);
 	}
 	//dis= dis *dis;
 	return dis;
