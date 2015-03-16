@@ -564,7 +564,8 @@ namespace CWinFormOpenCV {
 					 w_fourier.image_process(w_opencv.getImage());
 
 					 vector< vector<float> > features;
-					 //features.push_back(w_opencv.getHistVector());					 features.push_back(w_opencv.getHuVector());
+					 //features.push_back(w_opencv.getHistVector());
+					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_opencv.getSiftVector());
 					 features.push_back(w_fourier.get_vector());
 
@@ -1030,7 +1031,6 @@ namespace CWinFormOpenCV {
 				 w_svm.clearVectors();
 				 MessageBoxA(0, "pca & lda งนคF!", "TXT", MB_OK);
 			 }
-
 	private: System::Void trainSVM_lda_click(System::Object^  sender, System::EventArgs^  e) {
 				 w_svm.trainSVM_lda();
 				 w_svm.clearVectors();
@@ -1119,7 +1119,7 @@ namespace CWinFormOpenCV {
 				 DIR * dir;
 				 struct dirent * ptr;
 
-				 string base_path = "D:\\Personal\\Desktop\\Datasets\\Data20150130_pics";
+				 string base_path = "D:\\Personal\\Desktop\\Datasets\\Data20150130_pics\\group2";
 				 dir =opendir(base_path.c_str());
 				 while((ptr = readdir(dir))!=NULL) {
 					 // printf("d_name: %s\n",ptr->d_name);

@@ -594,6 +594,7 @@ void MySVM::k_means_lda(Mat trainingData , int k){
 
 double MySVM::distance(Mat center , Mat data , int index)
 {
+<<<<<<< HEAD
 	Mat center_b;
 	Mat data_b;
 	center.convertTo(center_b,CV_64FC1);
@@ -603,6 +604,16 @@ double MySVM::distance(Mat center , Mat data , int index)
 
 	double dis = 0.0;
 	for(int i = 0 ; i < buff.cols ; i++)
+=======
+	center.convertTo(center,CV_64FC1);
+	data.convertTo(data,CV_64FC1);
+	Mat a = data.clone();
+	Mat buff = center.row(index).clone();
+	Mat result = abs(a-buff);
+
+	double dis = 0.0;
+	for(int i = 0 ; i < result.cols ; i++)
+>>>>>>> d2b4780e10e79026eae7a51ccd3bc0e78f695d18
 	{
 		dis += abs(a.ptr<double>(0)[i] - buff.ptr<double>(0)[i]);
 	}
