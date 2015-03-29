@@ -118,6 +118,31 @@ void MyCV::detectSkin()
 	imshow("Skin", skinImage);
 	waitKey(10);
 }
+void MyCV::nondetectSkin()
+{
+	Mat GrayImage;
+	cvtColor(cvImage, GrayImage, CV_BGR2GRAY);
+	Mat resultImg = Mat::zeros(cvImage.size(), CV_8UC1);
+
+	uchar* resultPtr;
+	for (int y = 0; y < resultImg.rows; ++y)
+	{
+		resultPtr = resultImg.ptr<uchar>(y);
+		for (int x = 0; x < resultImg.cols; ++x)
+		{
+			if(GrayImage.ptr<uchar>(y)[x] >5)
+				resultPtr[x] = 255;
+			else
+				resultPtr[x] = 0;
+		}
+	}
+
+	skinImage = resultImg;
+	imshow("Skin", skinImage);
+	waitKey(10);
+}
+
+
 
 void MyCV::HuMoment()
 {
@@ -240,12 +265,6 @@ void MyCV::extractBOW()
 	while (keypoints.size() > 30) {
 		keypoints.pop_back();
 	}
-	// Draw keypoints
-	Mat keypointsImg;
-	drawKeypoints( skinColor, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
-	imshow("keypoints", keypointsImg);
-	waitKey(10);
 
 	// Extract the Bag-Of-Word
 	bowExtractor->compute(skinColor, keypoints, siftDescriptor);
@@ -493,14 +512,14 @@ void MyCV::setBOWExtractor(Mat vocabulary)
 void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
-	//cv::resize(cvImage, cvImage, cv::Size(960, 540));
 	cvtColor(cvImage, skinImage, CV_BGR2GRAY);
 }
 
 void MyCV::readFrame(Mat frame)
 {
 	cvImage = frame.clone();
-	cv::resize(cvImage, cvImage, cv::Size(960, 540));
+	//cv::resize(cvImage, cvImage, cv::Size(960, 540));
+	skinImage = cvImage.clone();
 }
 
 Mat MyCV::getImage()

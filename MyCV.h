@@ -21,6 +21,7 @@ public:
 	System::Drawing::Bitmap^ getBitmap();
 	System::Drawing::Bitmap^ getOtherBitmap(cv::Mat cvImage);
 	void detectSkin();
+	void nondetectSkin();
 	void HuMoment();
 	void calHistogram(int histSize, const float* histRange);
 	void detectSIFT();
