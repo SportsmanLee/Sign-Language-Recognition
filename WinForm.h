@@ -463,7 +463,7 @@ namespace CWinFormOpenCV {
 				 {
 					 if (filenames[i] == "." || filenames[i] == "..")
 						 continue;
-					 if (filenames[i].find("jpg") == std::string::npos)
+					 if (filenames[i].find("png") == std::string::npos)
 						 continue;
 					 message = path + "\\" + filenames[i];
 					 all_files.push_back(message);

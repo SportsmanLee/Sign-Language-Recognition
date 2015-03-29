@@ -71,9 +71,9 @@ System::Drawing::Bitmap^ MyCV::getOtherBitmap(Mat Image)
 void MyCV::detectSkin()
 {
 	// Skin Detection
-	int avg_cb = 110;  //YCbCr顏色空間膚色cb的平均值
+	/*int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 32;  //YCbCr顏色空間膚色的範圍
 	Mat resultImg = Mat::zeros(cvImage.size(), CV_8UC1);
 
 	Mat YCrCbImage;
@@ -101,6 +101,16 @@ void MyCV::detectSkin()
 				resultPtr[x] = 255;
 			else
 				resultPtr[x] = 0;
+		}
+	}*/
+	Mat resultImg = Mat::zeros(skinImage.size(), CV_8UC1);
+
+	for (int i = 0; i < skinImage.rows; ++i) {
+		for (int j = 0; j < skinImage.cols; ++j) {
+			if (skinImage.ptr<uchar>(i)[j] > 5)
+				resultImg.ptr<uchar>(i)[j] = 255;
+			else
+				resultImg.ptr<uchar>(i)[j] = 0;
 		}
 	}
 
@@ -180,31 +190,6 @@ void MyCV::detectSIFT()
 	vector<KeyPoint> keypoints;
 	
 	Mat skinColor = cvImage.clone();
-	/*Mat skinColor(skinImage.size(), CV_8UC3, Scalar(0, 0, 0));
-
-	int nRows = skinImage.rows;
-    int nCols = skinImage.cols * skinImage.channels();
-    if (skinImage.isContinuous()) {
-        nCols *= nRows;
-        nRows = 1;
-    }
-	
-	// Reserve skin color pixels with a 3-channels Mat
-	uchar* skinPtr;
-	Vec3b* dstPtr, * originPtr;
-	for (int y = 0; y < nRows; ++y)
-	{
-		skinPtr = skinImage.ptr<uchar>(y);
-		dstPtr = skinColor.ptr<Vec3b>(y);
-		originPtr = cvImage.ptr<Vec3b>(y);
-		for (int x = 0; x < nCols; ++x)
-		{
-			if (skinPtr[x] > 10)
-				dstPtr[x] = originPtr[x];
-			else
-				dstPtr[x] = Vec3b(0, 0, 0);
-		}
-	}*/
 
 	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinColor, keypoints);
@@ -241,29 +226,6 @@ void MyCV::extractBOW()
 	vector<KeyPoint> keypoints;
 
 	Mat skinColor = cvImage.clone();
-	/*Mat skinColor(skinImage.size(), CV_8UC3, Scalar(0, 0, 0));
-
-	int nRows = skinImage.rows;
-    int nCols = skinImage.cols * skinImage.channels();
-    if (skinImage.isContinuous()) {
-        nCols *= nRows;
-        nRows = 1;
-    }
-
-	// Reserve skin color pixels with a 3-channels Mat
-	uchar* skinPtr;
-	Vec3b* dstPtr, * originPtr;
-	for (int y = 0; y < nRows; ++y) {
-		skinPtr = skinImage.ptr<uchar>(y);
-		dstPtr = skinColor.ptr<Vec3b>(y);
-		originPtr = cvImage.ptr<Vec3b>(y);
-		for (int x = 0; x < nCols; ++x)	{
-			if (skinPtr[x] > 10)
-				dstPtr[x] = originPtr[x];
-			else
-				dstPtr[x] = Vec3b(0, 0, 0);
-		}
-	}*/
 
 	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinColor, keypoints);
@@ -531,7 +493,8 @@ void MyCV::setBOWExtractor(Mat vocabulary)
 void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
-	cv::resize(cvImage, cvImage, cv::Size(960, 540));
+	//cv::resize(cvImage, cvImage, cv::Size(960, 540));
+	cvtColor(cvImage, skinImage, CV_BGR2GRAY);
 }
 
 void MyCV::readFrame(Mat frame)

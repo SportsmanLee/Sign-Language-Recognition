@@ -133,13 +133,19 @@ void fourier::fourier_descriptor()
 	dft(z,z);
 	//cut 128 
 	
+	float Re = z[0].real(), Im = z[0].imag();
+	float magF0 = sqrt(Re*Re + Im*Im), magF;
 	for(int i = 0 ; i < 64 ; i ++)
 	{
-		FD.push_back(z[i].real());
+		Re = z[i].real();	Im = z[i].imag();
+		magF = sqrt(Re*Re + Im*Im) / magF0;
+		FD.push_back(magF);
 	}
 	for(unsigned int i = z.size()-64 ; i < z.size() ; i ++)
 	{
-		FD.push_back(z[i].real());
+		Re = z[i].real();	Im = z[i].imag();
+		magF = sqrt(Re*Re + Im*Im) / magF0;
+		FD.push_back(magF);
 	}
 
 	cv::normalize(FD, FD, 0, 1, CV_MINMAX);
