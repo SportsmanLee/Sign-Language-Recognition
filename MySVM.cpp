@@ -99,7 +99,7 @@ void MySVM::trainSVM()
 	// Train the SVM
 	CvSVM SVM;
 	if (SVM.train_auto(trainingData, labels, Mat(), Mat(), params)) {
-		SVM.save("svm_data_auto.xml");
+		SVM.save("svm_data.xml");
 	}
 }
 
