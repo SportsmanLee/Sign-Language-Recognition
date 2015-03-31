@@ -292,12 +292,6 @@ float MySVM::testSVM_lda()
 		testImage.at<float>(0, i) = testVector[i];
 	}
 
-
-
-
-	
-
-
 	//read pca & lda
 	string pca_file = "pca.yaml";
 	FileStorage fs(pca_file, FileStorage::READ);
@@ -375,8 +369,7 @@ float MySVM::testSVM_lda()
 	{
 		CvSVM SVM;
 		SVM.load(kmeans_path.c_str());
-		int res = -1;
-		res=SVM.predict(trandform_64f, false);
+		int res = SVM.predict(trandform_64f, false);
 		
 		if(min_index == 0)
 		{
@@ -621,4 +614,3 @@ void MySVM::clear_testVector()
 	testVector.clear();
 	transform.release();
 }
-

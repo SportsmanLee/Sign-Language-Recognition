@@ -152,16 +152,16 @@ void MyCV::HuMoment()
 	}
 
 	cv::Moments mom = cv::moments(contours[maxIdx]); 
-	double hu[7];
+	double hu[7] = {0};
 	cv::HuMoments(mom, hu);
 	
-	huVector.push_back((float)hu[1]);
-	huVector.push_back((float)hu[2]);
-	huVector.push_back((float)hu[3]);
-	huVector.push_back((float)hu[4]);
-	huVector.push_back((float)hu[5]);
-	huVector.push_back((float)hu[6]);
-	huVector.push_back((float)hu[7]);
+	huVector.push_back(static_cast<float>(hu[0]));
+	huVector.push_back(static_cast<float>(hu[1]));
+	huVector.push_back(static_cast<float>(hu[2]));
+	huVector.push_back(static_cast<float>(hu[3]));
+	huVector.push_back(static_cast<float>(hu[4]));
+	huVector.push_back(static_cast<float>(hu[5]));
+	huVector.push_back(static_cast<float>(hu[6]));
 
 	cv::normalize(huVector, huVector, 0, 1, CV_MINMAX);
 }
@@ -241,11 +241,11 @@ void MyCV::extractBOW()
 		keypoints.pop_back();
 	}
 	// Draw keypoints
-	Mat keypointsImg;
+	/*Mat keypointsImg;
 	drawKeypoints( skinColor, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
 	imshow("keypoints", keypointsImg);
-	waitKey(10);
+	waitKey(10);*/
 
 	// Extract the Bag-Of-Word
 	bowExtractor->compute(skinColor, keypoints, siftDescriptor);
