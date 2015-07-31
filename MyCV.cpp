@@ -71,9 +71,9 @@ System::Drawing::Bitmap^ MyCV::getOtherBitmap(Mat Image)
 void MyCV::detectSkin()
 {
 	// Skin Detection
-	/*int avg_cb = 110;  //YCbCr顏色空間膚色cb的平均值
+	int avg_cb = 110;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 24;  //YCbCr顏色空間膚色的範圍
 	Mat resultImg = Mat::zeros(cvImage.size(), CV_8UC1);
 
 	Mat YCrCbImage;
@@ -102,8 +102,8 @@ void MyCV::detectSkin()
 			else
 				resultPtr[x] = 0;
 		}
-	}*/
-	Mat resultImg = Mat::zeros(skinImage.size(), CV_8UC1);
+	}
+	/*Mat resultImg = Mat::zeros(skinImage.size(), CV_8UC1);
 
 	for (int i = 0; i < skinImage.rows; ++i) {
 		for (int j = 0; j < skinImage.cols; ++j) {
@@ -112,7 +112,7 @@ void MyCV::detectSkin()
 			else
 				resultImg.ptr<uchar>(i)[j] = 0;
 		}
-	}
+	}*/
 
 	skinImage = resultImg;
 	imshow("Skin", skinImage);
@@ -135,15 +135,17 @@ void MyCV::HuMoment()
     /// Find contours
     findContours( skinGray, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
-	/*
+	
     /// Draw contours
-    Mat drawing = Mat::zeros( skinImage.size(), CV_8UC3 );
+    /*Mat drawing = Mat::zeros( skinImage.size(), CV_8UC3 );
     for( int i = 0; i< contours.size(); i++ )
     {
 		Scalar color = Scalar( 255,0,0);
 		drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
-    }
-	*/
+		imshow("contour", drawing);
+		waitKey(0);
+    }*/
+	
 	int maxIdx = 0;
 	for (size_t i = 0; i < contours.size(); ++i) {
 		if (contours[maxIdx].size() < contours[i].size()) {
@@ -152,16 +154,12 @@ void MyCV::HuMoment()
 	}
 
 	cv::Moments mom = cv::moments(contours[maxIdx]); 
-	double hu[7] = {0};
+	vector<double> hu;
 	cv::HuMoments(mom, hu);
 	
-	huVector.push_back(static_cast<float>(hu[0]));
-	huVector.push_back(static_cast<float>(hu[1]));
-	huVector.push_back(static_cast<float>(hu[2]));
-	huVector.push_back(static_cast<float>(hu[3]));
-	huVector.push_back(static_cast<float>(hu[4]));
-	huVector.push_back(static_cast<float>(hu[5]));
-	huVector.push_back(static_cast<float>(hu[6]));
+	for (size_t i = 0; i < hu.size(); ++i) {
+		huVector.push_back(static_cast<float>(hu[i]));
+	}
 
 	cv::normalize(huVector, huVector, 0, 1, CV_MINMAX);
 }
@@ -185,23 +183,22 @@ void MyCV::calHistogram(int histSize, const float* histRange)
 void MyCV::detectSIFT()
 {
 	// Detect the keypoints using SIFT Detector
-	SiftFeatureDetector detector(30, 3, 0.04, 10.0, 1.6f);
-	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
+	SiftFeatureDetector detector(50);
+	SiftDescriptorExtractor extractor(128);
 	vector<KeyPoint> keypoints;
 	
 	Mat skinColor = cvImage.clone();
 
-	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinColor, keypoints);
 	if (keypoints.empty()) {
 		// Debug
 		imshow("SIFT Empty!", skinColor);
 		waitKey();
 	}
-	while (keypoints.size() < 30) {
+	while (keypoints.size() < 50) {
 		keypoints.push_back(keypoints[keypoints.size() - 1]);
 	}
-	while (keypoints.size() > 30) {
+	while (keypoints.size() > 50) {
 		keypoints.pop_back();
 	}
 	
@@ -209,37 +206,36 @@ void MyCV::detectSIFT()
 	extractor.compute(skinColor, keypoints, siftDescriptor);
 
 	// Draw keypoints
-	/*Mat keypointsImg;
+	Mat keypointsImg;
 	drawKeypoints( skinImage, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 	cv::putText(keypointsImg, std::to_string(keypoints.size()), cv::Point(100, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0));
 	cv::putText(keypointsImg, std::to_string(siftDescriptor.rows), cv::Point(150, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
 	cv::putText(keypointsImg, std::to_string(siftDescriptor.cols), cv::Point(200, 100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
 	imshow("keypoints", keypointsImg);
-	waitKey();*/
+	waitKey(10);
 }
 
 void MyCV::extractBOW()
 {
 	// Detect the keypoints using SIFT Detector
-	SiftFeatureDetector detector(30, 3, 0.04, 10.0, 1.6f);
-	SiftDescriptorExtractor extractor(128, 3, 0.04, 10.0, 1.6f);
+	SiftFeatureDetector detector(50);
 	vector<KeyPoint> keypoints;
 
 	Mat skinColor = cvImage.clone();
 
-	// Detect SIFT keypoints & make sure the length of 30
 	detector.detect(skinColor, keypoints);
 	if (keypoints.empty()) {
 		// Debug
 		imshow("SIFT Empty!", skinColor);
 		waitKey();
 	}
-	while (keypoints.size() < 30) {
+	while (keypoints.size() < 50) {
 		keypoints.push_back(keypoints[keypoints.size() - 1]);
 	}
-	while (keypoints.size() > 30) {
+	while (keypoints.size() > 50) {
 		keypoints.pop_back();
 	}
+
 	// Draw keypoints
 	/*Mat keypointsImg;
 	drawKeypoints( skinColor, keypoints, keypointsImg, Scalar::all(-1), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
@@ -298,87 +294,6 @@ void MyCV::regionGrowing(int x, int y, int regionLabel)
 		checkList.erase(checkList.begin());
 	}
 }
-
-/*vector<cv::Point> MyCV::contourGrowing(cv::Point seedPoint, Mat& borderMap)
-{
-	vector<cv::Point> checkList;
-	vector<cv::Point> contour;
-	contour.push_back(seedPoint);
-	checkList.push_back(seedPoint);
-
-	while(checkList.size() > 0) {
-		cv::Point candidate = checkList.front();
-
-		for (int m = candidate.y - 1; m < candidate.y + 2; ++m) {
-				if (m < 1 || m >= borderMap.rows - 1)	continue;
-			for (int n = candidate.x - 1; n < candidate.x + 2; ++n) {
-				if (n < 1 || n >= borderMap.cols - 1)	continue;
-				if (m == candidate.y && n == candidate.x)	continue;
-
-				if (borderMap.ptr<uchar>(m)[n] > 10) {
-					cv::Point checkPoint(cv::Point(n, m));
-					bool isNew = true;
-					for (size_t j = 0; j < contour.size(); ++j) {
-						if (checkPoint.x == contour[j].x && checkPoint.y == contour[j].y) {
-							isNew = false;
-							break;
-						}
-					}
-					if (isNew) {	// 確認新輪廓點為哪一端並加入輪廓中
-						cv::Point head = contour.front(), tail = contour.back();
-						int distanceH = abs(head.x - checkPoint.x) + abs(head.y - checkPoint.y);
-						int distanceT = abs(tail.x - checkPoint.x) + abs(tail.y - checkPoint.y);
-						if (distanceH < distanceT) {
-							contour.insert(contour.begin(), checkPoint);
-						}
-						else {
-							contour.insert(contour.end(), checkPoint);
-						}
-						checkList.push_back(checkPoint);
-					}
-				}
-			}
-		}
-
-		checkList.erase(checkList.begin());
-	}
-
-	if (contour.size() > 100) {
-		return contour;
-	}
-	else {
-		return vector<cv::Point>();
-	}
-}
-
-vector<double> MyCV::calcCurvature(vector<cv::Point>& contour)
-{
-	// 只取第5個輪廓點至倒數第5個輪廓點計算曲率。
-	const int k = 5;
-	vector<double> curvature(5, 0.0);
-	for (int i = k; i < (int)contour.size() - k; ++i) {
-		cv::Point a(contour[i].x - contour[i + k].x, contour[i].y - contour[i + k].y);
-		cv::Point b(contour[i].x - contour[i - k].x, contour[i].y - contour[i - k].y);
-		
-		double c = (a.x * b.x + a.y * b.y) / (sqrt(a.x * a.x + a.y * a.y) * sqrt(b.x * b.x + b.y * b.y));
-		curvature.push_back(c);
-	}
-
-	curvature.insert(curvature.end(), 5, 0.0);
-
-	// display curvature histogram
-	vector<double> n_curvature(curvature);
-	Mat histImage(400, n_curvature.size() * 2, CV_8UC3, Scalar(0,0,0));
-	normalize(n_curvature, n_curvature, 0, histImage.rows, NORM_MINMAX, -1, Mat());
-	for (int i = 1; i < n_curvature.size(); ++i) {
-		line(histImage, cv::Point(2 * (i - 1), 400 - cvRound(n_curvature[i - 1])) ,
-			cv::Point(2 * i, 400 - cvRound(n_curvature[i])), Scalar(0, 0, 255), 1, 8, 0);
-	}
-	imshow("curvature", histImage);
-	waitKey(0);
-
-	return curvature;
-}*/
 
 void MyCV::setROI(int regionLabel)
 {
@@ -494,6 +409,12 @@ void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
 	//cv::resize(cvImage, cvImage, cv::Size(960, 540));
+	if (cvImage.rows >= cvImage.cols) {
+		cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols * 960 / cvImage.rows), 960));
+	}
+	else {
+		cv::resize(cvImage, cvImage, cv::Size(960, cvRound(cvImage.rows * 960 / cvImage.cols)));
+	}
 	cvtColor(cvImage, skinImage, CV_BGR2GRAY);
 }
 

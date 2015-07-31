@@ -463,7 +463,8 @@ namespace CWinFormOpenCV {
 				 {
 					 if (filenames[i] == "." || filenames[i] == "..")
 						 continue;
-					 if (filenames[i].find("png") == std::string::npos)
+					 if (filenames[i].find("png") == std::string::npos &&
+						 filenames[i].find("jpg") == std::string::npos)
 						 continue;
 					 message = path + "\\" + filenames[i];
 					 all_files.push_back(message);
@@ -538,6 +539,7 @@ namespace CWinFormOpenCV {
 				 }
 				 MessageBoxA(0, "跑完了!", "Ground Truth", MB_OK);
 				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
+				 destroyAllWindows();
 			 }
 	private: System::Void falseButton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 vector<std::string> all_files = loadImgsFromFolder();
@@ -605,6 +607,7 @@ namespace CWinFormOpenCV {
 				 }
 				 MessageBoxA(0, "跑完了!", "Ground False", MB_OK);
 				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
+				 destroyAllWindows();
 
 				 trainButton->Enabled = true;
 			 }
@@ -1017,6 +1020,7 @@ namespace CWinFormOpenCV {
 				 fileTextBox->Text = string;
 				 fileTextBox->Refresh();
 				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
+				 destroyAllWindows();
 
 				 output.close();
 			 }
