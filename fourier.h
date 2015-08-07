@@ -27,7 +27,6 @@ class fourier
 		vector<vector<cv::Point> > contours;
 		vector<vector<complex<float>>>contours_one_p;
 		vector<vector<cv::Point> > contours_one;
-		vector<vector<cv::Point> > inverse_contours;
 		vector<float> FD;
 		vector<Vec4i> hierarchy;
 

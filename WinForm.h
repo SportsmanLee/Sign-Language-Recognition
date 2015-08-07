@@ -79,6 +79,7 @@ namespace CWinFormOpenCV {
 	private: System::Windows::Forms::GroupBox^  testingGroupBox;
 	private: System::Windows::Forms::Button^  kmeansButton;
 	private: System::Windows::Forms::Button^  testLDAButton;
+	private: System::Windows::Forms::Button^  outputButton;
 
 
 
@@ -119,6 +120,7 @@ namespace CWinFormOpenCV {
 			this->kmeansButton = (gcnew System::Windows::Forms::Button());
 			this->testingGroupBox = (gcnew System::Windows::Forms::GroupBox());
 			this->testLDAButton = (gcnew System::Windows::Forms::Button());
+			this->outputButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->originPictureBox))->BeginInit();
 			this->trainingGroupBox->SuspendLayout();
 			this->processingGroupBox->SuspendLayout();
@@ -335,6 +337,7 @@ namespace CWinFormOpenCV {
 			// 
 			// trainingGroupBox
 			// 
+			this->trainingGroupBox->Controls->Add(this->outputButton);
 			this->trainingGroupBox->Controls->Add(this->truthButton);
 			this->trainingGroupBox->Controls->Add(this->falseButton);
 			this->trainingGroupBox->Controls->Add(this->trainButton);
@@ -409,11 +412,25 @@ namespace CWinFormOpenCV {
 			this->testLDAButton->UseVisualStyleBackColor = false;
 			this->testLDAButton->Click += gcnew System::EventHandler(this, &WinForm::testLDAButton_Click);
 			// 
+			// outputButton
+			// 
+			this->outputButton->BackColor = System::Drawing::Color::Gold;
+			this->outputButton->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->outputButton->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
+			this->outputButton->Font = (gcnew System::Drawing::Font(L"Consolas", 14.25F, System::Drawing::FontStyle::Bold));
+			this->outputButton->Location = System::Drawing::Point(6, 83);
+			this->outputButton->Name = L"outputButton";
+			this->outputButton->Size = System::Drawing::Size(213, 33);
+			this->outputButton->TabIndex = 20;
+			this->outputButton->Text = L"Output Features";
+			this->outputButton->UseVisualStyleBackColor = false;
+			this->outputButton->Click += gcnew System::EventHandler(this, &WinForm::outputButton_Click);
+			// 
 			// WinForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(753, 796);
+			this->ClientSize = System::Drawing::Size(753, 750);
 			this->Controls->Add(this->testingGroupBox);
 			this->Controls->Add(this->processingGroupBox);
 			this->Controls->Add(this->trainingGroupBox);
@@ -1213,6 +1230,78 @@ namespace CWinFormOpenCV {
 				 }
 				 closedir(dir);
 				 MessageBoxA(0, "done", "Ground Truth", MB_OK);
+			 }
+	private: System::Void outputButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 vector<std::string> all_files = loadImgsFromFolder();
+				 if (all_files.empty())	return;
+
+				 fstream output("output_features.txt", ios::out);
+
+				 while(all_files.size() > 0) {
+					 w_opencv.readImage(all_files[0]);
+					 
+					 w_opencv.detectSkin();
+					 w_opencv.regionCut();
+
+					 w_opencv.HuMoment();
+
+					 w_fourier.image_process(w_opencv.getImage());
+
+					 vector< vector<float> > features;
+
+					 features.push_back(w_opencv.getHuVector());
+					 features.push_back(w_fourier.get_vector());
+
+					 w_svm.concatenateTest(features);
+
+					 //===========display on window==============
+					 // To avoid memory leakage
+					 if(!originPictureBox->Image)
+						 delete originPictureBox->Image;
+					 Bitmap^ testImage;
+					 Bitmap^ resizeImage;
+					 try {
+						 testImage = w_opencv.getBitmap();
+						 if (testImage->Width > originPictureBox->Width || testImage->Height > originPictureBox->Height) {
+							 resizeImage = gcnew Bitmap(testImage, originPictureBox->Size);
+							 originPictureBox->Image = resizeImage;
+						 }
+						 else {
+							 originPictureBox->Image = testImage;
+						 }
+						 originPictureBox->Refresh();
+					 }
+					 finally {
+						 delete testImage;
+						 delete resizeImage;
+					 }
+					 waitKey(10);
+
+					 string message = std::to_string(all_files.size()) + " images left";
+					 System::String^ string = gcnew System::String(message.c_str());
+					 fileTextBox->Text = string;
+					 fileTextBox->Refresh();
+					 //==========================================
+					 vector<float> concatVector(w_svm.getTestVector());
+					 for (size_t i = 0; i < concatVector.size(); ++i)
+						output << concatVector[i] << ' ';
+					 output << endl;
+
+					 features.clear();
+					 concatVector.clear();
+					 w_opencv.clear();
+					 w_fourier.clear_vector();
+					 all_files.erase(all_files.begin());
+					 w_svm.clear_testVector();
+				 }
+				 string message = "Output features finished !!";
+				 System::String^ string = gcnew System::String(message.c_str());
+				 fileTextBox->Text = string;
+				 fileTextBox->Refresh();
+				 delete originPictureBox->Image;		originPictureBox->Image = nullptr;
+				 destroyAllWindows();
+
+				 output.close();
 			 }
 };
 }

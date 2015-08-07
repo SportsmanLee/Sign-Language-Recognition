@@ -126,7 +126,6 @@ void MyCV::HuMoment()
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
 	cv::morphologyEx(skinGray, skinGray, cv::MORPH_DILATE, element);
 
-    Mat canny_output;
     vector<vector<cv::Point> > contours;
     vector<Vec4i> hierarchy;
 
@@ -134,24 +133,20 @@ void MyCV::HuMoment()
     //Canny( skinImage, canny_output, thresh, thresh*2, 3 );
     /// Find contours
     findContours( skinGray, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-
-	
-    /// Draw contours
-    /*Mat drawing = Mat::zeros( skinImage.size(), CV_8UC3 );
-    for( int i = 0; i< contours.size(); i++ )
-    {
-		Scalar color = Scalar( 255,0,0);
-		drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
-		imshow("contour", drawing);
-		waitKey(0);
-    }*/
-	
+    	
 	int maxIdx = 0;
 	for (size_t i = 0; i < contours.size(); ++i) {
 		if (contours[maxIdx].size() < contours[i].size()) {
 			maxIdx = i;
 		}
 	}
+	
+    /// Draw contours
+    Mat drawing = Mat::zeros( skinImage.size(), CV_8UC3 );
+	Scalar color = Scalar( 255,0,0);
+	drawContours( drawing, contours, maxIdx, color, 2, 8, hierarchy, 0, cv::Point() );
+	imshow("contour", drawing);
+	waitKey(10);
 
 	cv::Moments mom = cv::moments(contours[maxIdx]); 
 	vector<double> hu;

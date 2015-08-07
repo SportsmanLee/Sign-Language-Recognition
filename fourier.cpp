@@ -42,9 +42,9 @@ void fourier::RGBtoYCbCr(IplImage *img)
 void fourier::Skin_Color_Detection(IplImage *img)
 {
 	//================
-	int avg_cb = 120;  //YCbCr顏色空間膚色cb的平均值
+	int avg_cb = 110;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 22;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 24;  //YCbCr顏色空間膚色的範圍
 	//================
 
 	CvScalar scalarImg;
@@ -65,14 +65,8 @@ void fourier::Skin_Color_Detection(IplImage *img)
 }
 
 void fourier::boundary(){
-	Mat kernel = cv::Mat::ones(3, 3, CV_8U);
-	Mat eroded;
-	erode(img_gray, eroded, kernel);
-	img_gray = img_gray - eroded;
-
 	IplImage *tmp, *YCbCr_img;
 
-	CvSeq* contour = 0;
 	tmp = cvCloneImage(&(IplImage)img);
 	YCbCr_img = cvCreateImage(cvGetSize(tmp), tmp->depth, tmp->nChannels);
 
@@ -86,28 +80,38 @@ void fourier::boundary(){
 
 	img = Mat(YCbCr_img,0);
 
-
 	//===========YCbCr轉灰階=============
 	cvtColor(img,img_gray,CV_RGB2GRAY);
 
-
 	//cvCvtColor( YCbCr_img, gray_img, CV_RGB2GRAY );
 	//===========Find Contours & Draw=============
-	
-	Canny( img_gray, img_gray, 10, 10*2, 3 );
-	/// Find contours
-	findContours( img_gray, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
+	cv::morphologyEx(img_gray, img_gray, cv::MORPH_DILATE, element);
+
+    vector<vector<cv::Point> > contours;
+    vector<Vec4i> hierarchy;
+
+    // Detect edges using canny
+    //Canny( skinImage, canny_output, thresh, thresh*2, 3 );
+    /// Find contours
+    findContours( img_gray, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 	
 	/// Draw contours
-	Mat drawing = Mat::zeros( img_gray.size(), CV_8UC3 );
-
-	vector<cv::Point> insertContours;
-	for(unsigned int i = 0 ;i < contours.size();i++) {
-		for (unsigned int j = 0; j < contours[i].size(); j++) {
-			insertContours.push_back(contours[i][j]);
+	int maxIdx = 0;
+	for (size_t i = 0; i < contours.size(); ++i) {
+		if (contours[maxIdx].size() < contours[i].size()) {
+			maxIdx = i;
 		}
 	}
-	contours_one.push_back(insertContours);
+	
+    /// Draw contours
+    /*Mat drawing = Mat::zeros( img.size(), CV_8UC3 );
+	Scalar color = Scalar( 255,0,0);
+	drawContours( drawing, contours, maxIdx, color, 2, 8, hierarchy, 0, cv::Point() );
+	imshow("fourier_contour", drawing);
+	waitKey(0);*/
+
+	contours_one.push_back(contours[maxIdx]);
 
 	cvReleaseImage(&YCbCr_img);
 	cvReleaseImage(&tmp);
@@ -117,6 +121,7 @@ void fourier::boundary(){
 
 	return;
 }
+
 void fourier::fourier_descriptor()
 {
 	vector<complex<float>> z (contours_one[0].size());
@@ -130,20 +135,21 @@ void fourier::fourier_descriptor()
 	contours_one_p.push_back(z);
 
 	//dft
-	dft(z,z);
+	vector<complex<float>> z_dft (contours_one[0].size());
+	dft(z,z_dft);
 	//cut 128 
 	
-	float Re = z[0].real(), Im = z[0].imag();
+	float Re = z_dft[0].real(), Im = z_dft[0].imag();
 	float magF0 = sqrt(Re*Re + Im*Im), magF;
 	for(int i = 0 ; i < 64 ; i ++)
 	{
-		Re = z[i].real();	Im = z[i].imag();
+		Re = z_dft[i].real();	Im = z_dft[i].imag();
 		magF = sqrt(Re*Re + Im*Im) / magF0;
 		FD.push_back(magF);
 	}
-	for(unsigned int i = z.size()-64 ; i < z.size() ; i ++)
+	for(unsigned int i = z_dft.size()-64 ; i < z_dft.size() ; i ++)
 	{
-		Re = z[i].real();	Im = z[i].imag();
+		Re = z_dft[i].real();	Im = z_dft[i].imag();
 		magF = sqrt(Re*Re + Im*Im) / magF0;
 		FD.push_back(magF);
 	}
@@ -185,7 +191,6 @@ void fourier::clear_vector()
 	contours.clear();
 	contours_one_p.clear();
 	contours_one.clear();
-	inverse_contours.clear();
 	hierarchy.clear();
 }
 
