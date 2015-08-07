@@ -73,7 +73,7 @@ void MyCV::detectSkin()
 	// Skin Detection
 	int avg_cb = 110;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 24;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 26;  //YCbCr顏色空間膚色的範圍
 	Mat resultImg = Mat::zeros(cvImage.size(), CV_8UC1);
 
 	Mat YCrCbImage;

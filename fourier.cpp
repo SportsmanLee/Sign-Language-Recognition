@@ -1,7 +1,7 @@
 ﻿// fourier transform main function 
 #include "stdafx.h"
 #include "fourier.h"
-
+#include <limits> 
 
 
 using namespace cv;
@@ -44,7 +44,7 @@ void fourier::Skin_Color_Detection(IplImage *img)
 	//================
 	int avg_cb = 110;  //YCbCr顏色空間膚色cb的平均值
 	int avg_cr = 155;  //YCbCr顏色空間膚色cr的平均值
-	int skinRange = 24;  //YCbCr顏色空間膚色的範圍
+	int skinRange = 26;  //YCbCr顏色空間膚色的範圍
 	//================
 
 	CvScalar scalarImg;
@@ -125,8 +125,6 @@ void fourier::boundary(){
 void fourier::fourier_descriptor()
 {
 	vector<complex<float>> z (contours_one[0].size());
-	//FD = vector<double>(128);
-	vector<Point> p (contours_one[0].size());
 	//point to complex
 	for(unsigned int i = 0 ; i < contours_one[0].size() ; i++)
 	{
@@ -137,20 +135,26 @@ void fourier::fourier_descriptor()
 	//dft
 	vector<complex<float>> z_dft (contours_one[0].size());
 	dft(z,z_dft);
-	//cut 128 
 	
+	//cut 128 
 	float Re = z_dft[0].real(), Im = z_dft[0].imag();
 	float magF0 = sqrt(Re*Re + Im*Im), magF;
 	for(int i = 0 ; i < 64 ; i ++)
 	{
 		Re = z_dft[i].real();	Im = z_dft[i].imag();
-		magF = sqrt(Re*Re + Im*Im) / magF0;
+		if (fabs(sqrt(Re*Re + Im*Im) / magF0) < numeric_limits<float>::epsilon())
+			magF = 0.0;
+		else
+			magF = sqrt(Re*Re + Im*Im) / magF0;
 		FD.push_back(magF);
 	}
 	for(unsigned int i = z_dft.size()-64 ; i < z_dft.size() ; i ++)
 	{
 		Re = z_dft[i].real();	Im = z_dft[i].imag();
-		magF = sqrt(Re*Re + Im*Im) / magF0;
+		if (fabs(sqrt(Re*Re + Im*Im) / magF0) < numeric_limits<float>::epsilon())
+			magF = 0.0;
+		else
+			magF = sqrt(Re*Re + Im*Im) / magF0;
 		FD.push_back(magF);
 	}
 
