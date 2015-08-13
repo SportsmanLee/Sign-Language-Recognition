@@ -26,9 +26,8 @@ public:
 	void calHistogram(int histSize, const float* histRange);
 	void detectSIFT();
 	void extractBOW();
+	void detectHOG();
 	void regionGrowing(int x, int y, int regionLabel);
-	//vector<cv::Point> contourGrowing(cv::Point seedPoint, Mat& borderMap);
-	//vector<double> calcCurvature(vector<cv::Point>& contour);
 	void setROI(int regionLabel);
 	void regionCut();
 	void readImage(std::string fileName);
@@ -41,6 +40,7 @@ public:
 	vector<float> getHuVector();
 	vector<float> getHistVector();
 	vector<float> getSiftVector();
+	vector<float> getHOGVector();
 	Mat getSiftDescriptor();
 	void clear();
 
@@ -53,5 +53,6 @@ private:
 	vector<float> huVector;
 	vector<float> histVector;
 	vector<float> siftVector;
+	vector<float> hogVector;
 	Ptr<BOWImgDescriptorExtractor> bowExtractor;
 };

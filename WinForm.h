@@ -1237,20 +1237,25 @@ namespace CWinFormOpenCV {
 
 				 fstream output("output_features.txt", ios::out);
 
+				 bool isHead = true;
+
 				 while(all_files.size() > 0) {
 					 w_opencv.readImage(all_files[0]);
 					 
 					 w_opencv.detectSkin();
-					 w_opencv.regionCut();
+					 //w_opencv.regionCut();
 
 					 w_opencv.HuMoment();
 
 					 w_fourier.image_process(w_opencv.getImage());
 
+					 w_opencv.detectHOG();
+
 					 vector< vector<float> > features;
 
 					 features.push_back(w_opencv.getHuVector());
 					 features.push_back(w_fourier.get_vector());
+					 features.push_back(w_opencv.getHOGVector());
 
 					 w_svm.concatenateTest(features);
 
@@ -1283,6 +1288,10 @@ namespace CWinFormOpenCV {
 					 fileTextBox->Refresh();
 					 //==========================================
 					 vector<float> concatVector(w_svm.getTestVector());
+					 if (isHead) {
+						 output << concatVector.size() << all_files.size() << endl;
+						 isHead = false;
+					 }
 					 for (size_t i = 0; i < concatVector.size(); ++i)
 						output << concatVector[i] << ' ';
 					 output << endl;

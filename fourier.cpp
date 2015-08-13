@@ -145,7 +145,7 @@ void fourier::fourier_descriptor()
 		if (fabs(sqrt(Re*Re + Im*Im) / magF0) < numeric_limits<float>::epsilon())
 			magF = 0.0;
 		else
-			magF = sqrt(Re*Re + Im*Im) / magF0;
+			magF = fabs(sqrt(Re*Re + Im*Im) / magF0);
 		FD.push_back(magF);
 	}
 	for(unsigned int i = z_dft.size()-64 ; i < z_dft.size() ; i ++)
@@ -154,11 +154,11 @@ void fourier::fourier_descriptor()
 		if (fabs(sqrt(Re*Re + Im*Im) / magF0) < numeric_limits<float>::epsilon())
 			magF = 0.0;
 		else
-			magF = sqrt(Re*Re + Im*Im) / magF0;
+			magF = fabs(sqrt(Re*Re + Im*Im) / magF0);
 		FD.push_back(magF);
 	}
 
-	cv::normalize(FD, FD, 0, 1, CV_MINMAX);
+	cv::normalize(FD, FD, 1.0, 0.0, CV_MINMAX);
 
 	/*
 	dft(z,z,CV_DXT_INV_SCALE);

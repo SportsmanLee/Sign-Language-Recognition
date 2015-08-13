@@ -251,6 +251,20 @@ void MyCV::extractBOW()
 	normalize(siftVector, siftVector, 0, 1, CV_MINMAX);
 }
 
+void MyCV::detectHOG()
+{
+	Mat grayImage;
+	cvtColor(cvImage, grayImage, CV_BGR2GRAY);
+	resize(grayImage, grayImage, cv::Size(64,48));
+
+	HOGDescriptor hog(cv::Size(32, 16), cv::Size(32, 16), 
+					cv::Size(16, 8), cv::Size(16, 8), 9);
+
+	hog.compute(grayImage, hogVector, cv::Size(), cv::Size());
+
+	normalize(hogVector, hogVector, 0, 1, CV_MINMAX);
+}
+
 // Dynamic Programming
 void MyCV::regionGrowing(int x, int y, int regionLabel)
 {
@@ -404,13 +418,15 @@ void MyCV::readImage(std::string fileName)
 {
 	cvImage = imread(fileName, CV_LOAD_IMAGE_COLOR);
 	//cv::resize(cvImage, cvImage, cv::Size(960, 540));
-	if (cvImage.rows >= cvImage.cols) {
-		cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols * 960 / cvImage.rows), 960));
+	if (cvImage.rows > 960 || cvImage.cols > 960) {
+		if (cvImage.rows >= cvImage.cols) {
+			cv::resize(cvImage, cvImage, cv::Size(cvRound(cvImage.cols * 960 / cvImage.rows), 960));
+		}
+		else {
+			cv::resize(cvImage, cvImage, cv::Size(960, cvRound(cvImage.rows * 960 / cvImage.cols)));
+		}
+		cvtColor(cvImage, skinImage, CV_BGR2GRAY);
 	}
-	else {
-		cv::resize(cvImage, cvImage, cv::Size(960, cvRound(cvImage.rows * 960 / cvImage.cols)));
-	}
-	cvtColor(cvImage, skinImage, CV_BGR2GRAY);
 }
 
 void MyCV::readFrame(Mat frame)
@@ -447,6 +463,11 @@ vector<float> MyCV::getHuVector()
 vector<float> MyCV::getSiftVector()
 {
 	return siftVector;
+}
+
+vector<float> MyCV::getHOGVector()
+{
+	return hogVector;
 }
 
 Mat MyCV::getSiftDescriptor()
